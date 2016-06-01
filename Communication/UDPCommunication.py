@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-import socket, pickle
+import socket, pickle, time
 from threading import Thread
 from collections import deque
 
@@ -40,15 +40,24 @@ class UDPReceiving(object):
     def _run(self):
         """ Boucle de réception de données """
         while self.is_running:
-            data, addr = self._sock.recvfrom(1024)
-            if not len(self._data) or not data == self._data[-1]:
-                data = pickle.loads(data)
-                self._data.append(data)
+            try:
+                data, addr = self._sock.recvfrom(1024)
+                if not len(self._data) or not data == self._data[-1]:
+                    data = pickle.loads(data)
+                    print(data)
+                    self._data.append(data)
+            except OSError:
+                print('@udp_recv.stopped')
+                exit(0)
 
     def stop(self):
         """ Arrête la boucle de réception """
         # TODO : Revoir la méthode d'arrêt des threads
-        self.is_running = False
+        try:
+            self.is_running = False
+            self._sock.close()
+        except OSError:
+            pass
 
     def get_last_data(self):
         if len(self._data):
