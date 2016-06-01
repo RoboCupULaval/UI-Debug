@@ -29,6 +29,9 @@ class FieldDisplay(QGraphicsView):
         self.timer.timeout.connect(self.refresh)
         self.timer.start(15)
 
+        # Option
+        self.vanishing = False
+
     def set_model(self, model):
         assert isinstance(model, QAbstractItemModel)
         self.model = model
@@ -60,9 +63,11 @@ class FieldDisplay(QGraphicsView):
                     self.graph_mobs['ball'].setPos(x, y)
 
             else:
-                self.graph_mobs['ball'].hide()
+                if self.vanishing:
+                    self.graph_mobs['ball'].hide()
         except IndexError:
-            self.graph_mobs['ball'].hide()
+            if self.vanishing:
+                self.graph_mobs['ball'].hide()
 
     def refresh_robots_yellow(self):
         for id_bot in range(len(self.graph_mobs['robots_yellow'])):
@@ -78,9 +83,11 @@ class FieldDisplay(QGraphicsView):
                         self.graph_mobs['robots_yellow'][id_bot].setPos(x, y)
                         self.graph_mobs['robots_yellow'][id_bot].setRotation(math.degrees(theta))
                 else:
-                    self.graph_mobs['robots_yellow'][id_bot].hide()
+                    if self.vanishing:
+                        self.graph_mobs['robots_yellow'][id_bot].hide()
             except IndexError:
-                self.graph_mobs['robots_yellow'][id_bot].hide()
+                if self.vanishing:
+                    self.graph_mobs['robots_yellow'][id_bot].hide()
 
     def refresh_robots_blue(self):
         for id_bot in range(len(self.graph_mobs['robots_blue'])):
@@ -97,9 +104,11 @@ class FieldDisplay(QGraphicsView):
                         self.graph_mobs['robots_blue'][id_bot].setPos(x, y)
                         self.graph_mobs['robots_blue'][id_bot].setRotation(math.degrees(theta))
                 else:
-                    self.graph_mobs['robots_blue'][id_bot].hide()
+                    if self.vanishing:
+                        self.graph_mobs['robots_blue'][id_bot].hide()
             except IndexError:
-                self.graph_mobs['robots_blue'][id_bot].hide()
+                if self.vanishing:
+                    self.graph_mobs['robots_blue'][id_bot].hide()
 
     def mousePressEvent(self, event):
         x, y = self.model.field_info.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
@@ -150,3 +159,6 @@ class FieldDisplay(QGraphicsView):
             robots_blue.setSpanAngle(50000)
             robots_blue.setBrush(QBrush(QColor(105, 255, 255)))
             robots_blue.setPen(QPen(QColor(0, 0, 0)))
+
+    def change_vanish_option(self):
+        self.vanishing = not self.vanishing

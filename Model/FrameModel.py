@@ -15,8 +15,9 @@ __author__ = 'RoboCupULaval'
 
 class FrameModel(QAbstractItemModel):
     # TODO : Revoir le modele pour le rendre standard à Qt
-    def __init__(self):
-        super(FrameModel, self).__init__()
+    def __init__(self, parent=None):
+        QAbstractItemModel.__init__(parent)
+        self.parent = parent
         self.field_info = Field()
         self.receive_data_queue = deque(maxlen=100)
         self.send_data_queue = deque(maxlen=100)
@@ -32,6 +33,7 @@ class FrameModel(QAbstractItemModel):
         self.udp_receiver.start()
 
         self.frame_catcher = Thread(target=self.catch_frame)
+        self.frame_catcher_stop = False
         self.frame_catcher.start()
 
     def init_headerdata(self):
@@ -63,13 +65,15 @@ class FrameModel(QAbstractItemModel):
         self.col_header.append('pixel_y')
 
     def catch_frame(self):
-        while True:
+        while not self.frame_catcher_stop:
             frame = self.vision.get_latest_frame()
             if frame is None:
                 continue
             if len(self.receive_data_queue) == 0 or not frame.detection.frame_number == self.receive_data_queue[-1].detection.frame_number:
                 self.receive_data_queue.append(frame)
             sleep(0.001)
+        print('@model.catch_frame: stopped')
+        exit(1)
 
     def is_connected(self):
         if len(self.receive_data_queue) > 0:
@@ -115,6 +119,8 @@ class FrameModel(QAbstractItemModel):
             else:
                 return None
         elif 2 <= index.row() < 8:
+            if not index.row() - 2 == self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].robot_id:
+                raise IndexError
             if index.col() == 4:
                 return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].confidence
             elif index.col() == 5:
@@ -132,6 +138,8 @@ class FrameModel(QAbstractItemModel):
             else:
                 return None
         elif 8 <= index.row() <= 13:
+            if not index.row() - 8 == self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].robot_id:
+                raise IndexError
             if index.col() == 4:
                 return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].confidence
             elif index.col() == 5:
@@ -156,6 +164,10 @@ class FrameModel(QAbstractItemModel):
         if not len(self.send_data_queue) or not position == self.send_data_queue[-1]:
             self.send_data_queue.append(position)
             self.udp_sender.send_message(self.send_data_queue[-1])
+
+    def quit(self):
+        self.frame_catcher_stop = True
+        self.udp_receiver.stop()
 
 
 class MyModelIndex(object):
