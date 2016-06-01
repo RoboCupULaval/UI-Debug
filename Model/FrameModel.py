@@ -7,6 +7,7 @@ from threading import Thread
 from PyQt4.QtCore import *
 
 from Communication.vision import Vision
+from Communication.UDPCommunication import UDPSending, UDPReceiving
 from Model.Field import Field
 
 __author__ = 'RoboCupULaval'
@@ -24,6 +25,11 @@ class FrameModel(QAbstractItemModel):
         self.init_headerdata()
 
         self.vision = Vision()
+
+        # Communication inter programme
+        self.udp_sender = UDPSending()
+        self.udp_receiver = UDPReceiving()
+        self.udp_receiver.start()
 
         self.frame_catcher = Thread(target=self.catch_frame)
         self.frame_catcher.start()
@@ -145,6 +151,12 @@ class FrameModel(QAbstractItemModel):
         else:
             return None
 
+    def add_target(self, p_x, p_y):
+        position = p_x, p_y
+        if not len(self.send_data_queue) or not position == self.send_data_queue[-1]:
+            self.send_data_queue.append(position)
+            self.udp_sender.send_message(self.send_data_queue[-1])
+
 
 class MyModelIndex(object):
     # WARN: Classe temporaire le temps de modifier le modèle
@@ -161,7 +173,7 @@ class MyModelIndex(object):
     def isValid(self):
         if not isinstance(self._row, int) and 0 < self._row:
             return False
-        elif not isinstance(self._row, int) and 0 < self._row:
+        elif not isinstance(self._column, int) and 0 < self._row:
             return False
         else:
             return True

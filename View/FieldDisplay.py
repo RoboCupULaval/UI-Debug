@@ -103,6 +103,7 @@ class FieldDisplay(QGraphicsView):
 
     def mousePressEvent(self, event):
         x, y = self.model.field_info.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+        self.model.add_target(x, y)
         x, y, _ = self.model.field_info.convert_real_to_scene_pst(x, y)
         self.graph_mobs['target'].setPos(x, y)
 
