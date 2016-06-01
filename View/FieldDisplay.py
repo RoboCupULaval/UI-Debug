@@ -141,8 +141,9 @@ class FieldDisplay(QGraphicsView):
         self.graph_mobs['ball'].setPen(QPen(QColor(255, 92, 0)))
 
         # Élément graphique de la cible
-        self.graph_mobs['target'] = QGraphicsEllipseItem(-5, -5, 10, 10)
-        self.graph_mobs['target'].setBrush(QBrush(Qt.red))
+        self.graph_mobs['target'] = QGraphicsPixmapItem(QPixmap('Img/ico-target.png'))
+        self.graph_mobs['target'].setOffset(-55, -55)
+        self.graph_mobs['target'].scale(0.21, 0.21)
 
         # Élément graphique des robots jaunes
         self.graph_mobs['robots_yellow'] = [QGraphicsEllipseItem(-11.25, -11.25, 22.5, 22.5) for _ in range(6)]

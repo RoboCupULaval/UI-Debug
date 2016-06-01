@@ -13,12 +13,12 @@ __author__ = 'RoboCupULaval'
 
 class MainWindow(QWidget):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        QWidget.__init__(self)
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
-
+        self.setWindowIcon(QIcon('Img/favicon.jpg'))
         self.menubar = QMenuBar(self)
         self.layout = QVBoxLayout()
-        self.model = FrameModel(self)
+        self.model = FrameModel()
 
         self.view_property = QTableView()
         # self.view_property.setModel(self.model)
@@ -32,6 +32,7 @@ class MainWindow(QWidget):
         self.setLayout(self.layout)
 
         self.init_menubar()
+        self.init_signals()
 
     def init_menubar(self):
         # Menu
@@ -41,13 +42,16 @@ class MainWindow(QWidget):
 
         # Sous-menu
         exitAction = QAction('Quitter', self)
-        exitAction.triggered.connect(self.quit)
+        exitAction.triggered.connect(self.closeEvent)
         fileMenu.addAction(exitAction)
 
         vanishAction = QAction('Afficher le Vanishing', self, checkable=True)
         vanishAction.triggered.connect(self.view_screen.change_vanish_option)
         viewMenu.addAction(vanishAction)
 
-    def quit(self):
+    def init_signals(self):
+        self.connect(self, SIGNAL('triggered()'), self.closeEvent)
+
+    def closeEvent(self, event):
         self.model.quit()
         self.close()

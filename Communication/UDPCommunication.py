@@ -44,10 +44,9 @@ class UDPReceiving(object):
                 data, addr = self._sock.recvfrom(1024)
                 if not len(self._data) or not data == self._data[-1]:
                     data = pickle.loads(data)
-                    print(data)
                     self._data.append(data)
             except OSError:
-                print('@udp_recv.stopped')
+                print('@udp_recv.socket: stopped')
                 exit(0)
 
     def stop(self):
