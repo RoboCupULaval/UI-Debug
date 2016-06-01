@@ -14,7 +14,7 @@ __author__ = 'RoboCupULaval'
 
 
 class FrameModel(QAbstractItemModel):
-    # TODO : Revoir le modele pour le rendre standard à Qt
+    # TODO : Revoir le modèle pour le rendre standard à Qt
     def __init__(self):
         QAbstractItemModel.__init__(self)
         self.field_info = Field()
@@ -32,6 +32,7 @@ class FrameModel(QAbstractItemModel):
         self.udp_receiver.start()
 
         self.frame_catcher = Thread(target=self.catch_frame)
+        self.frame_catcher.daemon = True
         self.frame_catcher_stop = False
         self.frame_catcher.start()
 
@@ -70,7 +71,7 @@ class FrameModel(QAbstractItemModel):
                 continue
             if len(self.receive_data_queue) == 0 or not frame.detection.frame_number == self.receive_data_queue[-1].detection.frame_number:
                 self.receive_data_queue.append(frame)
-            sleep(0.001)
+            sleep(0.01)
         print('@model.catch_frame: stopped')
         exit(1)
 
@@ -159,14 +160,10 @@ class FrameModel(QAbstractItemModel):
             return None
 
     def add_target(self, p_x, p_y):
-        position = p_x, p_y
-        if not len(self.send_data_queue) or not position == self.send_data_queue[-1]:
-            self.send_data_queue.append(position)
+        datain = {'Strategy': 'FollowTarget', 'x': p_x, 'y': p_y}
+        if not len(self.send_data_queue) or not datain == self.send_data_queue[-1]:
+            self.send_data_queue.append(datain)
             self.udp_sender.send_message(self.send_data_queue[-1])
-
-    def quit(self):
-        self.frame_catcher_stop = True
-        self.udp_receiver.stop()
 
 
 class MyModelIndex(object):

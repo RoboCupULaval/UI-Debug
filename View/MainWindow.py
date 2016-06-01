@@ -45,7 +45,7 @@ class MainWindow(QWidget):
         exitAction.triggered.connect(self.closeEvent)
         fileMenu.addAction(exitAction)
 
-        vanishAction = QAction('Afficher le Vanishing', self, checkable=True)
+        vanishAction = QAction('Afficher Vanishing', self, checkable=True)
         vanishAction.triggered.connect(self.view_screen.change_vanish_option)
         viewMenu.addAction(vanishAction)
 
@@ -53,5 +53,4 @@ class MainWindow(QWidget):
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
 
     def closeEvent(self, event):
-        self.model.quit()
         self.close()

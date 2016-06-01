@@ -24,6 +24,7 @@ class UDPReceiving(object):
         self._port = p_port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._thread = Thread(target=self._run)
+        self._thread.daemon = True
 
         # Données
         self._data = deque(maxlen=100)
@@ -46,17 +47,11 @@ class UDPReceiving(object):
                     data = pickle.loads(data)
                     self._data.append(data)
             except OSError:
-                print('@udp_recv.socket: stopped')
-                exit(0)
+                exit(-1)
 
     def stop(self):
         """ Arrête la boucle de réception """
-        # TODO : Revoir la méthode d'arrêt des threads
-        try:
-            self.is_running = False
-            self._sock.close()
-        except OSError:
-            pass
+        self.is_running = False
 
     def get_last_data(self):
         if len(self._data):

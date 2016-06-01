@@ -27,7 +27,7 @@ class FieldDisplay(QGraphicsView):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.refresh)
-        self.timer.start(15)
+        self.timer.start(20)
 
         # Option
         self.vanishing = False
