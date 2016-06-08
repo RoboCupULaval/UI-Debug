@@ -16,7 +16,7 @@ class ClientUIDebug(object):
 
     # Méthode d'initialisation de l'UI Debug
     def init_tactics(self, list_tactics):
-        data = {'name': self._name, 'type': 10, 'STA': {'T': list_tactics}}
+        data = {'name': self._name, 'type': 10, 'data': {'T': list_tactics}}
         self._udp_sender.send_message(data)
 
     # Méthode d'envoie de commande

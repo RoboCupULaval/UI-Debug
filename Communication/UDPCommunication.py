@@ -20,6 +20,7 @@ class UDPSending(object):
 class UDPReceiving(object):
     def __init__(self, ip='localhost', port=20021):
         # Paramètres de connexion
+        self._num = 0
         self._ip = ip
         self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -44,8 +45,9 @@ class UDPReceiving(object):
             try:
                 data, addr = self._sock.recvfrom(1024)
                 if not len(self._data) or not data == self._data[-1]:
-                    data = pickle.loads(data)
+                    data = self._num, pickle.loads(data)
                     self._data.append(data)
+                    self._num += 1
             except OSError:
                 exit(-1)
 
