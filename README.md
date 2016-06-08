@@ -19,6 +19,27 @@ Il va obtenir directement de ce serveur les frames de visions et les clients se 
 
 La **version 0.0** garantie les API suivante:
 
+### API Schema v1
+
+L'API est disponible pour le langage Python. Tous les paquets de données transférés sont des dictionnaires python.
+Chaque paquet de données se structure de la manière suivante :
+
+```python
+paquet = {'name': str(nomDuDestinataire),
+          'type': int(numéroTypeDonnée),
+          'data': dict(données)}
+```
+
+#### Type de données
+
+Type | Famille | Données du paquet | Description
+---- | ------- | ----------------- | ---------------------------------------------------------------
+0    | Test    |                   |
+1    | Logger  | 'data_1': int/str | Affiche un nombre de données arbitraire dans la fenêtre de log
+     |         | 'data_N': int/str |
+2    | Logger  | 'level': int      | Affiche un message avec un niveau d'information
+     |         | 'message': str    |
+
 ### API serveur->ia
 
 * _toggle-human-control_
