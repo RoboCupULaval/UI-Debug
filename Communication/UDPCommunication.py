@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-import socket, pickle, time
+import socket, pickle
 from threading import Thread
 from collections import deque
 
@@ -8,9 +8,9 @@ __author__ = 'RoboCupULaval'
 
 
 class UDPSending(object):
-    def __init__(self, p_ip='localhost', p_port=10021):
-        self._ip = p_ip
-        self._port = p_port
+    def __init__(self, ip='localhost', port=10021):
+        self._ip = ip
+        self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_message(self, p_object):
@@ -18,10 +18,10 @@ class UDPSending(object):
 
 
 class UDPReceiving(object):
-    def __init__(self, p_ip='localhost', p_port=20021):
+    def __init__(self, ip='localhost', port=20021):
         # Paramètres de connexion
-        self._ip = p_ip
-        self._port = p_port
+        self._ip = ip
+        self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._thread = Thread(target=self._run)
         self._thread.daemon = True
