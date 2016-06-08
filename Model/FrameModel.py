@@ -26,11 +26,6 @@ class FrameModel(QAbstractItemModel):
 
         self.vision = Vision()
 
-        # Communication inter programme
-        self.udp_sender = UDPSending()
-        self.udp_receiver = UDPReceiving()
-        self.udp_receiver.start()
-
         self.frame_catcher = Thread(target=self.catch_frame)
         self.frame_catcher.daemon = True
         self.frame_catcher_stop = False
@@ -158,12 +153,6 @@ class FrameModel(QAbstractItemModel):
                 return None
         else:
             return None
-
-    def add_target(self, p_x, p_y):
-        datain = {'Strategy': 'FollowTarget', 'x': p_x, 'y': p_y}
-        if not len(self.send_data_queue) or not datain == self.send_data_queue[-1]:
-            self.send_data_queue.append(datain)
-            self.udp_sender.send_message(self.send_data_queue[-1])
 
 
 class MyModelIndex(object):

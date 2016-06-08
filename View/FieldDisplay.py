@@ -11,8 +11,9 @@ __author__ = 'RoboCupULaval'
 
 
 class FieldDisplay(QGraphicsView):
-    def __init__(self):
-        super(FieldDisplay, self).__init__()
+    def __init__(self, parent):
+        QGraphicsView.__init__(self, parent)
+        self.parent = parent
         self.scene = QGraphicsScene(self)
         self.model = None
         self.last_frame = 0
@@ -39,6 +40,8 @@ class FieldDisplay(QGraphicsView):
         self.scene.addItem(self.graph_mobs['target'])
         for graphic_bot in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             self.scene.addItem(graphic_bot)
+        for number in self.graph_mobs['robots_numbers']:
+            self.scene.addItem(number)
 
     def refresh(self):
             if self.model is None:
@@ -50,6 +53,22 @@ class FieldDisplay(QGraphicsView):
                     self.refresh_robots_blue()
                     self.refresh_robots_yellow()
                     self.last_frame = num_frame
+                    for bot in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
+                            bot.setPen(Qt.black)
+
+                    if self.parent.view_controller.isVisible():
+                        if not self.graph_mobs['target'].isVisible():
+                            self.graph_mobs['target'].show()
+                        id_colored = int(self.parent.view_controller.selectRobot.currentText())
+
+                        if id_colored < 5:
+                            self.graph_mobs['robots_yellow'][id_colored].setPen(Qt.red)
+                        else:
+                            self.graph_mobs['robots_blue'][id_colored - 6].setPen(Qt.red)
+                    else:
+                        if self.graph_mobs['target'].isVisible():
+                            self.graph_mobs['target'].hide()
+
 
     def refresh_ball(self):
         try:
@@ -81,6 +100,7 @@ class FieldDisplay(QGraphicsView):
                     if not x == self.graph_mobs['robots_yellow'][id_bot].pos().x()\
                        and not y == self.graph_mobs['robots_yellow'][id_bot].pos().y():
                         self.graph_mobs['robots_yellow'][id_bot].setPos(x, y)
+                        self.graph_mobs['robots_numbers'][id_bot].setPos(x + 5, y + 5)
                         self.graph_mobs['robots_yellow'][id_bot].setRotation(math.degrees(theta))
                 else:
                     if self.vanishing:
@@ -102,6 +122,7 @@ class FieldDisplay(QGraphicsView):
                     if not x == self.graph_mobs['robots_blue'][id_bot].pos().x()\
                        and not y == self.graph_mobs['robots_blue'][id_bot].pos().y():
                         self.graph_mobs['robots_blue'][id_bot].setPos(x, y)
+                        self.graph_mobs['robots_numbers'][id_bot + 6].setPos(x + 5, y + 5)
                         self.graph_mobs['robots_blue'][id_bot].setRotation(math.degrees(theta))
                 else:
                     if self.vanishing:
@@ -112,7 +133,7 @@ class FieldDisplay(QGraphicsView):
 
     def mousePressEvent(self, event):
         x, y = self.model.field_info.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
-        self.model.add_target(x, y)
+        self.parent.dataout_model.target = (x, y)
         x, y, _ = self.model.field_info.convert_real_to_scene_pst(x, y)
         self.graph_mobs['target'].setPos(x, y)
 
@@ -144,6 +165,7 @@ class FieldDisplay(QGraphicsView):
         self.graph_mobs['target'] = QGraphicsPixmapItem(QPixmap('Img/ico-target.png'))
         self.graph_mobs['target'].setOffset(-55, -55)
         self.graph_mobs['target'].scale(0.21, 0.21)
+        self.graph_mobs['target'].hide()
 
         # Élément graphique des robots jaunes
         self.graph_mobs['robots_yellow'] = [QGraphicsEllipseItem(-11.25, -11.25, 22.5, 22.5) for _ in range(6)]
@@ -161,5 +183,22 @@ class FieldDisplay(QGraphicsView):
             robots_blue.setBrush(QBrush(QColor(105, 255, 255)))
             robots_blue.setPen(QPen(QColor(0, 0, 0)))
 
+        # Élément graphique des nombres au dessus des robots
+        self.graph_mobs['robots_numbers'] = [QGraphicsTextItem(str(x)) for x in range(12)]
+        for number in self.graph_mobs['robots_numbers']:
+            font = QFont()
+            font.setBold(True)
+            number.setFont(font)
+            number.setPos(-6666, -6666)
+            number.hide()
+
     def change_vanish_option(self):
         self.vanishing = not self.vanishing
+
+    def show_number_option(self):
+        if self.graph_mobs['robots_numbers'][0].isVisible():
+            for number in self.graph_mobs['robots_numbers']:
+                number.hide()
+        else:
+            for number in self.graph_mobs['robots_numbers']:
+                number.show()
