@@ -1,12 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-import sys
-
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL
 
 from Model.FrameModel import FrameModel
-from View.FieldDisplay import FieldDisplay
+from Model.DataInModel import DataInModel
+from Model.DataOutModel import DataOutModel
+from .FieldDisplay import FieldDisplay
+from .ControllerDisplay import ControllerDisplay
 
 __author__ = 'RoboCupULaval'
 
@@ -16,19 +17,24 @@ class MainWindow(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
+        self.setFixedSize(1025, 750)
         self.menubar = QMenuBar(self)
         self.layout = QVBoxLayout()
-        self.model = FrameModel()
+        self.sub_layout = QHBoxLayout()
+        self.frame_model = FrameModel()
+        self.datain_model = DataInModel()
+        self.dataout_model = DataOutModel()
 
-        self.view_property = QTableView()
+        self.view_controller = ControllerDisplay(self)
         # self.view_property.setModel(self.model)
 
-        self.view_screen = FieldDisplay()
-        self.view_screen.set_model(self.model)
+        self.view_screen = FieldDisplay(self)
+        self.view_screen.set_model(self.frame_model)
 
         self.layout.addWidget(self.menubar)
-        self.layout.addWidget(self.view_screen)
-        self.layout.addWidget(self.view_property)
+        self.sub_layout.addWidget(self.view_screen)
+        self.sub_layout.addWidget(self.view_controller)
+        self.layout.addLayout(self.sub_layout)
         self.setLayout(self.layout)
 
         self.init_menubar()
@@ -38,6 +44,7 @@ class MainWindow(QWidget):
         # Menu
         fileMenu = self.menubar.addMenu('Fichier')
         viewMenu = self.menubar.addMenu('Vue')
+        toolMenu = self.menubar.addMenu('Outil')
         helpMenu = self.menubar.addMenu('Aide')
 
         # Sous-menu
@@ -48,6 +55,14 @@ class MainWindow(QWidget):
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
         vanishAction.triggered.connect(self.view_screen.change_vanish_option)
         viewMenu.addAction(vanishAction)
+
+        nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
+        nuumbAction.triggered.connect(self.view_screen.show_number_option)
+        viewMenu.addAction(nuumbAction)
+
+        tacticsControllerAction = QAction('Contrôleur de Tactiques', self,  checkable=True)
+        tacticsControllerAction.triggered.connect(self.view_controller.show_hide)
+        toolMenu.addAction(tacticsControllerAction)
 
     def init_signals(self):
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
