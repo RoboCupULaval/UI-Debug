@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from datetime import date
-from Model.DataIn.DataIn import DataIn
+from .DataIn import DataIn
 
 __author__ = 'RoboCupULaval'
 

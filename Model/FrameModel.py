@@ -8,7 +8,7 @@ from PyQt4.QtCore import *
 
 from Communication.vision import Vision
 from Communication.UDPCommunication import UDPSending, UDPReceiving
-from Model.Field import Field
+from .Field import Field
 
 __author__ = 'RoboCupULaval'
 

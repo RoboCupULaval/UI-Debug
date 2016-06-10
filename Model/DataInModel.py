@@ -3,8 +3,8 @@
 from time import sleep, time
 from threading import Thread, Lock
 from Communication.UDPCommunication import UDPReceiving
-from Model.DataIn.DataIn import DataIn
-from Model.DataIn.DataInFactory import DataInFactory, DataInLog, DataInSTA
+from .DataIn.DataIn import DataIn
+from .DataIn.DataInFactory import DataInFactory, DataInLog, DataInSTA
 
 
 __author__ = 'RoboCupULaval'
