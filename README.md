@@ -19,29 +19,48 @@ Il va obtenir directement de ce serveur les frames de visions et les clients se 
 
 La **version 0.0** garantie les API suivante:
 
-### API Schema v1
+### Protocole de communication v1.0
 
-L'API est disponible pour le langage Python. Tous les paquets de données transférés sont des dictionnaires python.
+L'API est disponible pour le langage Python. Tous les paquets de données transférés sont des dictionnaires python qui sont sérialisés avec la librairie pickle.
 Chaque paquet de données se structure de la manière suivante :
 
 ```python
-packet = {'name': str,      # Indique le nom du destinataire.
-          'version': str,   # Indique la version de l'API utilisée
+packet = {'name': str,      # Indique le nom de l'émetteur.
+          'version': str,   # Indique la version de l'API utilisée.
           'type': int,      # Indique le type de données.
           'link': int,      # Indique la numéro du robot dont les données sont associées (None étant aucun).
-          'data': dict()}   # Données du paquet dans un dictionnaire (cf. les données par type).
+          'data': dict(...) # Données du paquet dans un dictionnaire (cf. les données par type).
+          }
+
+""" Exemple de paquet : Afficher une ligne rouge pendant 5 secondes """
+packet = {'name': 'JulienB',
+          'version': '1.0',
+          'type': 3001,
+          'link': None,
+          'data': {'start': (100, 100),
+                   'end':   (200, 200),
+                   'color': (255, 0, 0),
+                   'width': 2,
+                   'style': 'SolidLine',
+                   'timeout': 5
+                   }
+          }
 ```
 
-#### Type de données
+#### Définition des types de données
 
-Les données sont divisées en 4 familles qui ont chacunes leurs spécificités:
+Les données sont divisées en 4 familles qui ont chacunes leurs spécificités :
 
-Valeur type | Nom de Famille | Description
------------ | -------------- | ---------------------------------------------------------------------------------------
-0 <= 9      | Logger         | Affiche de l'information sous forme de texte dans la fenêtre assignée dans l'UI.
-10 <= 29    | Setter/Getter  | Permet de paramétrer des données de l'IA dans l'UI ou de récupérer des données de l'UI de maniére ponctuelle.
-30 <= 49    | Drawer         | Dessine des éléments dans la fenêtre du terrain.
-50 <= 59    | Initializer    | Permet d'initialiser l'UI avec des données de l'IA à la connexion.
+  Valeur type | Nom de Famille | Description
+------------- | -------------- | ---------------------------------------------------------------------------------------
+0 <= 999      | Logger         | Affiche de l'information sous forme de texte dans la fenêtre assignée dans l'UI.
+1000 <= 2999  | Setter/Getter  | Permet de paramétrer des données de l'IA dans l'UI ou de récupérer des données de l'UI de maniére ponctuelle.
+3000 <= 4999  | Drawer         | Dessine des éléments dans la fenêtre du terrain.
+5000 <= 6999  | Initializer    | Permet d'initialiser l'UI avec des données de l'IA à la connexion.
+
+### Description des données par type
+
+L'information du paquet['data'] sont les données que l'on souhaite traiter. Il y a un type différent par données.
 
 ```python
 # Type 1 - Affiche n'importe quelles données dans la fenêtre du logger.
@@ -56,14 +75,14 @@ data = {'level': int,       # 0:NOSET | 1:DEBUG | 2:INFO | 3:WARN | 4:ERR | 5:C
 
 """ ... """
 
-# Type 11 - Envoie à l'UI la liste des stratégies, tactiques et actions disponibles.
+# Type 1001 - Envoie à l'UI la liste des stratégies, tactiques et actions disponibles.
 data = {'strategy': list(str),      # Liste de toutes les stratégies
         'tactic': list(str),        # Liste de toutes les tactiques
         'action': list(str)}        # Liste de toutes les actions
 
 """ ... """
 
-# Type 31 - Dessine une ligne simple dans la fenêtre graphique du terrain.
+# Type 3001 - Dessine une Ligne simple dans la fenêtre graphique du terrain.
 data = {'start': tuple(int, int),       # Coordonnées du premier point
         'end': tuple(int, int),         # Coordonnées du point final
         'color': tuple(int, int, int),  # Couleur RGB
@@ -71,14 +90,14 @@ data = {'start': tuple(int, int),       # Coordonnées du premier point
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
 
-# Type 32 - Dessine une série de lignes dans la fenêtre graphique du terrain.
+# Type 3002 - Dessine une Série de Lignes dans la fenêtre graphique du terrain.
 data = {'points': list(tuple(int, int)), # Liste de coordonnées du premier point
         'color': tuple(int, int, int),  # Couleur RGB
         'width': int,                   # Épaisseur du trait
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
 
-# Type 33 - Dessine un cercle dans la fenêtre graphique du terrain.
+# Type 3003 - Dessine un Cercle dans la fenêtre graphique du terrain.
 data = {'center': tuple(int, int),      # Coordonnées du centre du cercle
         'radius': int,                  # Rayon du cercle
         'color': tuple(int, int int),   # Couleur RGB
@@ -86,19 +105,19 @@ data = {'center': tuple(int, int),      # Coordonnées du centre du cercle
         'is_fill': bool,                # Si le cercle est rempli ou non
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
 
-# Type 34 - Dessine un point dans la fenêtre graphique du terrain.
+# Type 3004 - Dessine un Point dans la fenêtre graphique du terrain.
 data = {'point': tuple(int, int),       # Coordonnées du centre du cercle
         'width': int,                   # Taille en pixel du point
         'color': tuple(int, int int),   # Couleur RGB
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
 
-# Type 35 - Dessine une série de point dans la fenêtre graphique du terrain.
+# Type 3005 - Dessine une Série de Point dans la fenêtre graphique du terrain.
 data = {'points': list(tuple(int, int)),# Coordonnées du centre du cercle
         'width': int,                   # Taille en pixel du point
         'color': tuple(int, int int),   # Couleur RGB
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
 
-# Type 36 - Dessine un rectangle dans la fenêtre graphique du terrain.
+# Type 3006 - Dessine un Rectangle dans la fenêtre graphique du terrain.
 data = {'top_left': tuple(int, int),    # Coordonnées du premier point
         'bottom_right': tuple(int, int),# Coordonnées du point final
         'color': tuple(int, int, int),  # Couleur RGB
@@ -106,6 +125,34 @@ data = {'top_left': tuple(int, int),    # Coordonnées du premier point
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
         'is_fill': bool,                # Si le forme est rempli ou non
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
+
+# Type 3007 - Dessine les informations d'une Influence Map sur le terrain.
+data = {'field_data': list(int, int, ...),      # Données de l'Influence Map
+        'size': tuple(int, int),                # Taille de la grille
+        'focus': tuple(int, int, int, int)      # Affiche uniquement les données dans un rectangle prédéfini
+        'hotest_numb': int,                     # Nombre le plus élevé
+        'hotest_color': tuple(int, int ,int ),  # Couleur RGB du nombre le plus élevé
+        'coldest_numb': int,                    # Nombre le moins élevé
+        'coldest_color': tuple(int, int, int),  # Couleur RGB du nombre le moins élevé
+        'has_grid': bool,                       # Affichage de la grille ?
+        'grid_color': tuple(int, int, int),     # Couleur RGB des traits de la grille
+        'grid_width': int,                      # Taille des traits de la grille
+        'grid_style': str,                      # SolidLine | DashLine | DotLine | DashDotLine
+        'opacity': int}                         # Indice d'opacité de la grille de 0 à 10 (0 étant transparente)
+        'timeout': int                          # Temps d'affichage en seconde (0 étant un temps infini)
+        }
+
+# Type 3008 - Dessine un Texte de couleur
+data = {'position': tuple(int, int)     # Position de l'affichage du texte
+        'text': str,                    # Texte à afficher
+         s'size': int,                    # Taille du texte en pixel
+        'font': str,                    # Arial | Courier New | Verdana
+        'align': str,                   # Right | Left | Center
+        'color': tuple(int, int, int),  # Couleur RGB
+        'has_bold': bool,               # Si le texte est en gras
+        'has_italic': bool,             # Si le texte est en italic
+        'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
+        }
 ```
 
 ### API serveur->ia
