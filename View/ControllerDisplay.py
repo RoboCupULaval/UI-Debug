@@ -17,7 +17,7 @@ class ControllerDisplay(QWidget):
 
     def init_ui(self):
         # Configuration des Label
-        self.title = QLabel('Tactic Controller', self)
+        self.title = QLabel('Contrôleur de Tactiques', self)
         font = QFont()
         font.setBold(True)
         font.setPixelSize(20)
@@ -31,10 +31,10 @@ class ControllerDisplay(QWidget):
         self.selectRobot = QComboBox(self)
         for x in range(6+6):
             self.selectRobot.addItem(str(x))
-        self.selectRobot.move(50, 50)
+        self.selectRobot.move(100, 50)
 
         self.selectTactic = QComboBox(self)
-        self.selectTactic.move(50, 100)
+        self.selectTactic.move(100, 100)
         self.refresh_tactic()
 
         # Configuration des PushButton

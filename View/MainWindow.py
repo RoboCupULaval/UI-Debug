@@ -50,6 +50,10 @@ class MainWindow(QWidget):
         helpMenu = self.menubar.addMenu('Aide')
 
         # Sous-menu
+        helpAction = QAction('À propos', self)
+        helpAction.triggered.connect(self.credits)
+        helpMenu.addAction(helpAction)
+
         exitAction = QAction('Quitter', self)
         exitAction.triggered.connect(self.closeEvent)
         fileMenu.addAction(exitAction)
@@ -68,6 +72,9 @@ class MainWindow(QWidget):
 
     def init_signals(self):
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
+
+    def credits(self):
+        QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')
 
     def closeEvent(self, event):
         self.close()
