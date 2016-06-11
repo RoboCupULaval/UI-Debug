@@ -1,8 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-import time
 from PyQt4.QtGui import *
-from PyQt4.QtCore import *
 
 __author__ = 'RoboCupULaval'
 

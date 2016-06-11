@@ -1,15 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-import sys
-
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
-from View.FieldDisplay import FieldDisplay
-from View.ControllerDisplay import ControllerDisplay
+from .FieldDisplay import FieldDisplay
+from .ControllerDisplay import ControllerDisplay
 
 __author__ = 'RoboCupULaval'
 

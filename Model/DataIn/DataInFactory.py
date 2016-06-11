@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.DataInLog import DataInLog
-from Model.DataIn.DataInSTA import DataInSTA
+from .DataInLog import DataInLog
+from .DataInSTA import DataInSTA
 
 __author__ = 'RoboCupULaval'
 

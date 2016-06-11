@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from Communication.UDPCommunication import UDPSending, UDPReceiving
+from .UDPCommunication import UDPSending, UDPReceiving
 
 __author__ = 'RoboCupULaval'
 
