@@ -8,6 +8,7 @@ from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
 from .FieldView import FieldView
 from .StrategyCtrView import StrategyCtrView
+from .LoggerView import LoggerView
 
 __author__ = 'RoboCupULaval'
 
@@ -17,28 +18,30 @@ class MainWindow(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
-        self.setFixedSize(1025, 750)
+        self.setFixedSize(1025, 900)
         self.menubar = QMenuBar(self)
-        self.layout = QVBoxLayout()
-        self.sub_layout = QHBoxLayout()
+        layout = QVBoxLayout()
+        sub_layout = QHBoxLayout()
         self.frame_model = FrameModel()
         self.datain_model = DataInModel()
         self.dataout_model = DataOutModel()
 
+        self.view_logger = LoggerView(self)
+        self.view_logger.set_model(self.datain_model)
         self.view_controller = StrategyCtrView(self)
-        # self.view_property.setModel(self.model)
-
         self.view_screen = FieldView(self)
         self.view_screen.set_model(self.frame_model)
 
-        self.layout.addWidget(self.menubar)
-        self.sub_layout.addWidget(self.view_screen)
-        self.sub_layout.addWidget(self.view_controller)
-        self.layout.addLayout(self.sub_layout)
-        self.setLayout(self.layout)
+        layout.addWidget(self.menubar)
+        sub_layout.addWidget(self.view_screen)
+        sub_layout.addWidget(self.view_controller)
+        layout.addLayout(sub_layout)
+        layout.addWidget(self.view_logger)
+        self.setLayout(layout)
 
         self.init_menubar()
         self.init_signals()
+        self.resize_window()
 
     def init_menubar(self):
         # Menu
@@ -68,6 +71,10 @@ class MainWindow(QWidget):
         tacticsControllerAction.triggered.connect(self.view_controller.show_hide)
         toolMenu.addAction(tacticsControllerAction)
 
+        loggerAction = QAction('Afficher le Logger', self,  checkable=True)
+        loggerAction.triggered.connect(self.view_logger.show_hide)
+        toolMenu.addAction(loggerAction)
+
     def init_signals(self):
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
 
@@ -76,3 +83,12 @@ class MainWindow(QWidget):
 
     def closeEvent(self, event):
         self.close()
+
+    def resize_window(self):
+        width = 1025
+        height = 750
+        if self.view_logger.isVisible():
+            height += 150
+        if self.view_controller.isVisible():
+            width += 265
+        self.setFixedSize(width, height)

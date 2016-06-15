@@ -91,6 +91,12 @@ class DataInModel(object):
         except:
             return None
 
+    def get_last_log(self, index=0):
+        if len(self._data_logging):
+            return self._data_logging[index:]
+        else:
+            return None
+
     @staticmethod
     def package_is_valid(package):
         try:

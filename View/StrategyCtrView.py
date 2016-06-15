@@ -10,7 +10,6 @@ class StrategyCtrView(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.parent = parent
-        self.setFixedSize(300, 700)
         self.init_ui()
         self.hide()
 
@@ -133,7 +132,6 @@ class StrategyCtrView(QWidget):
     def show_hide(self):
         if self.isVisible():
             self.hide()
-            self.parent.setFixedSize(1025, 750)
         else:
-            self.parent.setFixedSize(1325, 750)
             self.show()
+        self.parent.resize_window()
