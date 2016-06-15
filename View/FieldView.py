@@ -10,7 +10,7 @@ from Model.FrameModel import MyModelIndex
 __author__ = 'RoboCupULaval'
 
 
-class FieldDisplay(QGraphicsView):
+class FieldView(QGraphicsView):
     def __init__(self, parent):
         QGraphicsView.__init__(self, parent)
         self.parent = parent
@@ -55,8 +55,7 @@ class FieldDisplay(QGraphicsView):
                     self.last_frame = num_frame
                     for bot in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
                             bot.setPen(Qt.black)
-
-                    if self.parent.view_controller.isVisible():
+                    if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
                         if not self.graph_mobs['target'].isVisible():
                             self.graph_mobs['target'].show()
                         id_colored = int(self.parent.view_controller.selectRobot.currentText())

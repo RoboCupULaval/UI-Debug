@@ -12,3 +12,6 @@ class DataOutModel(object):
 
     def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0)):
         self._udp_sender.send_message({'tactic': {'id': id_bot, 'tactic': tactic, 'target': target, 'goal': goal}})
+
+    def send_strat(self, strat):
+        self._udp_sender.send_message({'strategy': strat})

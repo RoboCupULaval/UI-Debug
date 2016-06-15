@@ -66,7 +66,6 @@ class FrameModel(QAbstractItemModel):
                 continue
             if len(self.receive_data_queue) == 0 or not frame.detection.frame_number == self.receive_data_queue[-1].detection.frame_number:
                 self.receive_data_queue.append(frame)
-                print(frame)
             sleep(0.01)
 
     def is_connected(self):

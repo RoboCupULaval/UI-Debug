@@ -6,8 +6,8 @@ from PyQt4.QtCore import SIGNAL
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
-from .FieldDisplay import FieldDisplay
-from .ControllerDisplay import ControllerDisplay
+from .FieldView import FieldView
+from .StrategyCtrView import StrategyCtrView
 
 __author__ = 'RoboCupULaval'
 
@@ -25,10 +25,10 @@ class MainWindow(QWidget):
         self.datain_model = DataInModel()
         self.dataout_model = DataOutModel()
 
-        self.view_controller = ControllerDisplay(self)
+        self.view_controller = StrategyCtrView(self)
         # self.view_property.setModel(self.model)
 
-        self.view_screen = FieldDisplay(self)
+        self.view_screen = FieldView(self)
         self.view_screen.set_model(self.frame_model)
 
         self.layout.addWidget(self.menubar)
@@ -64,7 +64,7 @@ class MainWindow(QWidget):
         nuumbAction.triggered.connect(self.view_screen.show_number_option)
         viewMenu.addAction(nuumbAction)
 
-        tacticsControllerAction = QAction('Contrôleur de Tactiques', self,  checkable=True)
+        tacticsControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
         tacticsControllerAction.triggered.connect(self.view_controller.show_hide)
         toolMenu.addAction(tacticsControllerAction)
 

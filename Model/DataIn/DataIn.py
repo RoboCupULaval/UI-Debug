@@ -7,10 +7,10 @@ __author__ = 'RoboCupULaval'
 
 class DataIn(object):
     def __init__(self, name, type, data):
-        self._name = name
-        self._type = type
-        self._data = data
-        self._time = datetime.now()
+        self.name = name
+        self.type = type
+        self.data = data
+        self.time = datetime.now()
 
     @staticmethod
     def package_is_valid(name, type):
@@ -19,4 +19,4 @@ class DataIn(object):
         assert 0 <= type <= 50
 
     def get_time(self):
-        return self._time
+        return self.time

@@ -28,4 +28,7 @@ class DataInSTA(DataIn):
             return False
 
     def get_tactics(self):
-        return sorted(self._data['T'])
+        return sorted(self.data['T'])
+
+    def get_strats(self):
+        return sorted(self.data['S'])
