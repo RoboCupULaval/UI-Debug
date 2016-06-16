@@ -11,8 +11,9 @@ __author__ = 'RoboCupULaval'
 
 
 class DataInModel(object):
-    def __init__(self):
+    def __init__(self, controller=None):
         # Initialisation
+        self._controller = controller
         self._udp_receiver = UDPReceiving()
         self._last_packet = None
         self._data_logging = list()
@@ -41,7 +42,7 @@ class DataInModel(object):
                         if data_in is not None and self.package_is_valid(data_in):
                             data = DataInFactory.get_data(data_in['name'], data_in['type'], data_in['data'])
                             if isinstance(data, DataInLog):
-                                self._data_logging.append(data)
+                                self.add_logging(data)
                             elif isinstance(data, DataInSTA):
                                 if self._data_STA is not None:
                                     for key in data.data.keys():
@@ -52,6 +53,10 @@ class DataInModel(object):
                     self._last_packet = package[0] if package is not None else None
                     self._lock.release()
             sleep(0.01)
+
+    def add_logging(self, data):
+        self._data_logging.append(data)
+        self._controller.update_logging()
 
     def _get_data(self, type=0):
         while True:

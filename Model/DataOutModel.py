@@ -6,7 +6,8 @@ __author__ = 'RoboCupULaval'
 
 
 class DataOutModel(object):
-    def __init__(self):
+    def __init__(self, controller=None):
+        self._controller = controller
         self._name = 'UI'
         self._version = 'v1.0'
         self._udp_sender = UDPSending()

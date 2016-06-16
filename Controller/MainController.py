@@ -18,10 +18,11 @@ __author__ = 'RoboCupULaval'
 class MainController(QWidget):
     def __init__(self):
         QWidget.__init__(self)
+
         # Création des Modèles
-        self.model_frame = FrameModel()
-        self.model_datain = DataInModel()
-        self.model_dataout = DataOutModel()
+        self.model_frame = FrameModel(self)
+        self.model_datain = DataInModel(self)
+        self.model_dataout = DataOutModel(self)
 
         # Création des Vues
         self.view_menu = QMenuBar(self)
@@ -97,6 +98,9 @@ class MainController(QWidget):
 
     def init_signals(self):
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
+
+    def update_loggin(self):
+        self.view_logger.refresh()
 
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')

@@ -15,8 +15,9 @@ __author__ = 'RoboCupULaval'
 
 class FrameModel(QAbstractItemModel):
     # TODO : Revoir le modèle pour le rendre standard à Qt
-    def __init__(self):
+    def __init__(self, controller):
         QAbstractItemModel.__init__(self)
+        self._controller = controller
         self.field_info = FieldInformation()
         self.receive_data_queue = deque(maxlen=100)
         self.send_data_queue = deque(maxlen=100)
