@@ -5,8 +5,8 @@ from math import cos, sin, atan2
 __author__ = 'RoboCupULaval'
 
 
-class Field(object):
-    """ La classe Field représente les informations relatives au terrain """
+class FieldInformation(object):
+    """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
     def __init__(self):
         self.type = 0
         self.ratio_screen = 1 / 10

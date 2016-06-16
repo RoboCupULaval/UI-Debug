@@ -56,7 +56,7 @@ Les données sont divisées en 4 familles qui ont chacunes leurs spécificités 
 0 <= 999      | Logger         | Affiche de l'information sous forme de texte dans la fenêtre assignée dans l'UI.
 1000 <= 2999  | Setter/Getter  | Permet de paramétrer des données de l'IA dans l'UI ou de récupérer des données de l'UI de maniére ponctuelle.
 3000 <= 4999  | Drawer         | Dessine des éléments dans la fenêtre du terrain.
-5000 <= 6999  | Initializer    | Permet d'initialiser l'UI avec des données de l'IA à la connexion.
+5000 <= 6999  | Sender         | Commande envoyée de l'UI vers le client
 
 ### Description des données par type
 

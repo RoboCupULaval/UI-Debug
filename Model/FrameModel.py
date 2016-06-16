@@ -8,7 +8,7 @@ from PyQt4.QtCore import *
 
 from Communication.vision import Vision
 from Communication.UDPCommunication import UDPSending, UDPReceiving
-from .Field import Field
+from .FieldInformation import FieldInformation
 
 __author__ = 'RoboCupULaval'
 
@@ -17,7 +17,7 @@ class FrameModel(QAbstractItemModel):
     # TODO : Revoir le modèle pour le rendre standard à Qt
     def __init__(self):
         QAbstractItemModel.__init__(self)
-        self.field_info = Field()
+        self.field_info = FieldInformation()
         self.receive_data_queue = deque(maxlen=100)
         self.send_data_queue = deque(maxlen=100)
         self.row_header = list()

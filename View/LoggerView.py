@@ -21,6 +21,7 @@ class LoggerView(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        self.setFixedHeight(200)
         self.log_queue = QListWidget(self)
         layout = QHBoxLayout()
         layout.addWidget(self.log_queue)

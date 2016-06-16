@@ -14,6 +14,7 @@ class StrategyCtrView(QWidget):
         self.hide()
 
     def init_ui(self):
+        self.setFixedWidth(300)
         # Création des pages d'onglet
         self.page_controller = QTabWidget(self)
         self.page_strategy = QWidget()
@@ -81,12 +82,10 @@ class StrategyCtrView(QWidget):
         tact_stop_but.clicked.connect(self.send_tactic_stop)
         but_group_tact.addWidget(tact_stop_but)
 
-
         self.page_tact_vbox.addWidget(group_bot_select)
         self.page_tact_vbox.addLayout(but_group_tact)
 
         self.page_tactic.setLayout(self.page_tact_vbox)
-
 
         # + Onglet
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
