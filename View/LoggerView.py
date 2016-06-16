@@ -6,6 +6,8 @@ from PyQt4.QtGui import QListWidget
 from PyQt4.QtGui import QHBoxLayout
 from PyQt4.QtGui import QVBoxLayout
 from PyQt4.QtGui import QPushButton
+from PyQt4.QtGui import QIcon
+from PyQt4.QtCore import QSize
 from Model.DataInModel import DataInModel
 
 __author__ = 'RoboCupULaval'
@@ -24,27 +26,30 @@ class LoggerView(QWidget):
         self.setFixedHeight(200)
         self.log_queue = QListWidget(self)
         layout = QHBoxLayout()
-        layout.addWidget(self.log_queue)
 
         layout_btn = QVBoxLayout()
-        self.btn_pause = QPushButton('Pause')
-        self.btn_pause.setCheckable(True)
-        self.btn_pause.setChecked(self.pause)
-        self.btn_pause.clicked.connect(self.pauseEvent)
-        layout_btn.addWidget(self.btn_pause)
+        self.btn_media_ctrl = QPushButton()
+        self.btn_media_ctrl.setIcon(QIcon('Img/control_pause.png'))
+        self.btn_media_ctrl.setIconSize(QSize(16, 16))
+        self.btn_media_ctrl.setDisabled(True)
+        self.btn_media_ctrl.setCheckable(False)
+        self.btn_media_ctrl.clicked.connect(self.pauseEvent)
+        layout_btn.addWidget(self.btn_media_ctrl)
+
+        # Initialisation Layout
         layout.addLayout(layout_btn)
+        layout.addWidget(self.log_queue)
 
         self.setLayout(layout)
 
         self.hide()
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_logger)
-        self.timer.start(250)
-
     def pauseEvent(self):
         self.pause = not self.pause
-        self.btn_pause.setChecked(self.pause)
+        if self.pause:
+            self.btn_media_ctrl.setIcon(QIcon('Img/control_play.png'))
+        else:
+            self.btn_media_ctrl.setIcon(QIcon('Img/control_pause.png'))
 
     def set_model(self, model):
         if isinstance(model, DataInModel):
@@ -52,7 +57,7 @@ class LoggerView(QWidget):
         else:
             raise TypeError('Logger should get data in model argument.')
 
-    def update_logger(self):
+    def refresh(self):
         if not self.pause:
             if self._model is not None:
                 messages = self._model.get_last_log(self._count)
@@ -64,6 +69,14 @@ class LoggerView(QWidget):
 
     def get_count(self):
         return self._count
+
+    def clear(self):
+        # TODO : Clear la liste des logs
+        pass
+
+    def save(self):
+        # TODO : Sauvegarde sous forme de texte les logs
+        pass
 
     def show_hide(self):
         if self.isVisible():
