@@ -17,7 +17,7 @@ class DataInModel(object):
         self._last_packet = None
         self._data_logging = list()
         self._data_config = list()
-        self._data_STA = {'S': None, 'T': None, 'A': None}
+        self._data_STA = None
         self._lock = Lock()
         self._data_recovery = Thread(target=self._get_data_in, daemon=True)
 
@@ -43,7 +43,11 @@ class DataInModel(object):
                             if isinstance(data, DataInLog):
                                 self._data_logging.append(data)
                             elif isinstance(data, DataInSTA):
-                                self._data_STA['T'] = data.get_tactics()
+                                if self._data_STA is not None:
+                                    for key in data.data.keys():
+                                        self._data_STA.data[key] = data.data[key]
+                                else:
+                                    self._data_STA = data
                 finally:
                     self._last_packet = package[0] if package is not None else None
                     self._lock.release()
@@ -60,8 +64,8 @@ class DataInModel(object):
                         else:
                             return None
                     elif type == 2:
-                        if len(self._data_STA):
-                            return self._data_STA
+                        if isinstance(self._data_STA, DataInSTA):
+                            return self._data_STA.data
                         return None
                     else:
                         raise NotImplemented
@@ -78,7 +82,19 @@ class DataInModel(object):
     def get_tactics(self):
         try:
             return self._get_data(2)['T']
-        except NotImplemented:
+        except:
+            return None
+
+    def get_strats(self):
+        try:
+            return self._get_data(2)['S']
+        except:
+            return None
+
+    def get_last_log(self, index=0):
+        if len(self._data_logging):
+            return self._data_logging[index:]
+        else:
             return None
 
     @staticmethod

@@ -56,23 +56,23 @@ class DataInLog(DataIn):
 
     def __str__(self):
         message = ''
-        if self._type == 1:
-            for key, item in sorted(self._data.items()):
-                message += '<{}> '.format(date.strftime(self._time, "%H:%M:%S"))
-                message += '"{}": '.format(self._name)
+        if self.type == 1:
+            for key, item in sorted(self.data.items()):
+                message += '<{}> '.format(date.strftime(self.time, "%H:%M:%S"))
+                message += '"{}": '.format(self.name)
                 message += '{} = {}'.format(key, item) + '\n'
             message = message[:-1]
 
-        elif self._type == 2:
-            message += '<{}> '.format(date.strftime(self._time, "%H:%M:%S"))
-            message += '"{}": '.format(self._name)
-            message += "<{}> ".format(self.display_type[self._data['level']])
-            message += self._data['message']
+        elif self.type == 2:
+            message += '<{}> '.format(date.strftime(self.time, "%H:%M:%S"))
+            message += '"{}": '.format(self.name)
+            message += "<{}> ".format(self.display_type[self.data['level']])
+            message += self.data['message']
 
         return message
 
     def get_message(self):
-        return self._data['message']
+        return self.data['message']
 
     def get_level(self):
-        return self._data['level']
+        return self.data['level']
