@@ -5,6 +5,7 @@ from threading import Thread, Lock
 from Communication.UDPCommunication import UDPReceiving
 from .DataIn.DataIn import DataIn
 from .DataIn.DataInFactory import DataInFactory, DataInLog, DataInSTA
+from .DataIn.DataInDraw import DataInDraw
 
 
 __author__ = 'RoboCupULaval'
@@ -15,9 +16,11 @@ class DataInModel(object):
         # Initialisation
         self._controller = controller
         self._udp_receiver = UDPReceiving()
+        self._datain_factory = DataInFactory()
         self._last_packet = None
         self._data_logging = list()
         self._data_config = list()
+        self._data_draw = dict()
         self._data_STA = None
         self._lock = Lock()
         self._data_recovery = Thread(target=self._get_data_in, daemon=True)
@@ -27,6 +30,10 @@ class DataInModel(object):
         self._initialization()
 
     def _initialization(self):
+
+        self._data_draw['notset'] = list()
+        self._data_draw['robots_yellow'] = [list() for _ in range(6)]
+        self._data_draw['robots_blue'] = [list() for _ in range(6)]
 
         self._udp_receiver.start()
         self._data_recovery.start()
@@ -40,7 +47,7 @@ class DataInModel(object):
                     if package is not None and not package[0] == self._last_packet:
                         data_in = package[1]
                         if data_in is not None and self.package_is_valid(data_in):
-                            data = DataInFactory.get_data(data_in['name'], data_in['type'], data_in['data'])
+                            data = self._datain_factory.get_datain_object(data_in['name'], data_in['type'], data_in['data'])
                             if isinstance(data, DataInLog):
                                 self.add_logging(data)
                             elif isinstance(data, DataInSTA):
@@ -49,6 +56,9 @@ class DataInModel(object):
                                         self._data_STA.data[key] = data.data[key]
                                 else:
                                     self._data_STA = data
+                            elif isinstance(data, DataInDraw):
+                                self._data_draw['notset'].append(data)
+                                self.show_draw(self._data_draw['notset'][-1])
                 finally:
                     self._last_packet = package[0] if package is not None else None
                     self._lock.release()
@@ -72,6 +82,8 @@ class DataInModel(object):
                         if isinstance(self._data_STA, DataInSTA):
                             return self._data_STA.data
                         return None
+                    elif type == 3:
+                        return self._data_draw
                     else:
                         raise NotImplemented
                 finally:
@@ -102,6 +114,10 @@ class DataInModel(object):
         else:
             return None
 
+    def show_draw(self, draw):
+        if isinstance(draw, DataInDraw):
+            self._controller.show_draw(draw)
+
     @staticmethod
     def package_is_valid(package):
         try:
@@ -110,3 +126,7 @@ class DataInModel(object):
             return DataIn.package_is_valid(package['name'], package['type'])
         except KeyError:
             return False
+
+    def save_logging(self, path):
+        # TODO: Enregistrer les logs dans un fichier texte
+        print(path)

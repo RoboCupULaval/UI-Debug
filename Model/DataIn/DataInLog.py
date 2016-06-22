@@ -8,9 +8,11 @@ __author__ = 'RoboCupULaval'
 
 class DataInLog(DataIn):
     def __init__(self, name, type, data):
-        DataIn.__init__(self, name, type, data)
-        if not self.data_is_valid(name, type, data):
-            raise AttributeError()
+        DataIn.__init__(self, name, type)
+        self.data = data
+        if not self.data_is_valid(data):
+            pass
+
         self.display_type = {0: 'NOTSET',
                              1: 'DEBUG',
                              2: 'INFO',
@@ -23,9 +25,8 @@ class DataInLog(DataIn):
         raise NotImplemented
 
     @staticmethod
-    def data_is_valid(name, type, data):
+    def data_is_valid(data):
         try:
-            DataIn.package_is_valid(name, type)
             if type == 1:
                 # Vérifie le format de données
                 assert isinstance(data, dict)

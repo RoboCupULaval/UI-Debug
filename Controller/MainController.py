@@ -8,14 +8,20 @@ from PyQt4.QtCore import SIGNAL
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
+
 from View.FieldView import FieldView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
+from View.MainWindow import MainWindow
+
+from .DrawController import DrawController
+from .FieldController import FieldController
 
 __author__ = 'RoboCupULaval'
 
 
 class MainController(QWidget):
+    # TODO: Dissocier Controller de la fenêtre principale
     def __init__(self):
         QWidget.__init__(self)
 
@@ -25,10 +31,15 @@ class MainController(QWidget):
         self.model_dataout = DataOutModel(self)
 
         # Création des Vues
+        self.main_window = MainWindow()
         self.view_menu = QMenuBar(self)
         self.view_logger = LoggerView(self)
         self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
+
+        # Création des Contrôleurs
+        self.draw_handler = DrawController()
+        self.field_handler = FieldController()
 
         # Initialisation des UI
         self.init_main_window()
@@ -99,8 +110,11 @@ class MainController(QWidget):
     def init_signals(self):
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
 
-    def update_loggin(self):
+    def update_logging(self):
         self.view_logger.refresh()
+
+    def save_logging(self, path):
+        self.model_datain.save_logging(path)
 
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')
@@ -110,3 +124,14 @@ class MainController(QWidget):
 
     def resize_window(self):
         self.setFixedSize(self.minimumSizeHint())
+
+    def show_draw(self, draw):
+        try:
+            for key, item in draw.data.items():
+                if isinstance(item, tuple) and len(item) == 2:
+                    x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
+                    draw.data[key] = x, y
+            qt_draw = self.draw_handler.get_qt_draw_object(draw)
+            self.view_screen.load_draw(qt_draw)
+        except NotImplemented():
+            print('@qt_draw not implemented yet.')

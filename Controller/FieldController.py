@@ -5,7 +5,7 @@ from math import cos, sin, atan2
 __author__ = 'RoboCupULaval'
 
 
-class FieldInformation(object):
+class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
     def __init__(self):
         self.type = 0

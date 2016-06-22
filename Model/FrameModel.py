@@ -1,14 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-from time import sleep
 from collections import deque
 from threading import Thread
+from time import sleep
 
 from PyQt4.QtCore import *
 
 from Communication.vision import Vision
-from Communication.UDPCommunication import UDPSending, UDPReceiving
-from .FieldInformation import FieldInformation
+from Controller.FieldController import FieldController
 
 __author__ = 'RoboCupULaval'
 
@@ -18,7 +17,7 @@ class FrameModel(QAbstractItemModel):
     def __init__(self, controller):
         QAbstractItemModel.__init__(self)
         self._controller = controller
-        self.field_info = FieldInformation()
+        self.field_info = FieldController()
         self.receive_data_queue = deque(maxlen=100)
         self.send_data_queue = deque(maxlen=100)
         self.row_header = list()
@@ -82,7 +81,10 @@ class FrameModel(QAbstractItemModel):
         return len(self.row_header)
 
     def data(self, index, int_role=None):
-        # TODO : Rendre dynamique les données (dans le cas de Vanish)
+        # TODO : /!\ Rendre dynamique les données (dans le cas de Vanish)
+        # WARN: Si le frame ne contient pas tous les robots, aucun robot
+        # n'aura sa position rafraichis
+
         if index.row() >= self.rowCount():
             return None
 
