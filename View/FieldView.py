@@ -43,106 +43,12 @@ class FieldView(QGraphicsView):
         for number in self.graph_mobs['robots_numbers']:
             self.scene.addItem(number)
 
-    def refresh(self):
-        """ Rafraîchit tous les paramètres des éléments graphiques de la fenêtre """
-        if self.model is None:
-            pass
-        elif self.model.is_connected():
-            num_frame = self.model.data(MyModelIndex(0, 0))
-            if not num_frame == self.last_frame:
-                self.refresh_ball()
-                self.refresh_robots_blue()
-                self.refresh_robots_yellow()
-                self.last_frame = num_frame
-                for bot in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
-                        bot.setPen(Qt.black)
-                if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
-                    if not self.graph_mobs['target'].isVisible():
-                        self.graph_mobs['target'].show()
-                    id_colored = int(self.parent.view_controller.selectRobot.currentText())
-
-                    if id_colored < 5:
-                        self.graph_mobs['robots_yellow'][id_colored].setPen(Qt.red)
-                    else:
-                        self.graph_mobs['robots_blue'][id_colored - 6].setPen(Qt.red)
-                else:
-                    if self.graph_mobs['target'].isVisible():
-                        self.graph_mobs['target'].hide()
-
-
-    def refresh_ball(self):
-        """ Rafraîchit les paramètre de la balle """
-        try:
-            x = self.model.data((1, 5))
-            y = self.model.data((1, 6))
-            if x is not None and y is not None:
-                if not self.graph_mobs['ball'].isVisible():
-                    self.graph_mobs['ball'].show()
-                x, y, _ = self.model.field_info.convert_real_to_scene_pst(x, y)
-                if not x == self.graph_mobs['ball'].pos().x() and not y == self.graph_mobs['ball'].pos().y():
-                    self.graph_mobs['ball'].setPos(x, y)
-
-            else:
-                if self.option_vanishing:
-                    self.graph_mobs['ball'].hide()
-        except IndexError:
-            if self.option_vanishing:
-                self.graph_mobs['ball'].hide()
-
-    def refresh_robots_yellow(self):
-        """ Rafraîchit les paramètres des robots de l'équipe jaune """
-        for id_bot in range(len(self.graph_mobs['robots_yellow'])):
-            try:
-                x = self.model.data((id_bot + 2, 5))
-                y = self.model.data((id_bot + 2, 6))
-                theta = self.model.data((id_bot + 2, 8))
-                if x is not None and y is not None:
-                    if not self.graph_mobs['robots_yellow'][id_bot].isVisible(): self.graph_mobs['robots_yellow'][id_bot].show()
-                    x, y, theta = self.model.field_info.convert_real_to_scene_pst(x, y, theta=theta)
-                    if not x == self.graph_mobs['robots_yellow'][id_bot].pos().x()\
-                       and not y == self.graph_mobs['robots_yellow'][id_bot].pos().y():
-                        self.graph_mobs['robots_yellow'][id_bot].setPos(x, y)
-                        self.graph_mobs['robots_numbers'][id_bot].setPos(x + 5, y + 5)
-                        self.graph_mobs['robots_yellow'][id_bot].setRotation(math.degrees(theta))
-                else:
-                    if self.option_vanishing:
-                        self.graph_mobs['robots_yellow'][id_bot].hide()
-            except IndexError:
-                if self.option_vanishing:
-                    self.graph_mobs['robots_yellow'][id_bot].hide()
-
-    def refresh_robots_blue(self):
-        """ Rafraîchit les paranètres des robots de l'équipe bleue """
-        for id_bot in range(len(self.graph_mobs['robots_blue'])):
-            try:
-                x = self.model.data((id_bot + 8, 5))
-                y = self.model.data((id_bot + 8, 6))
-                theta = self.model.data((id_bot + 8, 8))
-
-                if x is not None and y is not None:
-                    if not self.graph_mobs['robots_blue'][id_bot].isVisible(): self.graph_mobs['robots_blue'][id_bot].show()
-                    x, y, theta = self.model.field_info.convert_real_to_scene_pst(x, y, theta=theta)
-                    if not x == self.graph_mobs['robots_blue'][id_bot].pos().x()\
-                       and not y == self.graph_mobs['robots_blue'][id_bot].pos().y():
-                        self.graph_mobs['robots_blue'][id_bot].setPos(x, y)
-                        self.graph_mobs['robots_numbers'][id_bot + 6].setPos(x + 5, y + 5)
-                        self.graph_mobs['robots_blue'][id_bot].setRotation(math.degrees(theta))
-                else:
-                    if self.option_vanishing:
-                        self.graph_mobs['robots_blue'][id_bot].hide()
-            except IndexError:
-                if self.option_vanishing:
-                    self.graph_mobs['robots_blue'][id_bot].hide()
-
     def mousePressEvent(self, event):
         if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
             x, y = self.model.field_info.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.parent.model_dataout.target = (x, y)
             x, y, _ = self.model.field_info.convert_real_to_scene_pst(x, y)
             self.graph_mobs['target'].setPos(x, y)
-            self.graph_mobs['target'].show()
-        else:
-            self.graph_mobs['target'].hide()
 
     def draw_field(self):
         """ Dessine le terrain et ses contours """
@@ -314,7 +220,11 @@ class FieldView(QGraphicsView):
 
     def hide_select_bot(self):
         if self.last_target is not None:
-            self.last_target.setPen(Qt.black)
+            if not self.parent.view_controller.page_tactic.isVisible():
+                self.last_target.setPen(Qt.black)
+                self.last_target = None
+            else:
+                self.last_target.setPen(Qt.black)
 
     def update_tactic_targeting(self):
         if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
