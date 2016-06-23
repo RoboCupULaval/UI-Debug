@@ -87,17 +87,21 @@ class FieldView(QGraphicsView):
         self.graph_mobs['ball'] = QGraphicsEllipseItem(-2.15, -2.15, 4.3, 4.3)
         self.graph_mobs['ball'].setBrush(QBrush(QColor(255, 92, 0)))
         self.graph_mobs['ball'].setPen(QPen(QColor(255, 92, 0)))
+        self.graph_mobs['ball'].setZValue(10)
+        self.graph_mobs['ball'].hide()
 
         # Élément graphique de la cible
         self.graph_mobs['target'] = QGraphicsPixmapItem(QPixmap('Img/ico-target.png'))
         self.graph_mobs['target'].setOffset(-55, -55)
         self.graph_mobs['target'].scale(0.21, 0.21)
         self.graph_mobs['target'].hide()
+        self.graph_mobs['target'].setZValue(10)
 
         # Élément graphique des robots jaunes
         self.graph_mobs['robots_yellow'] = [QGraphicsEllipseItem(-11.25, -11.25, 22.5, 22.5) for _ in range(6)]
         for robot_yellow in self.graph_mobs['robots_yellow']:
             robot_yellow.hide()
+            robot_yellow.setZValue(10)
             robot_yellow.setSpanAngle(50000)
             robot_yellow.setBrush(QBrush(QColor(255, 255, 105)))
             robot_yellow.setPen(QPen(QColor(0, 0, 0)))
@@ -106,6 +110,7 @@ class FieldView(QGraphicsView):
         self.graph_mobs['robots_blue'] = [QGraphicsEllipseItem(-11.25, -11.5, 22.5, 22.5) for _ in range(6)]
         for robots_blue in self.graph_mobs['robots_blue']:
             robots_blue.hide()
+            robots_blue.setZValue(10)
             robots_blue.setSpanAngle(50000)
             robots_blue.setBrush(QBrush(QColor(105, 255, 255)))
             robots_blue.setPen(QPen(QColor(0, 0, 0)))
@@ -115,6 +120,7 @@ class FieldView(QGraphicsView):
         for number in self.graph_mobs['robots_numbers']:
             font = QFont()
             font.setBold(True)
+            number.setZValue(10)
             number.setFont(font)
             number.setPos(-6666, -6666)
             number.hide()
@@ -211,6 +217,7 @@ class FieldView(QGraphicsView):
             self.graph_mobs['robots_numbers'][bot_id].hide()
 
     def show_select_bot(self, bot_id):
+        """ Affiche le robot sélectionné """
         graph_bot = self.graph_mobs['robots_yellow'][bot_id] if bot_id < 6 else self.graph_mobs['robots_blue'][bot_id - 6]
         if not self.last_target == graph_bot:
             if self.last_target is not None:
@@ -219,6 +226,7 @@ class FieldView(QGraphicsView):
             self.last_target = graph_bot
 
     def hide_select_bot(self):
+        """ Cache le dernier robot sélectionné """
         if self.last_target is not None:
             if not self.parent.view_controller.page_tactic.isVisible():
                 self.last_target.setPen(Qt.black)
@@ -227,6 +235,7 @@ class FieldView(QGraphicsView):
                 self.last_target.setPen(Qt.black)
 
     def update_tactic_targeting(self):
+        """ Met à jour la vue de la cible """
         if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
             if not self.graph_mobs['target'].isVisible():
                 self.graph_mobs['target'].show()

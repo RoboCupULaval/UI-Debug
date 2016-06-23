@@ -49,8 +49,11 @@ class DataInModel(object):
                     package = self._udp_receiver.get_last_data()
                     if package is not None and not package[0] == self._last_packet:
                         data_in = package[1]
-                        if data_in is not None and self.package_is_valid(data_in):
-                            data = self._datain_factory.get_datain_object(data_in['name'], data_in['type'], data_in['data'])
+                        if data_in is not None:
+                            if self.package_is_valid(data_in):
+                                data = self._datain_factory.get_datain_object(data_in['name'], data_in['type'], data_in['data'])
+                            else:
+                                data = self._datain_factory.get_msg_bad_format(**data_in)
                             if isinstance(data, DataInLog):
                                 self.add_logging(data)
                             elif isinstance(data, DataInSTA):
@@ -124,10 +127,15 @@ class DataInModel(object):
     @staticmethod
     def package_is_valid(package):
         try:
+            assert isinstance(package, dict)
+            assert 'name' in package.keys()
+            assert isinstance(package['name'], str)
+            assert 'type' in package.keys()
+            assert isinstance(package['type'], int)
+            assert 'data' in package.keys()
+            assert isinstance(package['data'], dict)
             return True
-            # TODO: Faire vérification du paquet
-            return DataIn.package_is_valid(package['name'], package['type'])
-        except KeyError:
+        except AssertionError:
             return False
 
     def save_logging(self, path):

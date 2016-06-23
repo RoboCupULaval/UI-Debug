@@ -2,6 +2,7 @@
 
 from datetime import date
 from .DataIn import DataIn
+from .DataIn import FormatPackageError
 
 __author__ = 'RoboCupULaval'
 
@@ -10,8 +11,8 @@ class DataInLog(DataIn):
     def __init__(self, name, type, data):
         DataIn.__init__(self, name, type)
         self.data = data
-        if not self.data_is_valid(data):
-            pass
+        if not self.data_is_valid():
+            raise FormatPackageError()
 
         self.display_type = {0: 'NOTSET',
                              1: 'DEBUG',
@@ -20,34 +21,29 @@ class DataInLog(DataIn):
                              4: 'ERROR',
                              5: 'FATAL'}
 
-    def get_qt_object(self):
-        # TODO : Générer l'object qt en question
-        raise NotImplemented
-
-    @staticmethod
-    def data_is_valid(data):
+    def data_is_valid(self):
         try:
-            if type == 1:
+            if self.type == 1:
                 # Vérifie le format de données
-                assert isinstance(data, dict)
+                assert isinstance(self.data, dict)
 
                 # Vérifie toutes les données
-                for key, item in data.items():
+                for key, item in self.data.items():
                     assert isinstance(key, str)
                     assert isinstance(item, (int, str, float))
 
-            elif type == 2:
+            elif self.type == 2:
                 # Vérifie le format de données
-                assert isinstance(data, dict)
+                assert isinstance(self.data, dict)
 
                 # Vérifie le level
-                assert 'level' in data.keys()
-                assert isinstance(data['level'], int)
-                assert 0 <= data['level'] <= 5
+                assert 'level' in self.data.keys()
+                assert isinstance(self.data['level'], int)
+                assert 0 <= self.data['level'] <= 5
 
                 # Vérifie le message
-                assert 'message' in data.keys()
-                assert isinstance(data['message'], str)
+                assert 'message' in self.data.keys()
+                assert isinstance(self.data['message'], str)
             else:
                 raise NotImplementedError()
 
