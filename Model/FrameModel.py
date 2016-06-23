@@ -1,8 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
 from collections import deque
-from threading import Thread
-from time import sleep
 
 from PyQt4.QtCore import *
 
@@ -12,166 +10,76 @@ from Controller.FieldController import FieldController
 __author__ = 'RoboCupULaval'
 
 
-class FrameModel(QAbstractItemModel):
+class FrameModel(object):
     # TODO : Revoir le modèle pour le rendre standard à Qt
     def __init__(self, controller):
-        QAbstractItemModel.__init__(self)
         self._controller = controller
         self.field_info = FieldController()
         self.receive_data_queue = deque(maxlen=100)
         self.send_data_queue = deque(maxlen=100)
         self.row_header = list()
         self.col_header = list()
-        self.init_headerdata()
 
         self.vision = Vision()
 
-        self.frame_catcher = Thread(target=self.catch_frame)
-        self.frame_catcher.daemon = True
         self.frame_catcher_stop = False
-        self.frame_catcher.start()
 
-    def init_headerdata(self):
-        self.row_header.append('frame')
-        self.row_header.append('balls')
-        self.row_header.append('robot_yellow_0')
-        self.row_header.append('robot_yellow_1')
-        self.row_header.append('robot_yellow_2')
-        self.row_header.append('robot_yellow_3')
-        self.row_header.append('robot_yellow_4')
-        self.row_header.append('robot_yellow_5')
-        self.row_header.append('robot_blue_0')
-        self.row_header.append('robot_blue_1')
-        self.row_header.append('robot_blue_2')
-        self.row_header.append('robot_blue_3')
-        self.row_header.append('robot_blue_4')
-        self.row_header.append('robot_blue_5')
-
-        self.col_header.append('frame_number')
-        self.col_header.append('t_capture')
-        self.col_header.append('t_sent')
-        self.col_header.append('camera_id')
-        self.col_header.append('confidence')
-        self.col_header.append('x')
-        self.col_header.append('y')
-        self.col_header.append('z')
-        self.col_header.append('orientation')
-        self.col_header.append('pixel_x')
-        self.col_header.append('pixel_y')
+        self.frame_timer = QTimer()
+        self.frame_timer.timeout.connect(self.catch_frame)
+        self.frame_timer.start(20)
 
     def catch_frame(self):
-        while not self.frame_catcher_stop:
+        if not self.frame_catcher_stop:
             frame = self.vision.get_latest_frame()
             if frame is None:
-                continue
-            if len(self.receive_data_queue) == 0 or not frame.detection.frame_number == self.receive_data_queue[-1].detection.frame_number:
-                self.receive_data_queue.append(frame)
-            sleep(0.01)
+                pass
+            elif len(self.receive_data_queue) == 0 or not frame.detection.frame_number == self.receive_data_queue[-1].detection.frame_number:
+                self.update_data(frame)
+
+    def update_data(self, frame):
+        self.receive_data_queue.append(frame)
+        # Mise à jour des données de la balle
+        try:
+            x = self.receive_data_queue[-1].detection.balls[0].x
+            y = self.receive_data_queue[-1].detection.balls[0].y
+            self._controller.set_ball_pos_on_screen(x, y)
+        except BaseException:
+            self._controller.hide_mob()
+
+        # Mise à jour des données de l'équipe jaune
+        try:
+            list_bot_id = {0, 1, 2, 3, 4, 5}
+            for info_bot in self.receive_data_queue[-1].detection.robots_yellow:
+                list_bot_id.remove(info_bot.robot_id)
+                bot_id = info_bot.robot_id
+                x = info_bot.x
+                y = info_bot.y
+                theta = info_bot.orientation
+                self._controller.set_robot_pos_on_screen(bot_id, (x, y), theta)
+
+            for bot_id in list_bot_id:
+                self._controller.hide_mob(bot_id)
+        except BaseException:
+            pass
+
+        # Mise à jour des données de l'équipe blue
+        try:
+            list_bot_id = {0, 1, 2, 3, 4, 5}
+            for info_bot in self.receive_data_queue[-1].detection.robots_blue:
+                list_bot_id.remove(info_bot.robot_id)
+                bot_id = info_bot.robot_id
+                x = info_bot.x
+                y = info_bot.y
+                theta = info_bot.orientation
+                self._controller.set_robot_pos_on_screen(bot_id + 6, (x, y), theta)
+
+            for bot_id in list_bot_id:
+                self._controller.hide_mob(bot_id + 6)
+        except BaseException:
+            pass
+
 
     def is_connected(self):
         if len(self.receive_data_queue) > 0:
             return True
         return False
-
-    def columnCount(self, parent=None, *args, **kwargs):
-        return len(self.col_header)
-
-    def rowCount(self, parent=None, *args, **kwargs):
-        # TODO : Faire algo de comptage dynamique en fonction du contenu des frames
-        return len(self.row_header)
-
-    def data(self, index, int_role=None):
-        # TODO : /!\ Rendre dynamique les données (dans le cas de Vanish)
-        # WARN: Si le frame ne contient pas tous les robots, aucun robot
-        # n'aura sa position rafraichis
-
-        if index.row() >= self.rowCount():
-            return None
-
-        if index.row() == 0:
-            if index.col() == 0:
-                return self.receive_data_queue[-1].detection.frame_number
-            elif index.col() == 1:
-                return self.receive_data_queue[-1].detection.t_capture
-            elif index.col() == 2:
-                return self.receive_data_queue[-1].detection.t_sent
-            elif index.col() == 3:
-                return self.receive_data_queue[-1].detection.camera_id
-            else:
-                return None
-        elif index.row() == 1:
-            if index.col() == 4:
-                return self.receive_data_queue[-1].detection.balls.confidence
-            elif index.col() == 5:
-                return self.receive_data_queue[-1].detection.balls[0].x
-            elif index.col() == 6:
-                return self.receive_data_queue[-1].detection.balls[0].y
-            elif index.col() == 7:
-                return self.receive_data_queue[-1].detection.balls.z
-            elif index.col() == 9:
-                return self.receive_data_queue[-1].detection.balls.pixel_x
-            elif index.col() == 10:
-                return self.receive_data_queue[-1].detection.balls.pixel_y
-            else:
-                return None
-        elif 2 <= index.row() < 8:
-            if not index.row() - 2 == self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].robot_id:
-                raise IndexError
-            if index.col() == 4:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].confidence
-            elif index.col() == 5:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].x
-            elif index.col() == 6:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].y
-            elif index.col() == 7:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].z
-            elif index.col() == 8:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].orientation
-            elif index.col() == 9:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].pixel_x
-            elif index.col() == 10:
-                return self.receive_data_queue[-1].detection.robots_yellow[index.row() - 2].pixel_y
-            else:
-                return None
-        elif 8 <= index.row() <= 13:
-            if not index.row() - 8 == self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].robot_id:
-                raise IndexError
-            if index.col() == 4:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].confidence
-            elif index.col() == 5:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].x
-            elif index.col() == 6:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].y
-            elif index.col() == 7:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].z
-            elif index.col() == 8:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].orientation
-            elif index.col() == 9:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].pixel_x
-            elif index.col() == 10:
-                return self.receive_data_queue[-1].detection.robots_blue[index.row() - 8].pixel_y
-            else:
-                return None
-        else:
-            return None
-
-
-class MyModelIndex(object):
-    # WARN: Classe temporaire le temps de modifier le modèle
-    def __init__(self, row, column):
-        self._row = row
-        self._column = column
-
-    def row(self):
-        return self._row
-
-    def col(self):
-        return self._column
-
-    def isValid(self):
-        if not isinstance(self._row, int) and 0 < self._row:
-            return False
-        elif not isinstance(self._column, int) and 0 < self._row:
-            return False
-        else:
-            return True

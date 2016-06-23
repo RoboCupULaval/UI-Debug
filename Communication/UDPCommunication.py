@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import socket, pickle
-from threading import Thread
+from PyQt4.QtCore import QThread
 from collections import deque
 
 __author__ = 'RoboCupULaval'
@@ -24,8 +24,8 @@ class UDPReceiving(object):
         self._ip = ip
         self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._thread = Thread(target=self._run)
-        self._thread.daemon = True
+        self._thread = QThread()
+        self._thread.run = self._run
 
         # Données
         self._data = deque(maxlen=100)

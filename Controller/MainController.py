@@ -25,10 +25,9 @@ class MainController(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        # Création des Modèles
-        self.model_frame = FrameModel(self)
-        self.model_datain = DataInModel(self)
-        self.model_dataout = DataOutModel(self)
+        # Création des Contrôleurs
+        self.draw_handler = DrawController()
+        self.field_handler = FieldController()
 
         # Création des Vues
         self.main_window = MainWindow()
@@ -37,9 +36,10 @@ class MainController(QWidget):
         self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
 
-        # Création des Contrôleurs
-        self.draw_handler = DrawController()
-        self.field_handler = FieldController()
+        # Création des Modèles
+        self.model_frame = FrameModel(self)
+        self.model_datain = DataInModel(self)
+        self.model_dataout = DataOutModel(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -74,7 +74,7 @@ class MainController(QWidget):
         # Titre des menus et dimension
         self.view_menu.setFixedHeight(30)
         fileMenu = self.view_menu.addMenu('Fichier')
-        viewMenu = self.view_menu.addMenu('Vue')
+        viewMenu = self.view_menu.addMenu('Affichage')
         toolMenu = self.view_menu.addMenu('Outil')
         helpMenu = self.view_menu.addMenu('Aide')
 
@@ -125,7 +125,8 @@ class MainController(QWidget):
     def resize_window(self):
         self.setFixedSize(self.minimumSizeHint())
 
-    def show_draw(self, draw):
+    def add_draw_on_screen(self, draw):
+        """ Ajout un dessin sur la fenêtre du terrain """
         try:
             for key, item in draw.data.items():
                 if isinstance(item, tuple) and len(item) == 2:
@@ -135,3 +136,25 @@ class MainController(QWidget):
             self.view_screen.load_draw(qt_draw)
         except NotImplemented():
             print('@qt_draw not implemented yet.')
+
+    def set_ball_pos_on_screen(self, x, y):
+        """ Modifie la position de la balle sur le terrain """
+        x, y, theta = self.field_handler.convert_real_to_scene_pst(x, y)
+        self.view_screen.set_ball_pos(x, y)
+
+    def set_robot_pos_on_screen(self, bot_id, pst, theta):
+        """ Modifie la position et l'orientation d'un robot sur le terrain """
+        x, y, theta = self.field_handler.convert_real_to_scene_pst(pst[0], pst[1], theta)
+        self.view_screen.set_bot_pos(bot_id, x, y, theta)
+
+    def hide_mob(self, bot_id=None):
+        """ Cache l'objet mobile si l'information n'est pas update """
+        if self.view_screen.isVisible() and not self.view_screen.option_vanishing:
+            if bot_id is None:
+                self.view_screen.hide_ball()
+            else:
+                self.view_screen.hide_bot(bot_id)
+
+    def update_target_on_screen(self):
+        """ Interruption pour mettre à jour les données de la cible """
+        self.view_screen.update_tactic_targeting()

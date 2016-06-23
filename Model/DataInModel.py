@@ -1,7 +1,10 @@
 # Under MIT License, see LICENSE.txt
 
 from time import sleep, time
-from threading import Thread, Lock
+from threading import Lock
+
+from PyQt4.QtCore import QThread
+
 from Communication.UDPCommunication import UDPReceiving
 from .DataIn.DataIn import DataIn
 from .DataIn.DataInFactory import DataInFactory, DataInLog, DataInSTA
@@ -23,19 +26,19 @@ class DataInModel(object):
         self._data_draw = dict()
         self._data_STA = None
         self._lock = Lock()
-        self._data_recovery = Thread(target=self._get_data_in, daemon=True)
+        self._data_recovery = QThread()
 
         self._start_time = time()
 
         self._initialization()
 
     def _initialization(self):
-
+        """ Initialise la structure de données du DataInModel et des threads """
         self._data_draw['notset'] = list()
         self._data_draw['robots_yellow'] = [list() for _ in range(6)]
         self._data_draw['robots_blue'] = [list() for _ in range(6)]
-
         self._udp_receiver.start()
+        self._data_recovery.run = self._get_data_in
         self._data_recovery.start()
 
     def _get_data_in(self):
@@ -116,7 +119,7 @@ class DataInModel(object):
 
     def show_draw(self, draw):
         if isinstance(draw, DataInDraw):
-            self._controller.show_draw(draw)
+            self._controller.add_draw_on_screen(draw)
 
     @staticmethod
     def package_is_valid(package):

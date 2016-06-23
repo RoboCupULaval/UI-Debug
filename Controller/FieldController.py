@@ -16,7 +16,7 @@ class FieldController(object):
         self.is_x_axe_flipped = False
         self.is_y_axe_flipped = True
 
-    def convert_real_to_scene_pst(self, x, y, theta=0):
+    def convert_real_to_scene_pst(self, x, y, theta=0.0):
         rot_x = cos(theta)
         rot_y = sin(theta)
         if self.is_x_axe_flipped:

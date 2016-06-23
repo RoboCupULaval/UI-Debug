@@ -5,8 +5,6 @@ import math
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-from Model.FrameModel import MyModelIndex
-
 __author__ = 'RoboCupULaval'
 
 
@@ -27,16 +25,16 @@ class FieldView(QGraphicsView):
         self.init_window()
         self.draw_field()
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.refresh)
-        self.timer.start(17)
-
         # Option
-        self.vanishing = False
+        self.option_vanishing = True
+        self.option_show_number = False
+        self.option_target_mode = False
+
+        # Targeting
+        self.last_target = None
 
     def set_model(self, model):
         """ Ajoute le modèle de la vue """
-        assert isinstance(model, QAbstractItemModel)
         self.model = model
         self.scene.addItem(self.graph_mobs['ball'])
         self.scene.addItem(self.graph_mobs['target'])
@@ -75,8 +73,8 @@ class FieldView(QGraphicsView):
     def refresh_ball(self):
         """ Rafraîchit les paramètre de la balle """
         try:
-            x = self.model.data(MyModelIndex(1, 5))
-            y = self.model.data(MyModelIndex(1, 6))
+            x = self.model.data((1, 5))
+            y = self.model.data((1, 6))
             if x is not None and y is not None:
                 if not self.graph_mobs['ball'].isVisible():
                     self.graph_mobs['ball'].show()
@@ -85,19 +83,19 @@ class FieldView(QGraphicsView):
                     self.graph_mobs['ball'].setPos(x, y)
 
             else:
-                if self.vanishing:
+                if self.option_vanishing:
                     self.graph_mobs['ball'].hide()
         except IndexError:
-            if self.vanishing:
+            if self.option_vanishing:
                 self.graph_mobs['ball'].hide()
 
     def refresh_robots_yellow(self):
         """ Rafraîchit les paramètres des robots de l'équipe jaune """
         for id_bot in range(len(self.graph_mobs['robots_yellow'])):
             try:
-                x = self.model.data(MyModelIndex(id_bot + 2, 5))
-                y = self.model.data(MyModelIndex(id_bot + 2, 6))
-                theta = self.model.data(MyModelIndex(id_bot + 2, 8))
+                x = self.model.data((id_bot + 2, 5))
+                y = self.model.data((id_bot + 2, 6))
+                theta = self.model.data((id_bot + 2, 8))
                 if x is not None and y is not None:
                     if not self.graph_mobs['robots_yellow'][id_bot].isVisible(): self.graph_mobs['robots_yellow'][id_bot].show()
                     x, y, theta = self.model.field_info.convert_real_to_scene_pst(x, y, theta=theta)
@@ -107,19 +105,19 @@ class FieldView(QGraphicsView):
                         self.graph_mobs['robots_numbers'][id_bot].setPos(x + 5, y + 5)
                         self.graph_mobs['robots_yellow'][id_bot].setRotation(math.degrees(theta))
                 else:
-                    if self.vanishing:
+                    if self.option_vanishing:
                         self.graph_mobs['robots_yellow'][id_bot].hide()
             except IndexError:
-                if self.vanishing:
+                if self.option_vanishing:
                     self.graph_mobs['robots_yellow'][id_bot].hide()
 
     def refresh_robots_blue(self):
         """ Rafraîchit les paranètres des robots de l'équipe bleue """
         for id_bot in range(len(self.graph_mobs['robots_blue'])):
             try:
-                x = self.model.data(MyModelIndex(id_bot + 8, 5))
-                y = self.model.data(MyModelIndex(id_bot + 8, 6))
-                theta = self.model.data(MyModelIndex(id_bot + 8, 8))
+                x = self.model.data((id_bot + 8, 5))
+                y = self.model.data((id_bot + 8, 6))
+                theta = self.model.data((id_bot + 8, 8))
 
                 if x is not None and y is not None:
                     if not self.graph_mobs['robots_blue'][id_bot].isVisible(): self.graph_mobs['robots_blue'][id_bot].show()
@@ -130,17 +128,21 @@ class FieldView(QGraphicsView):
                         self.graph_mobs['robots_numbers'][id_bot + 6].setPos(x + 5, y + 5)
                         self.graph_mobs['robots_blue'][id_bot].setRotation(math.degrees(theta))
                 else:
-                    if self.vanishing:
+                    if self.option_vanishing:
                         self.graph_mobs['robots_blue'][id_bot].hide()
             except IndexError:
-                if self.vanishing:
+                if self.option_vanishing:
                     self.graph_mobs['robots_blue'][id_bot].hide()
 
     def mousePressEvent(self, event):
-        x, y = self.model.field_info.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
-        self.parent.model_dataout.target = (x, y)
-        x, y, _ = self.model.field_info.convert_real_to_scene_pst(x, y)
-        self.graph_mobs['target'].setPos(x, y)
+        if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
+            x, y = self.model.field_info.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+            self.parent.model_dataout.target = (x, y)
+            x, y, _ = self.model.field_info.convert_real_to_scene_pst(x, y)
+            self.graph_mobs['target'].setPos(x, y)
+            self.graph_mobs['target'].show()
+        else:
+            self.graph_mobs['target'].hide()
 
     def draw_field(self):
         """ Dessine le terrain et ses contours """
@@ -213,16 +215,11 @@ class FieldView(QGraphicsView):
 
     def change_vanish_option(self):
         """ Option qui rend apparent la disparition des robots """
-        self.vanishing = not self.vanishing
+        self.option_vanishing = not self.option_vanishing
 
     def show_number_option(self):
         """ Option qui affiche ou cache les numéros des robots """
-        if self.graph_mobs['robots_numbers'][0].isVisible():
-            for number in self.graph_mobs['robots_numbers']:
-                number.hide()
-        else:
-            for number in self.graph_mobs['robots_numbers']:
-                number.show()
+        self.option_show_number = not self.option_show_number
 
     def clear_drawing(self):
         """ Efface les dessins sur le terrain """
@@ -251,3 +248,83 @@ class FieldView(QGraphicsView):
             self.graph_draw['robots_blue'].append(qt_obj)
 
         self.scene.addItem(qt_obj)
+
+    def set_ball_pos(self, x, y):
+        """ Modifie la position de la balle sur la fenêtre du terrain """
+        if not self.graph_mobs['ball'].isVisible():
+            self.show_ball()
+        if not self.graph_mobs['ball'].pos().x() == x and not self.graph_mobs['ball'].pos().y() == y:
+            self.graph_mobs['ball'].setPos(x, y)
+
+    def set_bot_pos(self, bot_id, x, y, theta):
+        """ Modifie la position et l'orientation d'un robot sur la fenêtre du terrain """
+        if 0 <= bot_id < 6:
+            if not self.graph_mobs['robots_yellow'][bot_id].pos().x() == x and \
+                    not self.graph_mobs['robots_yellow'][bot_id].pos().y() == y:
+                self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
+                self.graph_mobs['robots_yellow'][bot_id].setRotation(math.radians(theta))
+                self.graph_mobs['robots_numbers'][bot_id].setPos(x, y)
+        elif 6 <= bot_id < 12:
+            if not self.graph_mobs['robots_blue'][bot_id - 6].pos().x() == x and \
+                    not self.graph_mobs['robots_blue'][bot_id - 6].pos().y() == y:
+                self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
+                self.graph_mobs['robots_blue'][bot_id - 6].setRotation(math.radians(theta))
+                self.graph_mobs['robots_numbers'][bot_id].setPos(x, y)
+        self.show_bot(bot_id)
+
+    def show_ball(self):
+        """ Affiche la balle dans la fenêtre de terrain """
+        self.graph_mobs['ball'].show()
+
+    def show_bot(self, bot_id):
+        """ Affiche un robot dans la fenêtre du terrain """
+        if 0 <= bot_id < 6:
+            self.graph_mobs['robots_yellow'][bot_id].show()
+            if self.option_show_number:
+                self.graph_mobs['robots_numbers'][bot_id].show()
+            else:
+                self.graph_mobs['robots_numbers'][bot_id].hide()
+        elif 6 <= bot_id < 12:
+            self.graph_mobs['robots_blue'][bot_id - 6].show()
+            if self.option_show_number:
+                self.graph_mobs['robots_numbers'][bot_id].show()
+            else:
+                self.graph_mobs['robots_numbers'][bot_id].hide()
+
+    def hide_ball(self):
+        """ Cache la balle dans la fenêtre de terrain """
+        self.graph_mobs['ball'].hide()
+
+    def hide_bot(self, bot_id):
+        """ Cache un robot dans la fenêtre de terrain """
+        if 0 <= bot_id < 6:
+            self.graph_mobs['robots_yellow'][bot_id].hide()
+            self.graph_mobs['robots_numbers'][bot_id].hide()
+        elif 6 <= bot_id < 12:
+            self.graph_mobs['robots_blue'][bot_id - 6].hide()
+            self.graph_mobs['robots_numbers'][bot_id].hide()
+
+    def show_select_bot(self, bot_id):
+        graph_bot = self.graph_mobs['robots_yellow'][bot_id] if bot_id < 6 else self.graph_mobs['robots_blue'][bot_id - 6]
+        if not self.last_target == graph_bot:
+            if self.last_target is not None:
+                self.last_target.setPen(Qt.black)
+            graph_bot.setPen(Qt.red)
+            self.last_target = graph_bot
+
+    def hide_select_bot(self):
+        if self.last_target is not None:
+            self.last_target.setPen(Qt.black)
+
+    def update_tactic_targeting(self):
+        if self.parent.view_controller.isVisible() and self.parent.view_controller.page_tactic.isVisible():
+            if not self.graph_mobs['target'].isVisible():
+                self.graph_mobs['target'].show()
+
+            id_colored = int(self.parent.view_controller.selectRobot.currentText())
+            self.show_select_bot(id_colored)
+
+        else:
+            self.hide_select_bot()
+            if self.graph_mobs['target'].isVisible():
+                self.graph_mobs['target'].hide()
