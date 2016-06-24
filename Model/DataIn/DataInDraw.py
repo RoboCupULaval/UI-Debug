@@ -1,7 +1,5 @@
 # Under MIT License, see LICENSE.txt
 
-from abc import abstractmethod
-
 from PyQt4.QtCore import Qt
 
 from .DataIn import DataIn
@@ -17,15 +15,9 @@ class DataInDraw(DataIn):
                            'DotLine': Qt.DotLine,
                            }
 
-    def __init__(self, name, type, data):
-        DataIn.__init__(self, name, type)
-        self.data = data
-
-    @abstractmethod
-    def format_data(self):
-        """ Vérifie les données et complète les données manquantes avec des valeurs par défauts """
-        raise NotImplemented()
-
+    def __init__(self, data_in):
+        DataIn.__init__(self, data_in)
+        self.data = data_in['data']
 
     @staticmethod
     def _colorRGB_is_valid(color):

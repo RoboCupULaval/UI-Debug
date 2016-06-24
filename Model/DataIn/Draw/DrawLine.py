@@ -7,40 +7,57 @@ __author__ = 'RoboCupULaval'
 
 
 class DrawLine(DataInDraw):
-    def __init__(self, name, type, data):
-        DataInDraw.__init__(self, name, type, data)
-        self._class_type = 3001
-        self.format_data()
+    def __init__(self, data_in):
+        DataInDraw.__init__(self, data_in)
+        self._format_data()
 
-    def format_data(self):
-        """ Vérifie les données et complète les données manquantes avec des valeurs par défauts """
+    def _check_obligatory_data(self):
+        """ Vérifie les données obligatoires """
         try:
-            if self.type == self._class_type:
-                keys = self.data.keys()
-                assert 'start' in keys
-                assert self._point_is_valid(self.data['start'])
-                assert 'end' in keys
-                assert self._point_is_valid(self.data['end'])
-                if 'color' in keys:
-                    assert self._colorRGB_is_valid(self.data['color'])
-                else:
-                    self.data['color'] = (0, 0, 0)
+            assert isinstance(self.data, dict),\
+                "data: {} n'est pas un dictionnaire.".format(type(self.data))
+            keys = self.data.keys()
+            assert 'start' in keys, \
+                "data['start'] n'existe pas."
+            assert self._point_is_valid(self.data['start']), \
+                "data['start']: {} n'est pas un point valide.".format(self.data['start'])
+            assert 'end' in keys, \
+                "data['end'] n'existe pas."
+            assert self._point_is_valid(self.data['end']),\
+                "data['end']: {} n'est pas un point valide.".format(self.data['end'])
+        except Exception as e:
+            raise FormatPackageError('{}: {}'.format(self.__name__, e))
 
-                if 'width' in keys:
-                    assert 0 < self.data['width']
-                else:
-                    self.data['width'] = 2
+    def _check_optinal_data(self):
+        """ Vérifie les données optionnelles """
+        keys = self.data.keys()
+        try:
+            if 'color' in keys:
+                assert self._colorRGB_is_valid(self.data['color']), \
+                    "data['color']: {} n'est pas une couleur valide.".format(self.data['color'])
+            else:
+                self.data['color'] = (0, 0, 0)
 
-                if 'style' in keys:
-                    assert self.data['style'] in self._line_style_allowed.keys()
-                else:
-                    self.data['style'] = 'SolidLine'
+            if 'width' in keys:
+                assert 0 < self.data['width'], \
+                    "data['width']: {} n'est pas une épaisseur valide".format(self.data['width'])
+            else:
+                self.data['width'] = 2
 
-                if 'timeout' in keys:
-                    assert self.data['timeout'] <= 0
-                else:
-                    self.data['timeout'] = 0
+            if 'style' in keys:
+                assert self.data['style'] in self._line_style_allowed, \
+                    "data['style']: {} n'est pas une style valide".format(self.data['style'])
+            else:
+                self.data['style'] = 'SolidLine'
 
-        except AssertionError:
-            raise FormatPackageError('Les données du paquet ne sont pas valides.')
+            if 'timeout' in keys:
+                assert self.data['timeout'] <= 0, \
+                    "data['timeout']: {} n'est pas valide.".format(self.data['timeout'])
+            else:
+                self.data['timeout'] = 0
+        except Exception as e:
+            raise FormatPackageError('{}: {}'.format(self.__name__, e))
 
+    @staticmethod
+    def get_type():
+        return 3001

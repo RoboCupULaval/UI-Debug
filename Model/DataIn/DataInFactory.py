@@ -1,54 +1,56 @@
 # Under MIT License, see LICENSE.txt
-
-from copy import copy
-
-from .DataIn import FormatPackageError
-from .DataInLog import DataInLog
-from .DataInSTA import DataInSTA
-from .Draw.DrawLine import DrawLine
+from .DataIn import DataIn
 
 __author__ = 'RoboCupULaval'
 
 
 class DataInFactory(object):
-
     def __init__(self):
         self._name = 'UI-System'
-        self._msg_bad_format = DataInLog(self._name, 2, {'level': 3, 'message': "Le format du paquet n'est pas conforme:\n"})
+        self._catalog_from_type_to_data_in_object = dict()
+        self._init_object_catalog()
+
+    def _init_object_catalog(self):
+        """ Initialise le catalogue d'objet pour la factory """
+        self._import_data_in_classes()
+        for subclass in DataIn.__subclasses__():
+            for subsubclass in subclass.__subclasses__():
+                self._catalog_from_type_to_data_in_object[subsubclass.get_type()] = subsubclass
+
+    def _import_data_in_classes(self):
+        """ Importe les objets dans les sous-dossiers de Model.DataIn """
+        from os import listdir
+        from os.path import isfile, join, isdir
+        from importlib.machinery import SourceFileLoader
+
+        path_current_dir = __file__.replace(DataInFactory.__name__ + '.py', '')
+        folders_inside_current_dir = [f for f in listdir(path_current_dir)
+                                      if isdir(join(path_current_dir, f)) and f.count('_') == 0]
+        for folder in folders_inside_current_dir:
+            files = [f for f in listdir(join(path_current_dir, folder))
+                     if isfile(join(path_current_dir, folder, f)) and f.count('_') == 0]
+            for file in files:
+                SourceFileLoader("", join(path_current_dir, folder, file)).load_module()
 
     def get_msg_bad_format(self, **kargs):
-        bad_log = copy(self._msg_bad_format)
-        bad_log.data['message'] += str(kargs)
+        """ Génère un LoggingMessage formaté pour recevoir des erreurs d'envoies de données """
+        bad_log = self._catalog_from_type_to_data_in_object[2]({'name': self._name,
+                                                                'type': 2,
+                                                                'link': None,
+                                                                'version': '1.0',
+                                                                'data': {'level': 3, 'message': ''}})
+        numb = False
+        for key, item in sorted(kargs.items()):
+            if numb:
+                bad_log.data['message'] += '\n'
+                numb = True
+            bad_log.data['message'] += '{}: {}'.format(key, item)
         return bad_log
 
-    def get_datain_object(self, name, type, data):
-        if 0 <= type < 1000:
-            try:
-                return DataInLog(name, type, data)
-            except FormatPackageError:
-                return self.get_msg_bad_format(name=name, type=type, data=data)
-
-        elif 1000 <= type < 3000:
-            try:
-                return DataInSTA(name, type, data)
-            except FormatPackageError:
-                return self.get_msg_bad_format(name=name, type=type, data=data)
-
-        elif 3000 <= type < 5000:
-            try:
-                if type == 3001:
-                    return DrawLine(name, type, data)
-                else:
-                    raise FormatPackageError
-
-            except FormatPackageError:
-                return self.get_msg_bad_format(name=name, type=type, data=data)
-
-        elif 5000 <= type < 7000:
-            try:
-                return self.get_msg_bad_format(name=name, type=type, data=data)
-            except FormatPackageError:
-                return self.get_msg_bad_format(name=name, type=type, data=data)
-
-        else:
-            return self.get_msg_bad_format(name=name, type=type, data=data)
+    def get_datain_object(self, data_in):
+        """ Génère un DataIn en fonction du paquet reçu """
+        try:
+            DataIn.package_is_valid(data_in)
+            return self._catalog_from_type_to_data_in_object[data_in['type']](data_in)
+        except Exception as e:
+            return self.get_msg_bad_format(FormatPackageError=str(e), PaquetBrute=data_in)

@@ -6,8 +6,9 @@ from threading import Lock
 from PyQt4.QtCore import QThread
 
 from Communication.UDPCommunication import UDPReceiving
-from .DataIn.DataIn import DataIn
-from .DataIn.DataInFactory import DataInFactory, DataInLog, DataInSTA
+from .DataIn.DataInFactory import DataInFactory
+from .DataIn.DataInLog import DataInLog
+from .DataIn.DataInSTA import DataInSTA
 from .DataIn.DataInDraw import DataInDraw
 
 
@@ -50,10 +51,7 @@ class DataInModel(object):
                     if package is not None and not package[0] == self._last_packet:
                         data_in = package[1]
                         if data_in is not None:
-                            if self.package_is_valid(data_in):
-                                data = self._datain_factory.get_datain_object(data_in['name'], data_in['type'], data_in['data'])
-                            else:
-                                data = self._datain_factory.get_msg_bad_format(**data_in)
+                            data = self._datain_factory.get_datain_object(data_in)
                             if isinstance(data, DataInLog):
                                 self.add_logging(data)
                             elif isinstance(data, DataInSTA):
