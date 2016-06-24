@@ -25,29 +25,47 @@ class FrameModel(object):
 
         # Initialisation des variables pour le frame catcher
         self._last_frame_catched_time = datetime.min
-        self._frame_catcher_update_rate = 30.0        # Fréquence d'update en Hz
+        self._frame_catcher_update_rate = 60.0        # Fréquence d'update en Hz
         self._frame_catcher_timer = QTimer()
         self._init_frame_catcher()
 
     def _init_frame_catcher(self):
         """ Initialise le timer pour récupérer """
         self._frame_catcher_timer.timeout.connect(self._catching_frame)
-        self._frame_catcher_timer.start(1 / self._frame_catcher_update_rate)
+        self._frame_catcher_timer.start(self._frequency_to_milliseconds_int(self._frame_catcher_update_rate))
+
+    def _update_is_in_progress(self):
+        """ Vérifie si la mise à jour des données est terminée pour éviter une erreur de récursivité """
+        if datetime.now() - self._last_frame_catched_time > timedelta(seconds=1 / self._frame_catcher_update_rate):
+            return False
+        else:
+            return True
+
+    def _frame_has_been_processed(self, frame):
+        """ Vérifie si un frame a été traité ou non """
+        if frame is None:
+            return True
+        if len(self._data_queue_received) == 0 or not frame.detection.frame_number == self._data_queue_received[-1].detection.frame_number:
+            return False
+        return True
 
     def _catching_frame(self):
         """ Récupère le dernier frame reçu, le met à jour et le sauvegarde """
-        if datetime.now() - self._last_frame_catched_time > timedelta(seconds=1 / self._frame_catcher_update_rate):
+        if not self._update_is_in_progress():
             frame = self._vision.get_latest_frame()
-            if frame is not None and \
-               (len(self._data_queue_received) == 0 or not
-                    frame.detection.frame_number == self._data_queue_received[-1].detection.frame_number):
+            if not self._frame_has_been_processed(frame):
                 self._last_frame_catched_time = datetime.now()
                 self._update_view_screen_mobs(frame)
 
     def _update_view_screen_mobs(self, frame):
-        """ Mise à jour des données de la vue de la balle et des robots """
+        """ Mise à jour des données de la vue des objets mobiles  """
         self._data_queue_received.append(frame)
-        # Mise à jour des données de la balle
+        self._update_view_screen_ball()
+        self._update_view_screen_team_yellow()
+        self._update_view_screen_team_blue()
+
+    def _update_view_screen_ball(self):
+        """ Muse à jour des données de la vue de la balle """
         try:
             x = self._data_queue_received[-1].detection.balls[0].x
             y = self._data_queue_received[-1].detection.balls[0].y
@@ -55,7 +73,8 @@ class FrameModel(object):
         except BaseException:
             self._controller.hide_mob()
 
-        # Mise à jour des données de l'équipe jaune
+    def _update_view_screen_team_yellow(self):
+        """ Muse à jour des données de la vue des robots de l'équipe jaune """
         try:
             list_bot_id = {0, 1, 2, 3, 4, 5}
             for info_bot in self._data_queue_received[-1].detection.robots_yellow:
@@ -71,7 +90,8 @@ class FrameModel(object):
         except BaseException:
             pass
 
-        # Mise à jour des données de l'équipe blue
+    def _update_view_screen_team_blue(self):
+        """ Muse à jour des données de la vue des robots de l'équipe bleue """
         try:
             list_bot_id = {0, 1, 2, 3, 4, 5}
             for info_bot in self._data_queue_received[-1].detection.robots_blue:
@@ -92,3 +112,8 @@ class FrameModel(object):
         if datetime.now() - self._last_frame_catched_time < timedelta(seconds=1):
             return True
         return False
+
+    @staticmethod
+    def _frequency_to_milliseconds_int(frequency):
+        """ Convertit une fréquence en millisecondes en format int """
+        return 1 / frequency * 1000
