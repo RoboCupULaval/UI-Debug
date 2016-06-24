@@ -5,7 +5,7 @@ from math import cos, sin, atan2
 __author__ = 'RoboCupULaval'
 
 
-class FieldInformation(object):
+class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
     def __init__(self):
         self.type = 0
@@ -16,7 +16,7 @@ class FieldInformation(object):
         self.is_x_axe_flipped = False
         self.is_y_axe_flipped = True
 
-    def convert_real_to_scene_pst(self, x, y, theta=0):
+    def convert_real_to_scene_pst(self, x, y, theta=0.0):
         rot_x = cos(theta)
         rot_y = sin(theta)
         if self.is_x_axe_flipped:

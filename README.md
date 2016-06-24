@@ -85,6 +85,7 @@ data = {'strategy': list(str),      # Liste de toutes les stratégies
 # Type 3001 - Dessine une Ligne simple dans la fenêtre graphique du terrain.
 data = {'start': tuple(int, int),       # Coordonnées du premier point
         'end': tuple(int, int),         # Coordonnées du point final
+        # === Options supplémentaires ===
         'color': tuple(int, int, int),  # Couleur RGB
         'width': int,                   # Épaisseur du trait
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
@@ -92,6 +93,7 @@ data = {'start': tuple(int, int),       # Coordonnées du premier point
 
 # Type 3002 - Dessine une Série de Lignes dans la fenêtre graphique du terrain.
 data = {'points': list(tuple(int, int)), # Liste de coordonnées du premier point
+        # === Options supplémentaires ===
         'color': tuple(int, int, int),  # Couleur RGB
         'width': int,                   # Épaisseur du trait
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
@@ -100,6 +102,7 @@ data = {'points': list(tuple(int, int)), # Liste de coordonnées du premier poin
 # Type 3003 - Dessine un Cercle dans la fenêtre graphique du terrain.
 data = {'center': tuple(int, int),      # Coordonnées du centre du cercle
         'radius': int,                  # Rayon du cercle
+        # === Options supplémentaires ===
         'color': tuple(int, int int),   # Couleur RGB
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
         'is_fill': bool,                # Si le cercle est rempli ou non
@@ -107,12 +110,14 @@ data = {'center': tuple(int, int),      # Coordonnées du centre du cercle
 
 # Type 3004 - Dessine un Point dans la fenêtre graphique du terrain.
 data = {'point': tuple(int, int),       # Coordonnées du centre du cercle
+        # === Options supplémentaires ===
         'width': int,                   # Taille en pixel du point
         'color': tuple(int, int int),   # Couleur RGB
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
 
 # Type 3005 - Dessine une Série de Point dans la fenêtre graphique du terrain.
 data = {'points': list(tuple(int, int)),# Coordonnées du centre du cercle
+        # === Options supplémentaires ===
         'width': int,                   # Taille en pixel du point
         'color': tuple(int, int int),   # Couleur RGB
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
@@ -120,6 +125,7 @@ data = {'points': list(tuple(int, int)),# Coordonnées du centre du cercle
 # Type 3006 - Dessine un Rectangle dans la fenêtre graphique du terrain.
 data = {'top_left': tuple(int, int),    # Coordonnées du premier point
         'bottom_right': tuple(int, int),# Coordonnées du point final
+        # === Options supplémentaires ===
         'color': tuple(int, int, int),  # Couleur RGB
         'width': int,                   # Épaisseur du trait
         'style': str,                   # SolidLine | DashLine | DotLine | DashDotLine
@@ -128,6 +134,7 @@ data = {'top_left': tuple(int, int),    # Coordonnées du premier point
 
 # Type 3007 - Dessine les informations d'une Influence Map sur le terrain.
 data = {'field_data': list(int, int, ...),      # Données de l'Influence Map
+        # === Options supplémentaires ===
         'size': tuple(int, int),                # Taille de la grille
         'focus': tuple(int, int, int, int)      # Affiche uniquement les données dans un rectangle prédéfini
         'hotest_numb': int,                     # Nombre le plus élevé
@@ -145,7 +152,8 @@ data = {'field_data': list(int, int, ...),      # Données de l'Influence Map
 # Type 3008 - Dessine un Texte de couleur
 data = {'position': tuple(int, int)     # Position de l'affichage du texte
         'text': str,                    # Texte à afficher
-         s'size': int,                    # Taille du texte en pixel
+        # === Options supplémentaires ===
+        'size': int,                    # Taille du texte en pixel
         'font': str,                    # Arial | Courier New | Verdana
         'align': str,                   # Right | Left | Center
         'color': tuple(int, int, int),  # Couleur RGB
