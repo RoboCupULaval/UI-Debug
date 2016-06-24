@@ -1,15 +1,16 @@
 # Under MIT License, see LICENSE.txt
 
 from datetime import date
-from Model.DataIn.DataIn import FormatPackageError
-from Model.DataIn.DataInLog import DataInLog
+
+from Model.DataIn.DataInObject import FormatPackageError
+from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
 
 __author__ = 'RoboCupULaval'
 
 
-class LoggingMessage(DataInLog):
+class LoggingMessage(BaseDataInLog):
     def __init__(self, data_in):
-        DataInLog.__init__(self, data_in)
+        BaseDataInLog.__init__(self, data_in)
         self._format_data()
 
     def _check_obligatory_data(self):
@@ -20,7 +21,7 @@ class LoggingMessage(DataInLog):
                 "data['level'] n'existe pas."
             assert isinstance(self.data['level'], int), \
                 "data['level']: {} n'est pas un level valide int.".format(type(self.data['level']))
-            assert min(DataInLog.display_type.keys()) <= self.data['level'] <= max(DataInLog.display_type.keys()), \
+            assert min(BaseDataInLog.display_type.keys()) <= self.data['level'] <= max(BaseDataInLog.display_type.keys()), \
                 "data['level']: {} n'est pas un level valide 0 <= level <= 5.".format(type(self.data['level']))
             assert 'message' in keys, "data['message'] n'existe pas."
             assert isinstance(self.data['message'], str), \

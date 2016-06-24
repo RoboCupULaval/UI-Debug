@@ -7,9 +7,9 @@ __author__ = 'RoboCupULaval'
 __version__ = '1.0'
 
 
-class DataIn:
+class DataInObject:
     def __init__(self, data_in):
-        DataIn.package_is_valid(data_in)
+        DataInObject.package_is_valid(data_in)
         self.name = data_in['name']
         self.type = data_in['type']
         self.version = data_in['version']
@@ -37,7 +37,7 @@ class DataIn:
     @staticmethod
     @abstractmethod
     def get_type():
-        """ Retour le numéro du type """
+        """ Associe un object DrawDataIn avec un DataIn à destination de la clé du catalogue de la DataInFactory """
         raise NotImplementedError()
 
     @staticmethod
@@ -82,7 +82,7 @@ class DataIn:
                     "paquet['data']: {} n'a pas le bon format (dict).".format(type(data_in['data']))
 
         except Exception as e:
-            raise FormatPackageError('{}: {}'.format(DataIn.__name__, e))
+            raise FormatPackageError('{}: {}'.format(DataInObject.__name__, e))
 
     def get_time(self):
         return self.time

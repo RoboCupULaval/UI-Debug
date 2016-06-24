@@ -1,19 +1,19 @@
 # Under MIT License, see LICENSE.txt
-from .DataIn import DataIn
+from .DataInObject import DataInObject
 
 __author__ = 'RoboCupULaval'
 
 
 class DataInFactory(object):
     def __init__(self):
-        self._name = 'UI-System'
+        self._name = DataInFactory.__name__
         self._catalog_from_type_to_data_in_object = dict()
         self._init_object_catalog()
 
     def _init_object_catalog(self):
         """ Initialise le catalogue d'objet pour la factory """
         self._import_data_in_classes()
-        for subclass in DataIn.__subclasses__():
+        for subclass in DataInObject.__subclasses__():
             for subsubclass in subclass.__subclasses__():
                 self._catalog_from_type_to_data_in_object[subsubclass.get_type()] = subsubclass
 
@@ -25,7 +25,7 @@ class DataInFactory(object):
 
         path_current_dir = __file__.replace(DataInFactory.__name__ + '.py', '')
         folders_inside_current_dir = [f for f in listdir(path_current_dir)
-                                      if isdir(join(path_current_dir, f)) and f.count('_') == 0]
+                                      if isdir(join(path_current_dir, f)) and not f.count('_') and not f.count('Base')]
         for folder in folders_inside_current_dir:
             files = [f for f in listdir(join(path_current_dir, folder))
                      if isfile(join(path_current_dir, folder, f)) and f.count('_') == 0]
@@ -50,7 +50,7 @@ class DataInFactory(object):
     def get_datain_object(self, data_in):
         """ Génère un DataIn en fonction du paquet reçu """
         try:
-            DataIn.package_is_valid(data_in)
+            DataInObject.package_is_valid(data_in)
             return self._catalog_from_type_to_data_in_object[data_in['type']](data_in)
         except Exception as e:
             return self.get_msg_bad_format(FormatPackageError=str(e), PaquetBrute=data_in)

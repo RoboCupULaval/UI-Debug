@@ -1,13 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-from .DataIn import DataIn
+from .DataInObject import DataInObject
 
 __author__ = 'RoboCupULaval'
 
 
-class DataInSTA(DataIn):
+class DataInSTA(DataInObject):
     def __init__(self, name, type, data):
-        DataIn.__init__(self, name, type, data)
+        DataInObject.__init__(self, name, type, data)
         if not self.data_is_valid(name, type, data):
             raise AttributeError()
 

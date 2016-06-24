@@ -2,12 +2,12 @@
 
 from abc import abstractmethod
 
-from .DataIn import DataIn
+from Model.DataIn.DataInObject import DataInObject
 
 __author__ = 'RoboCupULaval'
 
 
-class DataInLog(DataIn):
+class BaseDataInLog(DataInObject):
     display_type = {0: 'NOTSET',
                     1: 'DEBUG',
                     2: 'INFO',
@@ -16,7 +16,7 @@ class DataInLog(DataIn):
                     5: 'FATAL'}
 
     def __init__(self, data_in):
-        DataIn.__init__(self, data_in)
+        DataInObject.__init__(self, data_in)
         self.data = data_in['data']
 
     @abstractmethod

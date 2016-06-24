@@ -1,15 +1,16 @@
 # Under MIT License, see LICENSE.txt
 
 from datetime import date
-from Model.DataIn.DataIn import FormatPackageError
-from Model.DataIn.DataInLog import DataInLog
+
+from Model.DataIn.DataInObject import FormatPackageError
+from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
 
 __author__ = 'RoboCupULaval'
 
 
-class LoggingData(DataInLog):
+class LoggingData(BaseDataInLog):
     def __init__(self, data_in):
-        DataInLog.__init__(self, data_in)
+        BaseDataInLog.__init__(self, data_in)
         self._format_data()
 
     def _check_obligatory_data(self):

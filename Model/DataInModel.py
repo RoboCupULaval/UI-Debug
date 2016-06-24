@@ -1,16 +1,15 @@
 # Under MIT License, see LICENSE.txt
 
-from time import sleep, time
 from threading import Lock
+from time import sleep, time
 
 from PyQt4.QtCore import QThread
 
 from Communication.UDPCommunication import UDPReceiving
+from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
+from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
 from .DataIn.DataInFactory import DataInFactory
-from .DataIn.DataInLog import DataInLog
 from .DataIn.DataInSTA import DataInSTA
-from .DataIn.DataInDraw import DataInDraw
-
 
 __author__ = 'RoboCupULaval'
 
@@ -52,7 +51,7 @@ class DataInModel(object):
                         data_in = package[1]
                         if data_in is not None:
                             data = self._datain_factory.get_datain_object(data_in)
-                            if isinstance(data, DataInLog):
+                            if isinstance(data, BaseDataInLog):
                                 self.add_logging(data)
                             elif isinstance(data, DataInSTA):
                                 if self._data_STA is not None:
@@ -60,7 +59,7 @@ class DataInModel(object):
                                         self._data_STA.data[key] = data.data[key]
                                 else:
                                     self._data_STA = data
-                            elif isinstance(data, DataInDraw):
+                            elif isinstance(data, BaseDataInDraw):
                                 self._data_draw['notset'].append(data)
                                 self.show_draw(self._data_draw['notset'][-1])
                 finally:
@@ -119,7 +118,7 @@ class DataInModel(object):
             return None
 
     def show_draw(self, draw):
-        if isinstance(draw, DataInDraw):
+        if isinstance(draw, BaseDataInDraw):
             self._controller.add_draw_on_screen(draw)
 
     @staticmethod

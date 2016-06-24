@@ -14,7 +14,7 @@ from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 
-from .DrawController import DrawController
+from .QtObjectFactory import QtObjectFactory
 from .FieldController import FieldController
 
 __author__ = 'RoboCupULaval'
@@ -26,7 +26,7 @@ class MainController(QWidget):
         QWidget.__init__(self)
 
         # Création des Contrôleurs
-        self.draw_handler = DrawController()
+        self.draw_handler = QtObjectFactory()
         self.field_handler = FieldController()
 
         # Création des Vues

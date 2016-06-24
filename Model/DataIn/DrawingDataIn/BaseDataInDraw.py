@@ -1,22 +1,17 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtCore import Qt
-
-from .DataIn import DataIn
+from Controller.BaseQtObject import BaseQtObject
+from Model.DataIn.DataInObject import DataInObject
 
 __author__ = 'RoboCupULaval'
 
 
-class DataInDraw(DataIn):
+class BaseDataInDraw(DataInObject):
     """ Données entrantes pour les paquets de données pour dessiner """
-    _line_style_allowed = {'SolidLine': Qt.SolidLine,
-                           'DashLine': Qt.DashLine,
-                           'DashDotLine': Qt.DashDotDotLine,
-                           'DotLine': Qt.DotLine,
-                           }
+    line_style_allowed = BaseQtObject.line_style_allowed
 
     def __init__(self, data_in):
-        DataIn.__init__(self, data_in)
+        DataInObject.__init__(self, data_in)
         self.data = data_in['data']
 
     @staticmethod
@@ -35,7 +30,7 @@ class DataInDraw(DataIn):
     def _style_is_valid(style):
         """ Vérifie si le style de ligne est valide """
         try:
-            assert style in DataInDraw._line_style_allowed
+            assert style in BaseDataInDraw.line_style_allowed
             return True
         except AssertionError:
             return False
