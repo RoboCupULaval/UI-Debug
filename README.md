@@ -161,6 +161,31 @@ data = {'position': tuple(int, int)     # Position de l'affichage du texte
         'has_italic': bool,             # Si le texte est en italic
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
         }
+        
+""" ... """
+
+# Type 5001 - Basculer l'IA en mode contrôle humain/machine (toggle-human-control)
+data = {'is_human_control': bool    # Donne le contrôle de l'IA à la humain ou à la machine
+       }
+
+# Type 5002 - Envoie la Stratégie à adopter pour l'IA (set-strategy)
+data = {'strategy': str             # Nom de la stratégie
+       }
+
+# Type 5003 - Envoie la tactique à adopter pour un robot (set-robot-tactic)
+data = {'tactic': str,              # Nom de la tactique
+        'id': int                   # ID du robot
+        # === Options supplémentaires ===
+        'target': tuple(int, int)   # Position de la cible du robot
+        'goal': tuple(int, int)     # Position du but du robot
+       }
+
+# Type 5004 - Envoie la cible d'un robot (set-robot-target)
+data = {'id': int,                  # ID du robot
+        'target': tuple(int, int)   # Position de la cible du robot
+       }
+
+""" ... """
 ```
 
 ### API serveur->ia
