@@ -132,6 +132,14 @@ class MainController(QWidget):
                 if isinstance(item, tuple) and len(item) == 2:
                     x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
                     draw.data[key] = x, y
+                elif isinstance(item, list):
+                    for i, value in enumerate(item):
+                        if isinstance(value, tuple) and len(value) == 2:
+                            x, y, _ = self.field_handler.convert_real_to_scene_pst(value[0], value[1])
+                            draw.data[key][i] = x, y
+                elif key == 'radius':
+                    draw.data[key] *= self.field_handler.ratio_screen
+
             qt_draw = self.draw_handler.get_qt_draw_object(draw)
             self.view_screen.load_draw(qt_draw)
         except NotImplemented():

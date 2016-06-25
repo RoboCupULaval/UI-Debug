@@ -26,7 +26,7 @@ class DrawLineDataIn(BaseDataInDraw):
             assert self._point_is_valid(self.data['end']),\
                 "data['end']: {} n'est pas un point valide.".format(self.data['end'])
         except Exception as e:
-            raise FormatPackageError('{}: {}'.format(self.__name__, e))
+            raise FormatPackageError('{}: {}'.format(type(self).__name__, e))
 
     def _check_optinal_data(self):
         """ Vérifie les données optionnelles """
@@ -56,7 +56,7 @@ class DrawLineDataIn(BaseDataInDraw):
             else:
                 self.data['timeout'] = 0
         except Exception as e:
-            raise FormatPackageError('{}: {}'.format(self.__name__, e))
+            raise FormatPackageError('{}: {}'.format(type(self).__name__, e))
 
     @staticmethod
     def get_type():

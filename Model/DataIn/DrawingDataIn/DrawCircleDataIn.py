@@ -6,7 +6,7 @@ from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
 __author__ = 'RoboCupULaval'
 
 
-class DrawMultipleLinesDataIn(BaseDataInDraw):
+class DrawCircleDataIn(BaseDataInDraw):
     def __init__(self, data_in):
         BaseDataInDraw.__init__(self, data_in)
         self._format_data()
@@ -17,28 +17,34 @@ class DrawMultipleLinesDataIn(BaseDataInDraw):
             assert isinstance(self.data, dict),\
                 "data: {} n'est pas un dictionnaire.".format(type(self.data))
             keys = self.data.keys()
-            assert 'points' in keys, "data['points'] n'existe pas."
-            assert isinstance(self.data['points'], list), "data['points'] n'est pas une liste."
-            for point in self.data['points']:
-                assert self._point_is_valid(point), "data['points']: {} n'est pas un point valide.".format(point)
+            assert 'center' in keys, \
+                "data['center'] n'existe pas."
+            assert self._point_is_valid(self.data['center']), \
+                "data['center']: {} n'est pas un point valide.".format(self.data['center'])
+            assert 'radius' in keys, \
+                "data['radius'] n'existe pas."
+            assert isinstance(self.data['radius'], int), \
+                "data['radius']: {} n'a pas une taille valide (int)".format(type(self.data['radius']))
+            assert 0 < self.data['radius'], \
+                "data['radius']: {} n'a pas une taille valide (0 < radius)".format(type(self.data['radius']))
         except Exception as e:
-            raise FormatPackageError("{}: {}".format(type(self).__name__, str(e)))
+            raise FormatPackageError('{}: {}'.format(type(self).__name__, e))
 
     def _check_optinal_data(self):
         """ Vérifie les données optionnelles """
+        keys = self.data.keys()
         try:
-            keys = self.data.keys()
             if 'color' in keys:
                 assert self._colorRGB_is_valid(self.data['color']), \
                     "data['color']: {} n'est pas une couleur valide.".format(self.data['color'])
             else:
                 self.data['color'] = (0, 0, 0)
 
-            if 'width' in keys:
-                assert 0 < self.data['width'], \
-                    "data['width']: {} n'est pas une épaisseur valide".format(self.data['width'])
+            if 'is_fill' in keys:
+                assert isinstance(self.data['is_fill'], bool), \
+                    "data['is_fill']: {} n'est pas du bon type (bool)".format(type(self.data['is_fill']))
             else:
-                self.data['width'] = 2
+                self.data['is_fill'] = False
 
             if 'style' in keys:
                 assert self.data['style'] in self.line_style_allowed, \
@@ -52,8 +58,8 @@ class DrawMultipleLinesDataIn(BaseDataInDraw):
             else:
                 self.data['timeout'] = 0
         except Exception as e:
-            raise FormatPackageError("{}: {}".format(type(self).__name__, str(e)))
+            raise FormatPackageError('{}: {}'.format(type(self).__name__, e))
 
     @staticmethod
     def get_type():
-        return 3002
+        return 3003
