@@ -2,6 +2,7 @@
 
 from threading import Lock
 from time import sleep, time
+import pickle
 
 from PyQt4.QtCore import QThread
 
@@ -48,7 +49,7 @@ class DataInModel(object):
                 try:
                     package = self._udp_receiver.get_last_data()
                     if package is not None and not package[0] == self._last_packet:
-                        data_in = package[1]
+                        data_in = pickle.loads(package[1])
                         if data_in is not None:
                             data = self._datain_factory.get_datain_object(data_in)
                             if isinstance(data, BaseDataInLog):
@@ -65,7 +66,7 @@ class DataInModel(object):
                 finally:
                     self._last_packet = package[0] if package is not None else None
                     self._lock.release()
-            sleep(0.01)
+            sleep(0.001)
 
     def _append_logging_datain(self, data):
         self._data_logging.append(data)

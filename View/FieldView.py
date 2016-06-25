@@ -9,12 +9,14 @@ __author__ = 'RoboCupULaval'
 
 
 class FieldView(QGraphicsView):
+    frame_rate = 60
     def __init__(self, parent):
         QGraphicsView.__init__(self, parent)
         self.parent = parent
         self.scene = QGraphicsScene(self)
         self.model = None
         self.last_frame = 0
+        self.timer_screen_update = QTimer()
         self.graph_mobs = dict()
         self.graph_draw = dict()
 
@@ -22,6 +24,7 @@ class FieldView(QGraphicsView):
         self.init_draw_tools()
         self.init_graph_mobs()
 
+        self.init_view()
         self.init_window()
         self.draw_field()
 
@@ -32,6 +35,14 @@ class FieldView(QGraphicsView):
 
         # Targeting
         self.last_target = None
+
+    def init_view(self):
+        self.setViewportUpdateMode(QGraphicsView.NoViewportUpdate)
+        self.timer_screen_update.timeout.connect(self.update_custom)
+        self.timer_screen_update.start(1/self.frame_rate*1000)
+
+    def update_custom(self):
+        self.scene.update()
 
     def set_model(self, model):
         """ Ajoute le modèle de la vue """
@@ -174,13 +185,13 @@ class FieldView(QGraphicsView):
             if not self.graph_mobs['robots_yellow'][bot_id].pos().x() == x and \
                     not self.graph_mobs['robots_yellow'][bot_id].pos().y() == y:
                 self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
-                self.graph_mobs['robots_yellow'][bot_id].setRotation(math.radians(theta))
+                self.graph_mobs['robots_yellow'][bot_id].setRotation(math.degrees(theta))
                 self.graph_mobs['robots_numbers'][bot_id].setPos(x, y)
         elif 6 <= bot_id < 12:
             if not self.graph_mobs['robots_blue'][bot_id - 6].pos().x() == x and \
                     not self.graph_mobs['robots_blue'][bot_id - 6].pos().y() == y:
                 self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
-                self.graph_mobs['robots_blue'][bot_id - 6].setRotation(math.radians(theta))
+                self.graph_mobs['robots_blue'][bot_id - 6].setRotation(math.degrees(theta))
                 self.graph_mobs['robots_numbers'][bot_id].setPos(x, y)
         self.show_bot(bot_id)
 
