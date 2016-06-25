@@ -26,7 +26,7 @@ class MainController(QWidget):
         QWidget.__init__(self)
 
         # Création des Contrôleurs
-        self.draw_handler = QtObjectFactory()
+        self.draw_handler = QtObjectFactory(self)
         self.field_handler = FieldController()
 
         # Création des Vues
@@ -141,7 +141,8 @@ class MainController(QWidget):
                     draw.data[key] *= self.field_handler.ratio_screen
 
             qt_draw = self.draw_handler.get_qt_draw_object(draw)
-            self.view_screen.load_draw(qt_draw)
+            if qt_draw is not None:
+                self.view_screen.load_draw(qt_draw)
         except NotImplemented():
             print('@qt_draw not implemented yet.')
 
@@ -166,3 +167,6 @@ class MainController(QWidget):
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """
         self.view_screen.update_tactic_targeting()
+
+    def add_logging_message(self, name, message, level=2):
+        self.model_datain.add_logging(name, message, level=level)

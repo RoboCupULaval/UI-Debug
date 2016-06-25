@@ -52,7 +52,7 @@ class DataInModel(object):
                         if data_in is not None:
                             data = self._datain_factory.get_datain_object(data_in)
                             if isinstance(data, BaseDataInLog):
-                                self.add_logging(data)
+                                self._append_logging_datain(data)
                             elif isinstance(data, DataInSTA):
                                 if self._data_STA is not None:
                                     for key in data.data.keys():
@@ -67,11 +67,22 @@ class DataInModel(object):
                     self._lock.release()
             sleep(0.01)
 
-    def add_logging(self, data):
+    def _append_logging_datain(self, data):
         self._data_logging.append(data)
         self._controller.update_logging()
 
+    def add_logging(self, name, message, level=2):
+        data_in = {'name': name,
+                   'type': 2,
+                   'version': '1.0',
+                   'link': None,
+                   'data': {'level': level, 'message': message}
+                   }
+        self._append_logging_datain(self._datain_factory.get_datain_object(data_in))
+
+
     def _get_data(self, type=0):
+        # TODO: A refactor
         while True:
             if not self._lock.locked():
                 self._lock.acquire()
@@ -120,20 +131,6 @@ class DataInModel(object):
     def show_draw(self, draw):
         if isinstance(draw, BaseDataInDraw):
             self._controller.add_draw_on_screen(draw)
-
-    @staticmethod
-    def package_is_valid(package):
-        try:
-            assert isinstance(package, dict)
-            assert 'name' in package.keys()
-            assert isinstance(package['name'], str)
-            assert 'type' in package.keys()
-            assert isinstance(package['type'], int)
-            assert 'data' in package.keys()
-            assert isinstance(package['data'], dict)
-            return True
-        except AssertionError:
-            return False
 
     def save_logging(self, path):
         # TODO: Enregistrer les logs dans un fichier texte

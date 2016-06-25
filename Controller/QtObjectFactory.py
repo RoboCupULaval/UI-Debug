@@ -6,7 +6,8 @@ __author__ = 'RoboCupULaval'
 
 
 class QtObjectFactory:
-    def __init__(self):
+    def __init__(self, controller):
+        self._controller = controller
         self._name = QtObjectFactory.__name__
         self._catalog_from_datain_class_to_qt_object = dict()
         self._init_object_catalog()
@@ -37,4 +38,5 @@ class QtObjectFactory:
         try:
             return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__].get_qt_object(data_draw)
         except Exception as e:
-            print(e)
+            msg = "Problème lors de la création de l'objet Qt avec " + str(e)
+            self._controller.add_logging_message(self._name, msg, level=3)
