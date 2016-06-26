@@ -10,7 +10,7 @@ __author__ = 'RoboCupULaval'
 
 class LineQtObject(BaseQtObject):
     @staticmethod
-    def get_qt_object(drawing_data_in):
+    def get_qt_object(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         draw_data = drawing_data_in.data
         pen = QtGui.QPen()
         pen.setStyle(BaseQtObject.line_style_allowed[draw_data['style']])

@@ -10,7 +10,7 @@ __author__ = 'RoboCupULaval'
 class MultipleLinesQtObject(BaseQtObject):
 
     @staticmethod
-    def get_qt_object(drawing_data_in):
+    def get_qt_object(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         draw_data = drawing_data_in.data
         qt_objet = QtGui.QGraphicsItemGroup()
 
@@ -25,9 +25,9 @@ class MultipleLinesQtObject(BaseQtObject):
         for sec_point in draw_data['points'][1:]:
             x1, y1 = first_point
             x2, y2 = sec_point
-            qt_obj = QtGui.QGraphicsLineItem(x1, y1, x2, y2)
-            qt_obj.setPen(pen)
-            qt_objet.addToGroup(qt_obj)
+            qt_sub_obj = QtGui.QGraphicsLineItem(x1, y1, x2, y2)
+            qt_sub_obj.setPen(pen)
+            qt_objet.addToGroup(qt_sub_obj)
             first_point = sec_point
 
         return qt_objet

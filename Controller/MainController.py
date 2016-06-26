@@ -26,7 +26,7 @@ class MainController(QWidget):
         QWidget.__init__(self)
 
         # Création des Contrôleurs
-        self.draw_handler = QtObjectFactory()
+        self.draw_handler = QtObjectFactory(self)
         self.field_handler = FieldController()
 
         # Création des Vues
@@ -127,11 +127,13 @@ class MainController(QWidget):
 
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """
+        # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement
         try:
             for key, item in draw.data.items():
                 if isinstance(item, tuple) and len(item) == 2:
-                    x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
-                    draw.data[key] = x, y
+                    if key not in ['dimension', 'size']:
+                        x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
+                        draw.data[key] = x, y
                 elif isinstance(item, list):
                     for i, value in enumerate(item):
                         if isinstance(value, tuple) and len(value) == 2:
@@ -140,8 +142,12 @@ class MainController(QWidget):
                 elif key == 'radius':
                     draw.data[key] *= self.field_handler.ratio_screen
 
-            qt_draw = self.draw_handler.get_qt_draw_object(draw)
-            self.view_screen.load_draw(qt_draw)
+            qt_draw = self.draw_handler.get_qt_draw_object(draw,
+                                                           self.field_handler.ratio_screen,
+                                                           self.field_handler.size[0],
+                                                           self.field_handler.size[1])
+            if qt_draw is not None:
+                self.view_screen.load_draw(qt_draw)
         except NotImplemented():
             print('@qt_draw not implemented yet.')
 
@@ -166,3 +172,6 @@ class MainController(QWidget):
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """
         self.view_screen.update_tactic_targeting()
+
+    def add_logging_message(self, name, message, level=2):
+        self.model_datain.add_logging(name, message, level=level)

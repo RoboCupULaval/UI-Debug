@@ -10,7 +10,7 @@ __author__ = 'RoboCupULaval'
 class CircleQtObject(BaseQtObject):
 
     @staticmethod
-    def get_qt_object(drawing_data_in):
+    def get_qt_object(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         draw_data = drawing_data_in.data
 
         # Création du peintre

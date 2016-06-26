@@ -29,7 +29,7 @@ class LoggingMessage(BaseDataInLog):
         except Exception as e:
             raise FormatPackageError('{}: {}'.format(self.__name__, e))
 
-    def _check_optinal_data(self):
+    def _check_optional_data(self):
         """ Vérifie les données optionnelles """
         try:
             pass

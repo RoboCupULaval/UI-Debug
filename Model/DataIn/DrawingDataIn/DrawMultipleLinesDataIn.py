@@ -24,7 +24,7 @@ class DrawMultipleLinesDataIn(BaseDataInDraw):
         except Exception as e:
             raise FormatPackageError("{}: {}".format(type(self).__name__, str(e)))
 
-    def _check_optinal_data(self):
+    def _check_optional_data(self):
         """ Vérifie les données optionnelles """
         try:
             keys = self.data.keys()

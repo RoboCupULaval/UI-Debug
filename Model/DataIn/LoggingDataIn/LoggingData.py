@@ -20,7 +20,7 @@ class LoggingData(BaseDataInLog):
         except Exception as e:
             raise FormatPackageError('{}: {}'.format(self.__name__, e))
 
-    def _check_optinal_data(self):
+    def _check_optional_data(self):
         try:
             pass
         except Exception as e:

@@ -22,7 +22,7 @@ class DataInObject:
         raise NotImplementedError()
 
     @abstractmethod
-    def _check_optinal_data(self):
+    def _check_optional_data(self):
         """ Vérifie les données optionnelles """
         raise NotImplementedError()
 
@@ -30,7 +30,7 @@ class DataInObject:
         """ Vérifie les données et complète les données manquantes avec des valeurs par défauts """
         try:
             self._check_obligatory_data()
-            self._check_optinal_data()
+            self._check_optional_data()
         except Exception as e:
             raise FormatPackageError(e)
 

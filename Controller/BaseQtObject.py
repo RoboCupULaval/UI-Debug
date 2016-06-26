@@ -14,7 +14,7 @@ class BaseQtObject(object):
                           }
     @staticmethod
     @abstractmethod
-    def get_qt_object(drawing_data_in):
+    def get_qt_object(drawing_data_in, screen_ratio=0.1, screen_width=900, screen_height=600):
         """ Génère un object Qt en fonction des données du DrawDataIn """
         raise NotImplementedError()
 
