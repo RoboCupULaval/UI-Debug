@@ -33,10 +33,13 @@ class QtObjectFactory:
             for file in files:
                 SourceFileLoader("", join(path_current_dir, folder, file)).load_module()
 
-    def get_qt_draw_object(self, data_draw):
-        """ Génère un DataIn en fonction du paquet reçu """
+    def get_qt_draw_object(self, data_draw, screen_ratio=0.1, screen_width=9000, screen_height=6000):
+        """ Génère un DataIn en fonction data_draw paquet reçu """
         try:
-            return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__].get_qt_object(data_draw)
+            return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__].get_qt_object(data_draw,
+                                                                                                        screen_ratio=0.1,
+                                                                                                        screen_width=9000,
+                                                                                                        screen_height=6000)
         except Exception as e:
             msg = "Problème lors de la création de l'objet Qt avec " + str(e)
             self._controller.add_logging_message(self._name, msg, level=3)

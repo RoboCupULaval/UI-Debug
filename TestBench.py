@@ -14,20 +14,13 @@ if __name__ == '__main__':
            'link': None,
            'data': dict()
            }
-    pkg['data']['field_data'] = [[x+y for x in range(5)] for y in range(5)]
+    pkg['data']['field_data'] = [[x+y for x in range(20)] for y in range(15)]
+    pkg['data']['hotest_color'] = 255, 0, 0
+    pkg['data']['coldest_color'] = 0, 255, 0
+    pkg['data']['has_grid'] = True
+    pkg['data']['grid_width'] = 1
+    pkg['data']['grid_color'] = 255, 255, 255
+    pkg['data']['grid_style'] = 'DashLine'
+    pkg['data']['opacity'] = 10
+
     ex.send_message(pkg)
-    '''
-    x = 0
-    x_ecart = 10
-    t_ref = time()
-    while True:
-        if time() - t_ref > 0.002:
-            pkg['data']['start'] = 0, -3000 + x
-            pkg['data']['end'] = 1000, -3000 + x
-            ex.send_message(pkg)
-            t_ref = time()
-            x += x_ecart
-        if x == 600 * x_ecart:
-            print('TOTAL', time()-t_ref)
-            break
-            '''
