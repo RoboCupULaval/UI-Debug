@@ -25,9 +25,9 @@ class MultipleLinesQtObject(BaseQtObject):
         for sec_point in draw_data['points'][1:]:
             x1, y1 = first_point
             x2, y2 = sec_point
-            qt_obj = QtGui.QGraphicsLineItem(x1, y1, x2, y2)
-            qt_obj.setPen(pen)
-            qt_objet.addToGroup(qt_obj)
+            qt_sub_obj = QtGui.QGraphicsLineItem(x1, y1, x2, y2)
+            qt_sub_obj.setPen(pen)
+            qt_objet.addToGroup(qt_sub_obj)
             first_point = sec_point
 
         return qt_objet

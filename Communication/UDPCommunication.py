@@ -14,7 +14,8 @@ class UDPSending(object):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_message(self, p_object):
-        self._sock.sendto(pickle.dumps(p_object), (self._ip, self._port))
+        binaire = pickle.dumps(p_object)
+        self._sock.sendto(binaire, (self._ip, self._port))
 
 
 class UDPReceiving(object):
@@ -43,7 +44,7 @@ class UDPReceiving(object):
         """ Boucle de réception de données """
         while self.is_running:
             try:
-                data, addr = self._sock.recvfrom(1024)
+                data, addr = self._sock.recvfrom(65565)
                 if not len(self._data) or not data == self._data[-1]:
                     data = self._num, data
                     self._data.append(data)

@@ -130,8 +130,9 @@ class MainController(QWidget):
         try:
             for key, item in draw.data.items():
                 if isinstance(item, tuple) and len(item) == 2:
-                    x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
-                    draw.data[key] = x, y
+                    if key not in ['dimension']:
+                        x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
+                        draw.data[key] = x, y
                 elif isinstance(item, list):
                     for i, value in enumerate(item):
                         if isinstance(value, tuple) and len(value) == 2:
