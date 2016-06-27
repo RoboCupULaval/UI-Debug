@@ -1,0 +1,63 @@
+# Under MIT License, see LICENSE.txt
+
+from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
+
+__author__ = 'RoboCupULaval'
+
+
+class QtToolBox:
+    """ QToolBox regroupe tous les dessins primitifs disponiblent dans Qt dans le but de facilité la création
+        de dessins plus complexes."""
+    line_style = {'SolidLine': Qt.SolidLine,
+                  'DashLine': Qt.DashLine,
+                  'DashDotLine': Qt.DashDotDotLine,
+                  'DotLine': Qt.DotLine
+                  }
+
+    @staticmethod
+    def create_pen(color=(0, 0, 0), style='SolidLine', width=2, is_hide=False):
+        """ Génère un pinceau avec les paramètres entrants """
+        qt_pen = QtGui.QPen()
+        if not is_hide:
+            qt_pen.setWidth(width)
+            qt_pen.setStyle(QtToolBox.line_style[style])
+            qt_pen.setColor(QtGui.QColor(*color))
+        else:
+            qt_pen.setStyle(Qt.NoPen)
+        return qt_pen
+
+    @staticmethod
+    def create_brush(color=(0, 0, 0)):
+        """ Génère un brosse avec les paramètres entrants """
+        qt_brush = QtGui.QBrush(QtGui.QColor(*color))
+        return qt_brush
+
+    @staticmethod
+    def create_line(pst_start, pst_end, pen):
+        """ Génère une ligne avec les paramètres entrants """
+        qt_line = QtGui.QGraphicsLineItem(*pst_start, *pst_end)
+        qt_line.setPen(pen)
+        return qt_line
+
+    @staticmethod
+    def create_rect_item(pst_x, pst_y, width, height, pen=None, is_fill=False, brush=None, opacity=1):
+        """ Génère un rectangle avec les paramètres entrants """
+        qt_rect_item = QtGui.QGraphicsRectItem(pst_x, pst_y, width, height)
+        if pen is not None:
+            qt_rect_item.setPen(pen)
+        if is_fill and brush is not None:
+            qt_rect_item.setBrush(brush)
+        qt_rect_item.setOpacity(opacity)
+        return qt_rect_item
+
+    @staticmethod
+    def create_ellipse_item(pst_x, pst_y, width, height, pen=None, is_fill=False, brush=None, opacity=1):
+        """ Génère une ellipse avec les paramètres entrants """
+        qt_ellipse = QtGui.QGraphicsEllipseItem(pst_x, pst_y, width, height)
+        if pen is not None:
+            qt_ellipse.setPen(pen)
+        if is_fill and brush is not None:
+            qt_ellipse.setBrush(brush)
+        qt_ellipse.setOpacity(opacity)
+        return qt_ellipse
