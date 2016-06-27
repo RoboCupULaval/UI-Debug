@@ -72,15 +72,50 @@ def test_circle():
     ex.send_message(pkg)
 
 
+def test_rect():
+    """ Rectangle """
+    pkg = create_basic_pkg()
+    pkg['type'] = 3006
+    pkg['data']["top_left"] = randint(-3000, 3000), randint(-3000, 3000)
+    pkg['data']["bottom_right"] = pkg['data']["top_left"][0] + randint(100, 1000),pkg['data']["top_left"][1] + randint(100, 1000)
+    pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
+    pkg['data']['is_fill'] = True
+    ex.send_message(pkg)
+
+
+def test_point():
+    """ Point """
+    pkg = create_basic_pkg()
+    pkg['type'] = 3004
+    pkg['data']["point"] = randint(-3000, 3000), randint(-3000, 3000)
+    pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
+    ex.send_message(pkg)
+
+
+def test_multiple_points():
+    """ Point """
+    pkg = create_basic_pkg()
+    pkg['type'] = 3005
+    pkg['data']["points"] = [tuple([randint(-3000, 3000), randint(-3000, 3000)]) for _ in range(5)]
+    pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
+    pkg['data']['width'] = randint(2, 5)
+    ex.send_message(pkg)
+
+def stress_test():
+    """
+        Test tous les paquest :
+        /!\ Éviter de tester l'influenceMap en même temps que le reste /!\
+    """
+    for _ in range(5):
+        test_circle()
+        test_multiple_lines()
+        test_line()
+        test_rect()
+        test_point()
+        test_multiple_points()
+
 if __name__ == '__main__':
     ex = UDPSending(port=20021)
 
     # test_influence_map()
-    # test_line()
-    # test_multiple_lines()
-    for _ in range(10):
-        test_circle()
-        test_multiple_lines()
-        test_line()
-
-    test_influence_map()
+    stress_test()

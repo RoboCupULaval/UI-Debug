@@ -50,14 +50,14 @@ class InfluenceMapQtObject(BaseQtObject):
                 brush = QtToolBox.create_brush(rgb_value)
 
                 # Création et ajout du rectangle dans le groupe
-                qt_obj.addToGroup(QtToolBox.create_rect_item(ref_x + rect_width * nb_col,
-                                                             ref_y + rect_height * nb_line,
-                                                             rect_width,
-                                                             rect_height,
-                                                             pen=pen,
-                                                             is_fill=True,
-                                                             brush=brush,
-                                                             opacity=draw_data['opacity'] / 10.0)
+                qt_obj.addToGroup(QtToolBox.create_rect(ref_x + rect_width * nb_col,
+                                                        ref_y + rect_height * nb_line,
+                                                        rect_width,
+                                                        rect_height,
+                                                        pen=pen,
+                                                        is_fill=True,
+                                                        brush=brush,
+                                                        opacity=draw_data['opacity'] / 10.0)
                                   )
         return qt_obj
 

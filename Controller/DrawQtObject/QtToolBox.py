@@ -16,7 +16,7 @@ class QtToolBox:
                   }
 
     @staticmethod
-    def create_pen(color=(0, 0, 0), style='SolidLine', width=2, is_hide=False):
+    def create_pen(color=(0, 0, 0), style='SolidLine', width=1, is_hide=False):
         """ Génère un pinceau avec les paramètres entrants """
         qt_pen = QtGui.QPen()
         if not is_hide:
@@ -41,7 +41,7 @@ class QtToolBox:
         return qt_line
 
     @staticmethod
-    def create_rect_item(pst_x, pst_y, width, height, pen=None, is_fill=False, brush=None, opacity=1):
+    def create_rect(pst_x, pst_y, width, height, pen=None, is_fill=False, brush=None, opacity=1):
         """ Génère un rectangle avec les paramètres entrants """
         qt_rect_item = QtGui.QGraphicsRectItem(pst_x, pst_y, width, height)
         if pen is not None:
