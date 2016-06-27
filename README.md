@@ -137,8 +137,8 @@ data = {'field_data': list(int, int, ...),      # Données de l'Influence Map
         # === Options supplémentaires ===
         'size': tuple(int, int),                # Taille de la grille
         'focus': tuple(int, int, int, int)      # Affiche uniquement les données dans un rectangle prédéfini
-        'hotest_numb': int,                     # Nombre le plus élevé
-        'hotest_color': tuple(int, int ,int ),  # Couleur RGB du nombre le plus élevé
+        'hottest_numb': int,                     # Nombre le plus élevé
+        'hottest_color': tuple(int, int ,int ),  # Couleur RGB du nombre le plus élevé
         'coldest_numb': int,                    # Nombre le moins élevé
         'coldest_color': tuple(int, int, int),  # Couleur RGB du nombre le moins élevé
         'has_grid': bool,                       # Affichage de la grille ?

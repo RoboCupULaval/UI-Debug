@@ -54,20 +54,20 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
             else:
                 self.data['focus'] = 0, 0, self.data['size'][0], self.data['size'][1]
 
-            if 'hotest_numb' in keys:
-                assert isinstance(self.data['hotest_numb'], int)
+            if 'hottest_numb' in keys:
+                assert isinstance(self.data['hottest_numb'], int)
             else:
                 maxi = 0
                 for line in self.data['field_data']:
                     tmp_max = max(line)
                     if tmp_max > maxi:
                         maxi = tmp_max
-                self.data['hotest_numb'] = maxi
+                self.data['hottest_numb'] = maxi
 
-            if 'hotest_color' in keys:
-                assert BaseDataInDraw._colorRGB_is_valid(self.data['hotest_color'])
+            if 'hottest_color' in keys:
+                assert BaseDataInDraw._colorRGB_is_valid(self.data['hottest_color'])
             else:
-                self.data['hotest_color'] = 255, 0, 0
+                self.data['hottest_color'] = 255, 0, 0
 
             if 'coldest_numb' in keys:
                 assert isinstance(self.data['coldest_numb'], int)
@@ -79,7 +79,7 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
                         mini = tmp_min
                 self.data['coldest_numb'] = mini
 
-            assert self.data['coldest_numb'] <= self.data['hotest_numb']
+            assert self.data['coldest_numb'] <= self.data['hottest_numb']
 
             if 'coldest_color' in keys:
                 assert BaseDataInDraw._colorRGB_is_valid(self.data['coldest_color'])
