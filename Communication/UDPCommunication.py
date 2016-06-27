@@ -29,7 +29,8 @@ class UDPReceiving(object):
         self._thread.run = self._run
 
         # Données
-        self._data = deque(maxlen=100)
+        #self._data = deque(maxlen=100)
+        self._data = []
 
         # État
         self.is_running = False
@@ -58,4 +59,4 @@ class UDPReceiving(object):
 
     def get_last_data(self):
         if len(self._data):
-            return self._data[-1]
+            return self._data.pop(0)

@@ -48,7 +48,7 @@ class DataInModel(object):
                 self._lock.acquire()
                 try:
                     package = self._udp_receiver.get_last_data()
-                    if package is not None and not package[0] == self._last_packet:
+                    if package is not None:
                         data_in = pickle.loads(package[1])
                         if data_in is not None:
                             data = self._datain_factory.get_datain_object(data_in)
