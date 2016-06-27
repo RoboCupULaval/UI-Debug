@@ -161,7 +161,7 @@ class FieldView(QGraphicsView):
         self.lock_scene = True
         for qt_item in self.graph_draw['notset']:
             self.scene.removeItem(qt_item)
-            sleep(0.002)
+            sleep(0.010)
         self.graph_draw['notset'].clear()
 
         for list_item in self.graph_draw['robots_blue'] + self.graph_draw['robots_yellow']:
