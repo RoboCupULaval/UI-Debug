@@ -116,6 +116,15 @@ def stress_test():
 
 if __name__ == '__main__':
     ex = UDPSending(port=20021)
-
+    counter = 0
+    t_ref = time()
+    print('>>>> START')
+    while True:
+        if (time() - t_ref) > 1 / 60:
+            test_rect()
+            t_ref = time()
+            counter += 1
+        if counter == 100:
+            print('END <<<<')
+            break
     # test_influence_map()
-    stress_test()
