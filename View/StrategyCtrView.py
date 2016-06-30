@@ -28,8 +28,6 @@ class StrategyCtrView(QWidget):
 
         self.page_strat_but_apply = QPushButton('Appliquer')
         self.page_strat_but_apply.clicked.connect(self.send_strat)
-        self.page_strat_but_refresh = QPushButton('Rafraîchir')
-        self.page_strat_but_refresh.clicked.connect(self.refresh_strat)
         self.page_strat_but_cancel = QPushButton("STOP")
         but_cancel_font = QFont()
         but_cancel_font.setBold(True)
@@ -44,7 +42,6 @@ class StrategyCtrView(QWidget):
 
         but_group = QHBoxLayout()
         but_group.addWidget(self.page_strat_but_apply)
-        but_group.addWidget(self.page_strat_but_refresh)
         but_group.addWidget(self.page_strat_but_cancel)
         self.page_strat_vbox.addWidget(qgroup)
         self.page_strat_vbox.addLayout(but_group)
@@ -72,10 +69,6 @@ class StrategyCtrView(QWidget):
         tact_apply_but.clicked.connect(self.send_tactic)
         but_group_tact.addWidget(tact_apply_but)
 
-        tact_refresh_but = QPushButton('Rafraîchir')
-        tact_refresh_but.clicked.connect(self.refresh_tactic)
-        but_group_tact.addWidget(tact_refresh_but)
-
         tact_stop_but = QPushButton('STOP')
         tact_stop_but.setFont(but_cancel_font)
         tact_stop_but.setStyleSheet('QPushButton {color:red;}')
@@ -91,18 +84,16 @@ class StrategyCtrView(QWidget):
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
 
-    def refresh_tactic(self):
+    def refresh_tactic(self, tactics):
         self.selectTactic.clear()
-        tactics = self.parent.datain_model.get_tactics()
         if tactics is not None:
             for tactic in tactics:
                 self.selectTactic.addItem(tactic)
         else:
             self.selectTactic.addItem('Aucune Tactique disponible')
 
-    def refresh_strat(self):
+    def refresh_strat(self, strats):
         self.selectStrat.clear()
-        strats = self.parent.datain_model.get_strats()
         if strats is not None:
             for strat in strats:
                 self.selectStrat.addItem(strat)
@@ -112,21 +103,21 @@ class StrategyCtrView(QWidget):
     def send_strat(self):
         strat = str(self.selectStrat.currentText())
         if not strat == 'Aucune Stratégie disponible':
-            self.parent.dataout_model.send_strat(strat)
+            self.parent.model_dataout.send_strat(strat)
 
     def send_tactic(self):
         id_bot = str(self.selectRobot.currentText())
         tactic = str(self.selectTactic.currentText())
-        target = str(self.parent.dataout_model.target)
+        target = str(self.parent.model_dataout.target)
         if not tactic == 'Aucune Tactique disponible':
-            self.parent.dataout_model.send_tactic(id_bot, tactic, target)
+            self.parent.model_dataout.send_tactic(id_bot, tactic, target)
 
     def send_tactic_stop(self):
         for id_bot in range(6):
-            self.parent.dataout_model.send_tactic(id_bot, 'tStop')
+            self.parent.model_dataout.send_tactic(id_bot, 'tStop')
 
     def send_strat_stop(self):
-        self.parent.dataout_model.send_strat('pStop')
+        self.parent.model_dataout.send_strat('pStop')
 
     def show_hide(self):
         if self.isVisible():
