@@ -6,6 +6,7 @@ from Communication.UDPCommunication import UDPSending
 
 __author__ = 'RoboCupULaval'
 
+ex = UDPSending(port=20021)
 
 def create_basic_pkg():
     pkg = {'name': 'tester',
@@ -50,12 +51,12 @@ def test_influence_map():
     pkg = create_basic_pkg()
     pkg['type'] = 3007
     pkg['data']['field_data'] = [[x + y for x in range(20)] for y in range(15)]
-    pkg['data']['hottest_color'] = 255, 0, 0
-    pkg['data']['coldest_color'] = 0, 255, 0
-    pkg['data']['has_grid'] = True
+    pkg['data']['hottest_color'] = 255, 255, 255
+    pkg['data']['coldest_color'] = 0, 0, 0
+    pkg['data']['has_grid'] = False
     pkg['data']['grid_width'] = 1
     pkg['data']['grid_color'] = 255, 255, 255
-    pkg['data']['grid_style'] = 'DashLine'
+    pkg['data']['grid_style'] = 'SolidLine'
     pkg['data']['opacity'] = 10
     ex.send_message(pkg)
 
@@ -115,7 +116,7 @@ def stress_test():
         test_multiple_points()
 
 if __name__ == '__main__':
-    ex = UDPSending(port=20021)
+    '''
     counter = 0
     t_ref = time()
     print('>>>> START')
@@ -127,4 +128,5 @@ if __name__ == '__main__':
         if counter == 100:
             print('END <<<<')
             break
-    # test_influence_map()
+    '''
+    test_influence_map()

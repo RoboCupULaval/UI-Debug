@@ -10,6 +10,22 @@ __author__ = 'RoboCupULaval'
 
 
 class RectQtObject(BaseQtObject):
+    def __init__(self, data_in):
+        BaseQtObject.__init__(self)
+        self.data = data_in.data
+
+    def draw(self, painter):
+        if self.isVisible():
+            data = self.data
+            painter.setPen(QtToolBox.create_pen(color=data['color'],
+                                                style=data['style'],
+                                                width=data['width']))
+            painter.setBrush(QtToolBox.create_brush(data['color']))
+
+            rect_height = data['top_left'][0] - data['bottom_right'][0]
+            rect_width = data['bottom_right'][1] - data['top_left'][1]
+            painter.drawRect(*data['top_left'], rect_height, rect_width)
+
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         draw_data = drawing_data_in.data

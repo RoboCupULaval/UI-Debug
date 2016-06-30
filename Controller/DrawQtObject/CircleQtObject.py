@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from PyQt4.QtGui import QPainter
 from Controller.BaseQtObject import BaseQtObject
 from Controller.DrawQtObject.QtToolBox import QtToolBox
 from Model.DataIn.DrawingDataIn.DrawCircleDataIn import DrawCircleDataIn
@@ -9,6 +9,22 @@ __author__ = 'RoboCupULaval'
 
 
 class CircleQtObject(BaseQtObject):
+    def __init__(self, data_in):
+        BaseQtObject.__init__(self)
+        self.data = data_in.data
+
+    def draw(self, painter):
+        if self.isVisible():
+            data = self.data
+            painter.setPen(QtToolBox.create_pen(color=data['color'],
+                                                style=data['style'],
+                                                width=2))
+            painter.setBrush(QtToolBox.create_brush(color=data['color']))
+            x, y = data['center']
+            painter.drawEllipse(x - data['radius'],
+                                y - data['radius'],
+                                data['radius'] * 2,
+                                data['radius'] * 2)
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):

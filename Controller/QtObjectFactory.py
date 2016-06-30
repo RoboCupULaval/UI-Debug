@@ -43,3 +43,10 @@ class QtObjectFactory:
         except Exception as e:
             msg = "Problème lors de la création de l'objet Qt avec " + str(e)
             self._controller.add_logging_message(self._name, msg, level=3)
+
+    def get_specific_draw_object(self, index):
+        try:
+            return self._catalog_from_datain_class_to_qt_object[index]()
+        except Exception as e:
+            msg = "Problème lors de la création de l'objet Qt avec " + str(e)
+            self._controller.add_logging_message(self._name, msg, level=3)

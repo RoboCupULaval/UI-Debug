@@ -68,7 +68,6 @@ class MainController(QWidget):
 
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
-        self.view_screen.set_model(self.model_frame)
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -91,16 +90,25 @@ class MainController(QWidget):
 
         # => Menu Vue
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
-        vanishAction.triggered.connect(self.view_screen.change_vanish_option)
+        try:
+            vanishAction.triggered.connect(self.view_screen.change_vanish_option)
+        except:
+            pass
         viewMenu.addAction(vanishAction)
 
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
-        nuumbAction.triggered.connect(self.view_screen.show_number_option)
+        try:
+            nuumbAction.triggered.connect(self.view_screen.show_number_option)
+        except:
+            pass
         viewMenu.addAction(nuumbAction)
 
         # => Menu Outil
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
-        StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
+        try:
+            StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
+        except:
+            pass
         toolMenu.addAction(StrategyControllerAction)
 
         loggerAction = QAction('Afficher le Logger', self,  checkable=True)
@@ -148,30 +156,45 @@ class MainController(QWidget):
                                                            self.field_handler.size[1])
             if qt_draw is not None:
                 self.view_screen.load_draw(qt_draw)
-        except NotImplemented():
-            print('@qt_draw not implemented yet.')
+        except:
+            pass
 
     def set_ball_pos_on_screen(self, x, y):
-        """ Modifie la position de la balle sur le terrain """
-        x, y, theta = self.field_handler.convert_real_to_scene_pst(x, y)
-        self.view_screen.set_ball_pos(x, y)
+        try:
+            """ Modifie la position de la balle sur le terrain """
+            x, y, theta = self.field_handler.convert_real_to_scene_pst(x, y)
+            self.view_screen.set_ball_pos(x, y)
+        except:
+            pass
 
     def set_robot_pos_on_screen(self, bot_id, pst, theta):
-        """ Modifie la position et l'orientation d'un robot sur le terrain """
-        x, y, theta = self.field_handler.convert_real_to_scene_pst(pst[0], pst[1], theta)
-        self.view_screen.set_bot_pos(bot_id, x, y, theta)
+        try:
+            """ Modifie la position et l'orientation d'un robot sur le terrain """
+            x, y, theta = self.field_handler.convert_real_to_scene_pst(pst[0], pst[1], theta)
+            self.view_screen.set_bot_pos(bot_id, x, y, theta)
+        except:
+            pass
 
     def hide_mob(self, bot_id=None):
-        """ Cache l'objet mobile si l'information n'est pas update """
-        if self.view_screen.isVisible() and not self.view_screen.option_vanishing:
-            if bot_id is None:
-                self.view_screen.hide_ball()
-            else:
-                self.view_screen.hide_bot(bot_id)
+        try:
+            """ Cache l'objet mobile si l'information n'est pas update """
+            if self.view_screen.isVisible() and not self.view_screen.option_vanishing:
+                if bot_id is None:
+                    self.view_screen.hide_ball()
+                else:
+                    self.view_screen.hide_bot(bot_id)
+        except:
+            pass
 
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """
-        self.view_screen.update_tactic_targeting()
+        try:
+            self.view_screen.update_tactic_targeting()
+        except:
+            pass
 
     def add_logging_message(self, name, message, level=2):
         self.model_datain.add_logging(name, message, level=level)
+
+    def get_drawing_object(self, index):
+        return self.draw_handler.get_specific_draw_object(index)
