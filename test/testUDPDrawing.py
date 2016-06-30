@@ -101,6 +101,15 @@ def test_multiple_points():
     pkg['data']['width'] = randint(2, 5)
     ex.send_message(pkg)
 
+
+def test_strat():
+    pkg = create_basic_pkg()
+    pkg['type'] = 1001
+    pkg['data']['strategy'] = ['Start1', 'Start2']
+    pkg['data']['tactic'] = ['Tact1', 'Tact2']
+    ex.send_message(pkg)
+
+
 def stress_test():
     """
         Test tous les paquest :
@@ -116,15 +125,5 @@ def stress_test():
 
 if __name__ == '__main__':
     ex = UDPSending(port=20021)
-    counter = 0
-    t_ref = time()
-    print('>>>> START')
-    while True:
-        if (time() - t_ref) > 1 / 60:
-            test_rect()
-            t_ref = time()
-            counter += 1
-        if counter == 100:
-            print('END <<<<')
-            break
+    test_strat()
     # test_influence_map()

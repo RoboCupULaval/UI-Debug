@@ -11,8 +11,8 @@ from PyQt4.QtCore import QMutex
 from Communication.UDPCommunication import UDPReceiving
 from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
 from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
+from Model.DataIn.StratDataIn.BaseDataInStrat import BaseDataInStrat
 from .DataIn.DataInFactory import DataInFactory
-from .DataIn.DataInSTA import DataInSTA
 
 __author__ = 'RoboCupULaval'
 
@@ -58,12 +58,14 @@ class DataInModel(object):
                         data = self._datain_factory.get_datain_object(data_in)
                         if isinstance(data, BaseDataInLog):
                             self._append_logging_datain(data)
-                        elif isinstance(data, DataInSTA):
+                        elif isinstance(data, BaseDataInStrat):
                             if self._data_STA is not None:
                                 for key in data.data.keys():
                                     self._data_STA.data[key] = data.data[key]
                             else:
                                 self._data_STA = data
+                            self._controller.view_controller.refresh_strat(self._data_STA.data['strategy'])
+                            self._controller.view_controller.refresh_tactic(self._data_STA.data['tactic'])
                         elif isinstance(data, BaseDataInDraw):
                             self._data_draw['notset'].append(data)
                             self.show_draw(self._data_draw['notset'][-1])

@@ -23,15 +23,21 @@ class DataOutModel(object):
 
     def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0)):
         package = self.get_empty_package()
-        package['type'] = 5002
+        package['type'] = 5003
         package['link'] = id_bot
         package['data'] = {'tactic': tactic, 'target': target, 'goal': goal}
         self._udp_sender.send_message(package)
 
     def send_strat(self, strat):
         package = self.get_empty_package()
-        package['type'] = 5001
+        package['type'] = 5002
         package['data'] = {'strategy': strat}
+        self._udp_sender.send_message(package)
+
+    def send_toggle_human_control(self, result):
+        package = self.get_empty_package()
+        package['type'] = 5001
+        package['data'] = {'is_human_control': result}
         self._udp_sender.send_message(package)
 
     def get_empty_package(self):
