@@ -1,15 +1,13 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4 import QtGui
-
-from Controller.BaseQtObject import BaseQtObject
-from Controller.DrawQtObject.QtToolBox import QtToolBox
+from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.QtToolBox import QtToolBox
 from Model.DataIn.DrawingDataIn.DrawLineDataIn import DrawLineDataIn
 
 __author__ = 'RoboCupULaval'
 
 
-class LineQtObject(BaseQtObject):
+class LineQtObject(BaseDrawObject):
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         draw_data = drawing_data_in.data

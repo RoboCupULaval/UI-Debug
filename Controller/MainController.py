@@ -160,31 +160,20 @@ class MainController(QWidget):
             pass
 
     def set_ball_pos_on_screen(self, x, y):
-        try:
-            """ Modifie la position de la balle sur le terrain """
-            x, y, theta = self.field_handler.convert_real_to_scene_pst(x, y)
-            self.view_screen.set_ball_pos(x, y)
-        except:
-            pass
+        """ Modifie la position de la balle sur le terrain """
+        self.view_screen.set_ball_pos(x, y)
 
     def set_robot_pos_on_screen(self, bot_id, pst, theta):
-        try:
-            """ Modifie la position et l'orientation d'un robot sur le terrain """
-            x, y, theta = self.field_handler.convert_real_to_scene_pst(pst[0], pst[1], theta)
-            self.view_screen.set_bot_pos(bot_id, x, y, theta)
-        except:
-            pass
+        """ Modifie la position et l'orientation d'un robot sur le terrain """
+        self.view_screen.set_bot_pos(bot_id, *pst, theta)
 
     def hide_mob(self, bot_id=None):
-        try:
-            """ Cache l'objet mobile si l'information n'est pas update """
-            if self.view_screen.isVisible() and not self.view_screen.option_vanishing:
-                if bot_id is None:
-                    self.view_screen.hide_ball()
-                else:
-                    self.view_screen.hide_bot(bot_id)
-        except:
-            pass
+        """ Cache l'objet mobile si l'information n'est pas update """
+        if self.view_screen.isVisible() and not self.view_screen.option_vanishing:
+            if bot_id is None:
+                self.view_screen.hide_ball()
+            else:
+                self.view_screen.hide_bot(bot_id)
 
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """

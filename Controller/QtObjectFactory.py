@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from Controller.BaseQtObject import BaseQtObject
+from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 
 __author__ = 'RoboCupULaval'
 
@@ -15,7 +16,7 @@ class QtObjectFactory:
     def _init_object_catalog(self):
         """ Initialise le catalogue d'objet pour la factory """
         self._import_data_in_classes()
-        for subclass in BaseQtObject.__subclasses__():
+        for subclass in BaseDrawObject.__subclasses__() + BaseMobileObject.__subclasses__():
             self._catalog_from_datain_class_to_qt_object[subclass.get_datain_associated()] = subclass
 
     def _import_data_in_classes(self):
@@ -36,17 +37,14 @@ class QtObjectFactory:
     def get_qt_draw_object(self, data_draw, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         """ Génère un DataIn en fonction data_draw paquet reçu """
         try:
-            return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__].get_qt_item(data_draw,
-                                                                                                      screen_ratio=0.1,
-                                                                                                      screen_width=9000,
-                                                                                                      screen_height=6000)
+            return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__].get_qt_item(data_draw)
         except Exception as e:
             msg = "Problème lors de la création de l'objet Qt avec " + str(e)
             self._controller.add_logging_message(self._name, msg, level=3)
 
     def get_specific_draw_object(self, index):
         try:
-            return self._catalog_from_datain_class_to_qt_object[index]()
+            return self._catalog_from_datain_class_to_qt_object[index]
         except Exception as e:
             msg = "Problème lors de la création de l'objet Qt avec " + str(e)
             self._controller.add_logging_message(self._name, msg, level=3)

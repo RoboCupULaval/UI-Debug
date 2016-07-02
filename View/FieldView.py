@@ -1,12 +1,10 @@
 # Under MIT License, see LICENSE.txt
 
-import math
-from time import sleep
-
-from PyQt4 import QtGui
 from PyQt4 import QtCore
+from PyQt4 import QtGui
 
-from Controller.DrawQtObject.QtToolBox import QtToolBox
+from Controller.QtToolBox import QtToolBox
+
 __author__ = 'RoboCupULaval'
 
 
@@ -64,12 +62,9 @@ class FieldView(QtGui.QWidget):
         self.graph_draw['field'].draw(painter)
 
     def draw_mobs(self, painter):
-        for mobs in self.graph_mobs.values():
-            if isinstance(mobs, list):
-                for mob in mobs:
-                    mob.draw(painter)
-            else:
-                mobs.draw(painter)
+        self.graph_mobs['ball'].draw(painter)
+        for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
+            mob.draw(painter)
 
     def mousePressEvent(self, event):
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
@@ -87,12 +82,58 @@ class FieldView(QtGui.QWidget):
         """ Initialisation des objets graphiques """
 
         # Élément graphique pour les dessins
-        self.graph_draw['field'] = self.controller.get_drawing_object('field')
+        self.graph_draw['field'] = self.controller.get_drawing_object('field')()
         self.graph_draw['field'].show()
         self.graph_draw['notset'] = list()
         self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
         self.graph_draw['robots_blue'] = [list() for _ in range(6)]
 
         # Élément mobile graphique (Robot et balle)
-        self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')
+        self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
+        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(is_yellow=True) for _ in range(6)]
+        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(is_yellow=False) for _ in range(6)]
+        # TODO : show // init setters
+
+    def set_ball_pos(self, x, y):
+        """ Modifie la position de la balle sur la fenêtre du terrain """
+        if not self.graph_mobs['ball'].getX() == x and not self.graph_mobs['ball'].getY() == y:
+            self.graph_mobs['ball'].setPos(x, y)
         self.graph_mobs['ball'].show()
+
+    def set_bot_pos(self, bot_id, x, y, theta):
+        """ Modifie la position et l'orientation d'un robot sur la fenêtre du terrain """
+        if 0 <= bot_id < 6:
+            if not self.graph_mobs['robots_yellow'][bot_id].getX() == x and \
+                    not self.graph_mobs['robots_yellow'][bot_id].getY() == y:
+                self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
+                self.graph_mobs['robots_yellow'][bot_id].setRotation(theta)
+        elif 6 <= bot_id < 12:
+            if not self.graph_mobs['robots_blue'][bot_id - 6].getX() == x and \
+                    not self.graph_mobs['robots_blue'][bot_id - 6].getY() == y:
+                self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
+                self.graph_mobs['robots_blue'][bot_id - 6].setRotation(theta)
+        self.show_bot(bot_id)
+
+    def hide_ball(self):
+        """ Cache la balle dans la fenêtre de terrain """
+        self.graph_mobs['ball'].hide()
+
+    def hide_bot(self, bot_id):
+        """ Cache un robot dans la fenêtre de terrain """
+        if 0 <= bot_id < 6:
+            self.graph_mobs['robots_yellow'][bot_id].hide()
+            self.graph_mobs['robots_numbers'][bot_id].hide()
+        elif 6 <= bot_id < 12:
+            self.graph_mobs['robots_blue'][bot_id - 6].hide()
+            self.graph_mobs['robots_numbers'][bot_id].hide()
+
+    def show_ball(self):
+        """ Affiche la balle dans la fenêtre de terrain """
+        self.graph_mobs['ball'].show()
+
+    def show_bot(self, bot_id):
+        """ Affiche un robot dans la fenêtre du terrain """
+        if 0 <= bot_id < 6:
+            self.graph_mobs['robots_yellow'][bot_id].show()
+        elif 6 <= bot_id < 12:
+            self.graph_mobs['robots_blue'][bot_id - 6].show()

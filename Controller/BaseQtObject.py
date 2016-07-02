@@ -1,8 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
 from abc import abstractmethod
-from PyQt4.QtCore import Qt
-from .DrawQtObject.QtToolBox import QtToolBox
+
+from Controller.QtToolBox import QtToolBox
+
 __author__ = 'RoboCupULaval'
 
 
@@ -23,7 +24,7 @@ class BaseQtObject(object):
 
     @staticmethod
     @abstractmethod
-    def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=900, screen_height=600):
+    def get_qt_item(drawing_data_in):
         """ Génère un object Qt en fonction des données du DrawDataIn """
         raise NotImplementedError()
 

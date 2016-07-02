@@ -1,17 +1,13 @@
 # Under MIT License, see LICENSE.txt
-from PyQt4.QtGui import QPainter
-from Controller.BaseQtObject import BaseQtObject
-from Controller.DrawQtObject.QtToolBox import QtToolBox
-from Model.DataIn.DrawingDataIn.DrawCircleDataIn import DrawCircleDataIn
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
 
 
-class FieldLineQtObject(BaseQtObject):
+class FieldLineQtObject(BaseDrawObject):
     def __init__(self):
-        BaseQtObject.__init__(self)
+        BaseDrawObject.__init__(self)
 
     def draw(self, painter):
         if self.isVisible():

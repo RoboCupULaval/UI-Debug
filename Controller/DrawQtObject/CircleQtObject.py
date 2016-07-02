@@ -1,16 +1,14 @@
 # Under MIT License, see LICENSE.txt
-from PyQt4.QtGui import QPainter
-from Controller.BaseQtObject import BaseQtObject
-from Controller.DrawQtObject.QtToolBox import QtToolBox
+from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.QtToolBox import QtToolBox
 from Model.DataIn.DrawingDataIn.DrawCircleDataIn import DrawCircleDataIn
-from PyQt4 import QtGui
 
 __author__ = 'RoboCupULaval'
 
 
-class CircleQtObject(BaseQtObject):
+class CircleQtObject(BaseDrawObject):
     def __init__(self, data_in):
-        BaseQtObject.__init__(self)
+        BaseDrawObject.__init__(self)
         self.data = data_in.data
 
     def draw(self, painter):
