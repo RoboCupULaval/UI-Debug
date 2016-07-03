@@ -90,8 +90,8 @@ class FieldView(QtGui.QWidget):
 
         # Élément mobile graphique (Robot et balle)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
-        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(is_yellow=True) for _ in range(6)]
-        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(is_yellow=False) for _ in range(6)]
+        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, is_yellow=True) for x in range(6)]
+        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, is_yellow=False) for x in range(6, 12)]
         # TODO : show // init setters
 
     def set_ball_pos(self, x, y):
@@ -137,3 +137,11 @@ class FieldView(QtGui.QWidget):
             self.graph_mobs['robots_yellow'][bot_id].show()
         elif 6 <= bot_id < 12:
             self.graph_mobs['robots_blue'][bot_id - 6].show()
+
+    def show_number_option(self):
+        ''' Affiche les numéros des robots '''
+        for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
+            if mob.number_isVisible():
+                mob.hide_number()
+            else:
+                mob.show_number()

@@ -10,8 +10,9 @@ __author__ = 'RoboCupULaval'
 
 
 class RobotMob(BaseMobileObject):
-    def __init__(self, x=0, y=0, theta=0, is_yellow=True):
+    def __init__(self, bot_id, x=0, y=0, theta=0, is_yellow=True):
         BaseMobileObject.__init__(self, x, y, theta)
+        self._id = bot_id
         self._is_yellow = is_yellow
         self._show_number = False
         self._show_vector = False
@@ -19,7 +20,6 @@ class RobotMob(BaseMobileObject):
         self._radius = 180 / 2
 
     def draw(self, painter):
-        # TODO Ajouter logique d'affichage des numéros
         # TODO Ajouter vecteur de direction
         if self.isVisible():
             x, y, theta = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y, self._theta)
@@ -31,9 +31,13 @@ class RobotMob(BaseMobileObject):
             painter.setPen(QtToolBox.create_pen(color=(0, 0, 0),
                                                 style='SolidLine',
                                                 width=1))
+
             radius = self._radius * QtToolBox.field_ctrl.ratio_screen
             painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
             painter.drawLine(x, y, x + cos(theta) * radius, y + sin(theta) * radius)
+
+            if self._show_number:
+                painter.drawText(x + radius, y + radius * 2, str(self._id))
 
     def show_number(self):
         self._show_number = True
