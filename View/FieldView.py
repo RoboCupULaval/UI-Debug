@@ -63,6 +63,7 @@ class FieldView(QtGui.QWidget):
 
     def draw_mobs(self, painter):
         self.graph_mobs['ball'].draw(painter)
+        self.graph_mobs['target'].draw(painter)
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             mob.draw(painter)
 
@@ -70,7 +71,6 @@ class FieldView(QtGui.QWidget):
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             x, y = self.controller.field_handler.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.controller.model_dataout.target = (x, y)
-            x, y, _ = self.controller.field_handler.convert_real_to_scene_pst(x, y)
             self.graph_mobs['target'].setPos(x, y)
 
     def init_window(self):
@@ -88,10 +88,11 @@ class FieldView(QtGui.QWidget):
         self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
         self.graph_draw['robots_blue'] = [list() for _ in range(6)]
 
-        # Élément mobile graphique (Robot et balle)
+        # Élément mobile graphique (Robots, balle et cible)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
         self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, is_yellow=True) for x in range(6)]
         self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, is_yellow=False) for x in range(6, 12)]
+        self.graph_mobs['target'] = self.controller.get_drawing_object('target')()
         # TODO : show // init setters
 
     def set_ball_pos(self, x, y):
@@ -145,3 +146,13 @@ class FieldView(QtGui.QWidget):
                 mob.hide_number()
             else:
                 mob.show_number()
+
+    def change_vanish_option(self):
+        self.option_vanishing = not self.option_vanishing
+
+    def update_tactic_targeting(self):
+        # TODO refaire en passant par une méthode du MainController
+        if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
+            self.graph_mobs['target'].show()
+        else:
+            self.graph_mobs['target'].hide()

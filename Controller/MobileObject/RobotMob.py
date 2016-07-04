@@ -14,8 +14,9 @@ class RobotMob(BaseMobileObject):
         BaseMobileObject.__init__(self, x, y, theta)
         self._id = bot_id
         self._is_yellow = is_yellow
-        self._show_number = False
-        self._show_vector = False
+        self._display_number = False
+        self._display_select = False
+        self._display_vector = False
         self._vector = (0, 0)
         self._radius = 180 / 2
 
@@ -28,25 +29,39 @@ class RobotMob(BaseMobileObject):
             else:
                 painter.setBrush(QtToolBox.create_brush(color=(100, 150, 255)))
 
-            painter.setPen(QtToolBox.create_pen(color=(0, 0, 0),
-                                                style='SolidLine',
-                                                width=1))
+            if self._display_select:
+                painter.setPen(QtToolBox.create_pen(color=(255, 0, 0),
+                                                    style='SolidLine',
+                                                    width=2))
+            else:
+                painter.setPen(QtToolBox.create_pen(color=(0, 0, 0),
+                                                    style='SolidLine',
+                                                    width=1))
 
             radius = self._radius * QtToolBox.field_ctrl.ratio_screen
             painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
             painter.drawLine(x, y, x + cos(theta) * radius, y + sin(theta) * radius)
 
-            if self._show_number:
+            if self._display_number:
                 painter.drawText(x + radius, y + radius * 2, str(self._id))
 
+    def select(self):
+        self._display_select = True
+
+    def deselect(self):
+        self._display_select = False
+
+    def isSelect(self):
+        return self._display_select
+
     def show_number(self):
-        self._show_number = True
+        self._display_number = True
 
     def hide_number(self):
-        self._show_number = False
+        self._display_number = False
 
     def number_isVisible(self):
-        return self._show_number
+        return self._display_number
 
     @staticmethod
     def get_qt_item(drawing_data_in):

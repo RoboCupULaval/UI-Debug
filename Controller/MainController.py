@@ -90,25 +90,16 @@ class MainController(QWidget):
 
         # => Menu Vue
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
-        try:
-            vanishAction.triggered.connect(self.view_screen.change_vanish_option)
-        except:
-            pass
+        vanishAction.triggered.connect(self.view_screen.change_vanish_option)
         viewMenu.addAction(vanishAction)
 
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
-        try:
-            nuumbAction.triggered.connect(self.view_screen.show_number_option)
-        except:
-            pass
+        nuumbAction.triggered.connect(self.view_screen.show_number_option)
         viewMenu.addAction(nuumbAction)
 
         # => Menu Outil
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
-        try:
-            StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
-        except:
-            pass
+        StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
         toolMenu.addAction(StrategyControllerAction)
 
         loggerAction = QAction('Afficher le Logger', self,  checkable=True)

@@ -30,8 +30,8 @@ class FieldController(object):
         return x, y, atan2(rot_y, rot_x)
 
     def convert_screen_to_real_pst(self, x, y):
-        x = (x / self.ratio_screen - self.size[0] / 2 - self.marge * 2)
-        y = (y / self.ratio_screen - self.size[1] / 2 - self.marge * 2)
+        x = (x / self.ratio_screen - self.size[0] / 2 - self.marge)
+        y = (y / self.ratio_screen - self.size[1] / 2 - self.marge)
 
         if self.is_x_axe_flipped:
             x *= -1
