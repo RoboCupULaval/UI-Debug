@@ -9,8 +9,7 @@ __author__ = 'RoboCupULaval'
 
 class RectQtObject(BaseDrawObject):
     def __init__(self, data_in):
-        BaseDrawObject.__init__(self)
-        self.data = data_in.data
+        BaseDrawObject.__init__(self, data_in)
 
     def draw(self, painter):
         if self.isVisible():

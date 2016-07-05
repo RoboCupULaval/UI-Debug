@@ -10,7 +10,7 @@ class FieldController(object):
     def __init__(self):
         self.type = 0
         self.ratio_screen = 1 / 10
-        self.ratio_real = 1
+        self.ratio_field_mobs = 1
         self.marge = 250
         self.size = 9000, 6000
         self.is_x_axe_flipped = False

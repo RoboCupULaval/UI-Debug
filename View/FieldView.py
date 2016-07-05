@@ -49,8 +49,8 @@ class FieldView(QtGui.QWidget):
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.setBackground(QtToolBox.create_brush())
-        # self.draw_effects(painter)
         self.draw_field(painter)
+        self.draw_effects(painter)
         self.draw_mobs(painter)
         painter.end()
 
@@ -156,3 +156,7 @@ class FieldView(QtGui.QWidget):
             self.graph_mobs['target'].show()
         else:
             self.graph_mobs['target'].hide()
+
+    def load_draw(self, draw):
+        draw.show()
+        self.graph_draw['notset'].append(draw)

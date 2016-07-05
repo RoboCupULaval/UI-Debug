@@ -128,23 +128,7 @@ class MainController(QWidget):
         """ Ajout un dessin sur la fenêtre du terrain """
         # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement
         try:
-            for key, item in draw.data.items():
-                if isinstance(item, tuple) and len(item) == 2:
-                    if key not in ['dimension', 'size']:
-                        x, y, _ = self.field_handler.convert_real_to_scene_pst(item[0], item[1])
-                        draw.data[key] = x, y
-                elif isinstance(item, list):
-                    for i, value in enumerate(item):
-                        if isinstance(value, tuple) and len(value) == 2:
-                            x, y, _ = self.field_handler.convert_real_to_scene_pst(value[0], value[1])
-                            draw.data[key][i] = x, y
-                elif key == 'radius':
-                    draw.data[key] *= self.field_handler.ratio_screen
-
-            qt_draw = self.draw_handler.get_qt_draw_object(draw,
-                                                           self.field_handler.ratio_screen,
-                                                           self.field_handler.size[0],
-                                                           self.field_handler.size[1])
+            qt_draw = self.draw_handler.get_qt_draw_object(draw)
             if qt_draw is not None:
                 self.view_screen.load_draw(qt_draw)
         except:

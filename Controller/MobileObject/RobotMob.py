@@ -63,6 +63,15 @@ class RobotMob(BaseMobileObject):
     def number_isVisible(self):
         return self._display_number
 
+    def show_effects(self):
+        self._display_effects = True
+
+    def hide_effects(self):
+        self._display_effects = False
+
+    def effects_isVisible(self):
+        return self._display_effects
+
     @staticmethod
     def get_qt_item(drawing_data_in):
         return

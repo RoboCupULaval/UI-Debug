@@ -10,6 +10,19 @@ __author__ = 'RoboCupULaval'
 
 
 class MultipleLinesQtObject(BaseDrawObject):
+    def __init__(self, data_in):
+        BaseDrawObject.__init__(self, data_in)
+
+    def draw(self, painter):
+        painter.setPen(QtToolBox.create_pen(color=self.data['color'],
+                                            style=self.data['style'],
+                                            width=self.data['width']))
+        painter.setBrush(QtToolBox.create_brush(is_visible=False))
+        x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['points'][0])
+        for sec_point in self.data['points'][1:]:
+            x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*sec_point)
+            painter.drawLine(x1, y1, x2, y2)
+            x1, y1 = x2, y2
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):

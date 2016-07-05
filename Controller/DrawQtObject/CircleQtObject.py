@@ -8,8 +8,7 @@ __author__ = 'RoboCupULaval'
 
 class CircleQtObject(BaseDrawObject):
     def __init__(self, data_in):
-        BaseDrawObject.__init__(self)
-        self.data = data_in.data
+        BaseDrawObject.__init__(self, data_in)
 
     def draw(self, painter):
         if self.isVisible():
@@ -18,11 +17,12 @@ class CircleQtObject(BaseDrawObject):
                                                 style=data['style'],
                                                 width=2))
             painter.setBrush(QtToolBox.create_brush(color=data['color']))
-            x, y = data['center']
-            painter.drawEllipse(x - data['radius'],
-                                y - data['radius'],
-                                data['radius'] * 2,
-                                data['radius'] * 2)
+            x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*data['center'])
+            radius = data['radius'] * QtToolBox.field_ctrl.ratio_screen
+            painter.drawEllipse(x - radius,
+                                y - radius,
+                                radius * 2,
+                                radius * 2)
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
