@@ -11,10 +11,6 @@ class FieldLineQtObject(BaseDrawObject):
 
     def draw(self, painter):
         if self.isVisible():
-            # Dessine la pelouze
-            painter.setBrush(QtToolBox.create_brush(color=(0, 150, 0)))
-            painter.drawRect(0, 0, 950, 650)
-
             # Dessine les lignes
             painter.setBrush(QtToolBox.create_brush(is_visible=False))
             painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
@@ -30,4 +26,4 @@ class FieldLineQtObject(BaseDrawObject):
 
     @staticmethod
     def get_datain_associated():
-        return 'field'
+        return 'field-lines'

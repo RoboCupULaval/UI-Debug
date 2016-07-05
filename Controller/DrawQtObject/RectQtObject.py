@@ -18,10 +18,14 @@ class RectQtObject(BaseDrawObject):
                                                 style=data['style'],
                                                 width=data['width']))
             painter.setBrush(QtToolBox.create_brush(data['color']))
-
-            rect_height = data['top_left'][0] - data['bottom_right'][0]
-            rect_width = data['bottom_right'][1] - data['top_left'][1]
-            painter.drawRect(*data['top_left'], rect_height, rect_width)
+            x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*data['top_left'])
+            x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*data['bottom_right'])
+            rect_height = abs(x1 - x2)
+            rect_width = abs(y1 - y2)
+            painter.drawRect(min(x1, x2),
+                             max(y1, y2),
+                             rect_height,
+                             rect_width)
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):

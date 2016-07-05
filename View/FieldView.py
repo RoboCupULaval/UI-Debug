@@ -49,17 +49,21 @@ class FieldView(QtGui.QWidget):
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.setBackground(QtToolBox.create_brush())
-        self.draw_field(painter)
+        self.draw_field_ground(painter)
         self.draw_effects(painter)
+        self.draw_field_lines(painter)
         self.draw_mobs(painter)
         painter.end()
+
+    def draw_field_lines(self, painter):
+        self.graph_draw['field-lines'].draw(painter)
 
     def draw_effects(self, painter):
         for effect in self.graph_draw['notset']:
             effect.draw(painter)
 
-    def draw_field(self, painter):
-        self.graph_draw['field'].draw(painter)
+    def draw_field_ground(self, painter):
+        self.graph_draw['field-ground'].draw(painter)
 
     def draw_mobs(self, painter):
         self.graph_mobs['ball'].draw(painter)
@@ -82,8 +86,10 @@ class FieldView(QtGui.QWidget):
         """ Initialisation des objets graphiques """
 
         # Élément graphique pour les dessins
-        self.graph_draw['field'] = self.controller.get_drawing_object('field')()
-        self.graph_draw['field'].show()
+        self.graph_draw['field-ground'] = self.controller.get_drawing_object('field-ground')()
+        self.graph_draw['field-ground'].show()
+        self.graph_draw['field-lines'] = self.controller.get_drawing_object('field-lines')()
+        self.graph_draw['field-lines'].show()
         self.graph_draw['notset'] = list()
         self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
         self.graph_draw['robots_blue'] = [list() for _ in range(6)]

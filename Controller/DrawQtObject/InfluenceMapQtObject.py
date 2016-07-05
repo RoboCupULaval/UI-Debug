@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtGui import QGraphicsItemGroup
+from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QPainter
 
 from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
 from Controller.QtToolBox import QtToolBox
@@ -10,13 +11,64 @@ __author__ = 'RoboCupULaval'
 
 
 class InfluenceMapQtObject(BaseDrawObject):
+    def __init__(self, data_in):
+        BaseDrawObject.__init__(self, data_in)
+        self._pixmap = None
+
+    def _draw_pixmap(self):
+        # Calcul de la taille des rectangles
+        width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen
+        height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen
+        self._pixmap = QPixmap(width, height)
+        painter = QPainter(self._pixmap)
+        nb_width, nb_height = self.data['size']
+        ref_x, ref_y = 0, 0
+        rect_width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen / nb_width
+        rect_height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen / nb_height
+
+        # Paramétrage du pinceau
+        painter.setPen(QtToolBox.create_pen(color=self.data['grid_color'],
+                                            style=self.data['grid_style'],
+                                            width=self.data['grid_width'],
+                                            is_hide=not self.data['has_grid']))
+
+        for nb_line, line in enumerate(self.data['field_data']):
+            for nb_col, case in enumerate(line):
+                if case > self.data['hottest_numb']:
+                    case = self.data['hottest_numb']
+                if case < self.data['coldest_numb']:
+                    case = self.data['coldest_numb']
+                rgb_value = InfluenceMapQtObject._convert_rgb_value_with_minmax(case,
+                                                                                self.data['coldest_numb'],
+                                                                                self.data['hottest_numb'],
+                                                                                self.data['coldest_color'],
+                                                                                self.data['hottest_color'])
+                # Création de la brosse
+                painter.setBrush(QtToolBox.create_brush(rgb_value))
+                painter.drawRect(ref_x + rect_width * nb_col,
+                                 ref_y + rect_height * nb_line,
+                                 rect_width,
+                                 rect_height)
+
+    def draw(self, painter):
+        if self._pixmap is None:
+            self._draw_pixmap()
+
+        if self.isVisible():
+            x = QtToolBox.field_ctrl.marge * QtToolBox.field_ctrl.ratio_screen
+            y = QtToolBox.field_ctrl.marge * QtToolBox.field_ctrl.ratio_screen
+            width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen
+            height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen
+
+            painter.drawPixmap(x, y, width, height, self._pixmap)
+
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         # TODO - Ajouter la fonctionnalité FOCUS
         # TODO - WARNING - Le flipping des axes n'est pas géré pour le moment et peu impacter les positions rectangles
         draw_data = drawing_data_in.data
 
-        # Calcul de la taille des rectanbles
+        # Calcul de la taille des rectangles
         nb_width, nb_height = draw_data['size']
         ref_x, ref_y = -(screen_width * screen_ratio) / 2, -(screen_height * screen_ratio) / 2
         rect_width = (screen_width * screen_ratio) / nb_width

@@ -8,6 +8,19 @@ __author__ = 'RoboCupULaval'
 
 
 class PointQtObject(BaseDrawObject):
+    def __init__(self, data_in):
+        BaseDrawObject.__init__(self, data_in)
+
+    def draw(self, painter):
+        if self.isVisible():
+            painter.setPen(QtToolBox.create_pen())
+            painter.setBrush(QtToolBox.create_brush(color=self.data['color']))
+            x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['point'])
+            radius = self.data['width']
+            painter.drawEllipse(x - radius,
+                                y - radius,
+                                radius * 2,
+                                radius * 2)
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
