@@ -1,9 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
+from time import time
+
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 from Controller.QtToolBox import QtToolBox
+from Controller.DrawQtObject.InfluenceMapQtObject import InfluenceMapQtObject
 
 __author__ = 'RoboCupULaval'
 
@@ -19,6 +22,7 @@ class FieldView(QtGui.QWidget):
         self.timer_screen_update = QtCore.QTimer()
         self.graph_mobs = dict()
         self.graph_draw = dict()
+        self.graph_map = None
 
         # Option
         self.option_vanishing = True
@@ -46,14 +50,32 @@ class FieldView(QtGui.QWidget):
         self.update()
 
     def paintEvent(self, e):
+        self.timeout_manager()
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.setBackground(QtToolBox.create_brush())
         self.draw_field_ground(painter)
+        self.draw_map(painter)
         self.draw_effects(painter)
         self.draw_field_lines(painter)
         self.draw_mobs(painter)
         painter.end()
+
+    def timeout_manager(self):
+        ref_time = time()
+        if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
+            self.graph_map = None
+
+        temp_list_draw = []
+        for elem in self.graph_draw['notset']:
+            if not elem.time_is_up(ref_time):
+                temp_list_draw.append(elem)
+        self.graph_draw['notset'] = temp_list_draw
+
+
+    def draw_map(self, painter):
+        if self.graph_map is not None:
+            self.graph_map.draw(painter)
 
     def draw_field_lines(self, painter):
         self.graph_draw['field-lines'].draw(painter)
@@ -165,4 +187,7 @@ class FieldView(QtGui.QWidget):
 
     def load_draw(self, draw):
         draw.show()
-        self.graph_draw['notset'].append(draw)
+        if isinstance(draw, InfluenceMapQtObject):
+            self.graph_map = draw
+        else:
+            self.graph_draw['notset'].append(draw)

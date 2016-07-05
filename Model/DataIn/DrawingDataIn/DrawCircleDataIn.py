@@ -53,7 +53,7 @@ class DrawCircleDataIn(BaseDataInDraw):
                 self.data['style'] = 'SolidLine'
 
             if 'timeout' in keys:
-                assert self.data['timeout'] <= 0, \
+                assert self.data['timeout'] >= 0, \
                     "data['timeout']: {} n'est pas valide.".format(self.data['timeout'])
             else:
                 self.data['timeout'] = 0
