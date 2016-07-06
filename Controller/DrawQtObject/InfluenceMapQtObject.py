@@ -42,16 +42,16 @@ class InfluenceMapQtObject(BaseDrawObject):
 
     def draw(self, painter):
         if self._pixmap is not None and self.isVisible():
-            x = QtToolBox.field_ctrl.marge * QtToolBox.field_ctrl.ratio_screen
-            y = QtToolBox.field_ctrl.marge * QtToolBox.field_ctrl.ratio_screen
+            x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
             width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen
             height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen
-            painter.drawImage(QRect(x, y, width, height), self._pixmap)
+            painter.drawImage(QRect(x, y, width, height),
+                              self._pixmap.mirrored(horizontal=QtToolBox.field_ctrl.is_x_axe_flipped,
+                       vertical=QtToolBox.field_ctrl.is_y_axe_flipped))
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         # TODO - Ajouter la fonctionnalité FOCUS
-        # TODO - WARNING - Le flipping des axes n'est pas géré pour le moment et peu impacter les positions rectangles
         draw_data = drawing_data_in.data
 
         # Calcul de la taille des rectangles

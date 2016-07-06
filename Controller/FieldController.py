@@ -9,7 +9,6 @@ class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
     def __init__(self):
         self.type = 0
-        # TODO : Finir position de la camera
         self.camera_position = [0, 0]
         self.camera_speed = 50
         self._cursor_last_pst = None
@@ -77,10 +76,13 @@ class FieldController(object):
             self.camera_position[0] -= move_x
             self.camera_position[1] -= move_y
             self._cursor_last_pst = x, y
-            self.camera_position[0] = min(self.camera_position[0], self.size[0] * self.ratio_screen)
-            self.camera_position[1] = min(self.camera_position[1], self.size[1] * self.ratio_screen)
-            self.camera_position[0] = max(self.camera_position[0], -self.size[0] * self.ratio_screen)
-            self.camera_position[1] = max(self.camera_position[1], -self.size[1] * self.ratio_screen)
+            self._limit_camera()
+
+    def _limit_camera(self):
+        self.camera_position[0] = min(self.camera_position[0], self.size[0] * self.ratio_screen)
+        self.camera_position[1] = min(self.camera_position[1], self.size[1] * self.ratio_screen)
+        self.camera_position[0] = max(self.camera_position[0], -self.size[0] * self.ratio_screen)
+        self.camera_position[1] = max(self.camera_position[1], -self.size[1] * self.ratio_screen)
 
     def zoom(self):
         self.ratio_screen *= 1.10
