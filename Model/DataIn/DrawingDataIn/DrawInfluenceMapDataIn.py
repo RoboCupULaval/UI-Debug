@@ -115,6 +115,12 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
             else:
                 self.data['opacity'] = 10
 
+            if 'timeout' in keys:
+                assert self.data['timeout'] >= 0, \
+                    "data['timeout']: {} n'est pas valide.".format(self.data['timeout'])
+            else:
+                self.data['timeout'] = 0
+
         except Exception as e:
             raise FormatPackageError('{}: {}'.format(type(self).__name__, e))
 

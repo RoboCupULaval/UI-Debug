@@ -1,22 +1,60 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtGui import QGraphicsItemGroup
+from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QPainter
+from PyQt4.QtGui import QImage
+from PyQt4.QtGui import QColor
+from PyQt4.QtCore import QThread
+from PyQt4.QtCore import QRect
 
-from Controller.DrawQtObject.QtToolBox import QtToolBox
-from Controller.BaseQtObject import BaseQtObject
+from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.QtToolBox import QtToolBox
 from Model.DataIn.DrawingDataIn.DrawInfluenceMapDataIn import DrawInfluenceMapDataIn
 
 __author__ = 'RoboCupULaval'
 
 
-class InfluenceMapQtObject(BaseQtObject):
+class InfluenceMapQtObject(BaseDrawObject):
+    def __init__(self, data_in):
+        BaseDrawObject.__init__(self, data_in)
+        self._pixmap = None
+        self._thread = QThread()
+        self._thread.run = self._draw_image
+        self._thread.start()
+
+
+    def _draw_image(self):
+        width, height = self.data['size']
+        image = QImage(height, width, QImage.Format_RGB16)
+        for nb_line, line in enumerate(self.data['field_data']):
+            for nb_col, case in enumerate(line):
+                if case > self.data['hottest_numb']:
+                    case = self.data['hottest_numb']
+                if case < self.data['coldest_numb']:
+                    case = self.data['coldest_numb']
+                rgb_value = InfluenceMapQtObject._convert_rgb_value_with_minmax(case,
+                                                                                self.data['coldest_numb'],
+                                                                                self.data['hottest_numb'],
+                                                                                self.data['coldest_color'],
+                                                                                self.data['hottest_color'])
+                image.setPixel(nb_line, nb_col, QColor(*rgb_value).rgb())
+        self._pixmap = image
+
+    def draw(self, painter):
+        if self._pixmap is not None and self.isVisible():
+            x = QtToolBox.field_ctrl.marge * QtToolBox.field_ctrl.ratio_screen
+            y = QtToolBox.field_ctrl.marge * QtToolBox.field_ctrl.ratio_screen
+            width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen
+            height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen
+            painter.drawImage(QRect(x, y, width, height), self._pixmap)
+
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
         # TODO - Ajouter la fonctionnalité FOCUS
         # TODO - WARNING - Le flipping des axes n'est pas géré pour le moment et peu impacter les positions rectangles
         draw_data = drawing_data_in.data
 
-        # Calcul de la taille des rectanbles
+        # Calcul de la taille des rectangles
         nb_width, nb_height = draw_data['size']
         ref_x, ref_y = -(screen_width * screen_ratio) / 2, -(screen_height * screen_ratio) / 2
         rect_width = (screen_width * screen_ratio) / nb_width
