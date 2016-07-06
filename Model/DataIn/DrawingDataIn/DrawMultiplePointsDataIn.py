@@ -46,7 +46,7 @@ class DrawMultiplePointsDataIn(BaseDataInDraw):
                 self.data['width'] = 3
 
             if 'timeout' in keys:
-                assert self.data['timeout'] <= 0, \
+                assert self.data['timeout'] >= 0, \
                     "data['timeout']: {} n'est pas valide.".format(self.data['timeout'])
             else:
                 self.data['timeout'] = 0

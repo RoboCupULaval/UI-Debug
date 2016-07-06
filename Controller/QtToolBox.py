@@ -3,6 +3,8 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
+from Controller.FieldController import FieldController
+
 __author__ = 'RoboCupULaval'
 
 
@@ -14,6 +16,8 @@ class QtToolBox:
                   'DashDotLine': Qt.DashDotDotLine,
                   'DotLine': Qt.DotLine
                   }
+
+    field_ctrl = FieldController()
 
     @staticmethod
     def create_pen(color=(0, 0, 0), style='SolidLine', width=1, is_hide=False):
@@ -28,10 +32,12 @@ class QtToolBox:
         return qt_pen
 
     @staticmethod
-    def create_brush(color=(0, 0, 0)):
+    def create_brush(color=(0, 0, 0), is_visible=True):
         """ Génère un brosse avec les paramètres entrants """
-        qt_brush = QtGui.QBrush(QtGui.QColor(*color))
-        return qt_brush
+        if is_visible:
+            return QtGui.QBrush(QtGui.QColor(*color))
+        else:
+            return Qt.NoBrush
 
     @staticmethod
     def create_line(pst_start, pst_end, pen):
