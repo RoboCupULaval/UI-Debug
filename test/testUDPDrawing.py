@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from random import randint
-from time import time
+from time import time, sleep
 from Communication.UDPCommunication import UDPSending
 
 __author__ = 'RoboCupULaval'
@@ -30,6 +30,7 @@ def test_multiple_lines():
         var2 += randint(150, 500)
     pkg['data']['style'] = 'DashLine'
     pkg['data']['width'] = 2
+    pkg['data']['timeout'] = randint(2, 10)
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
     ex.send_message(pkg)
 
@@ -42,6 +43,7 @@ def test_line():
     pkg['data']['end'] = randint(-3000, 3000), randint(-3000, 3000)
     pkg['data']['style'] = 'DashLine'
     pkg['data']['width'] = 2
+    pkg['data']['timeout'] = randint(2, 10)
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
     ex.send_message(pkg)
 
@@ -50,14 +52,15 @@ def test_influence_map():
     """ InfluenceMapTest"""
     pkg = create_basic_pkg()
     pkg['type'] = 3007
-    pkg['data']['field_data'] = [[x + y for x in range(20)] for y in range(15)]
-    pkg['data']['hottest_color'] = 255, 255, 255
-    pkg['data']['coldest_color'] = 0, 0, 0
+    pkg['data']['field_data'] = [[randint(0, 100) for x in range(120)] for y in range(180)]
+    pkg['data']['hottest_color'] = 255, 0, 0
+    pkg['data']['coldest_color'] = 0, 255, 0
     pkg['data']['has_grid'] = False
     pkg['data']['grid_width'] = 1
     pkg['data']['grid_color'] = 255, 255, 255
     pkg['data']['grid_style'] = 'SolidLine'
     pkg['data']['opacity'] = 10
+    pkg['data']['timeout'] = randint(2, 10)
     ex.send_message(pkg)
 
 
@@ -70,6 +73,7 @@ def test_circle():
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
     pkg['data']['style'] = 'SolidLine'
     pkg['data']['is_fill'] = True
+    pkg['data']['timeout'] = randint(2, 10)
     ex.send_message(pkg)
 
 
@@ -81,6 +85,7 @@ def test_rect():
     pkg['data']["bottom_right"] = pkg['data']["top_left"][0] + randint(100, 1000),pkg['data']["top_left"][1] + randint(100, 1000)
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
     pkg['data']['is_fill'] = True
+    pkg['data']['timeout'] = randint(2, 10)
     ex.send_message(pkg)
 
 
@@ -90,6 +95,7 @@ def test_point():
     pkg['type'] = 3004
     pkg['data']["point"] = randint(-3000, 3000), randint(-3000, 3000)
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
+    pkg['data']['timeout'] = randint(2, 10)
     ex.send_message(pkg)
 
 
@@ -100,6 +106,7 @@ def test_multiple_points():
     pkg['data']["points"] = [tuple([randint(-3000, 3000), randint(-3000, 3000)]) for _ in range(5)]
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
     pkg['data']['width'] = randint(2, 5)
+    pkg['data']['timeout'] = randint(2, 10)
     ex.send_message(pkg)
 
 
@@ -111,31 +118,40 @@ def test_strat():
     ex.send_message(pkg)
 
 
+def test_text(msg=''):
+    pkg = create_basic_pkg()
+    pkg['type'] = 2
+    pkg['data']['level'] = 2
+    pkg['data']['message'] = 'HelloWorld' + msg
+    ex.send_message(pkg)
+
+
 def stress_test():
     """
         Test tous les paquest :
         /!\ Éviter de tester l'influenceMap en même temps que le reste /!\
     """
     for _ in range(5):
+        #test_influence_map()
         test_circle()
         test_multiple_lines()
         test_line()
         test_rect()
         test_point()
         test_multiple_points()
+        test_tree()
+
+
+def test_tree():
+    pkg = create_basic_pkg()
+    pkg['type'] = 3009
+    pkg['data']['timeout'] = 5
+    pkg['data']['tree'] = [((0, 0), (100, 100)),
+                           ((100, 100), (200, 100)),
+                           ((100, 100), (100, 150))]
+    ex.send_message(pkg)
 
 if __name__ == '__main__':
-    '''
-    counter = 0
-    t_ref = time()
-    print('>>>> START')
-    while True:
-        if (time() - t_ref) > 1 / 60:
-            test_rect()
-            t_ref = time()
-            counter += 1
-        if counter == 100:
-            print('END <<<<')
-            break
-    '''
-    test_influence_map()
+    # stress_test()
+    test_tree()
+
