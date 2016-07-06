@@ -93,6 +93,10 @@ class MainController(QWidget):
         vanishAction.triggered.connect(self.view_screen.change_vanish_option)
         viewMenu.addAction(vanishAction)
 
+        vectorAction = QAction('Afficher Vecteur vitesse des robots', self, checkable=True)
+        vectorAction.triggered.connect(self.view_screen.change_vector_option)
+        viewMenu.addAction(vectorAction)
+
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
         nuumbAction.triggered.connect(self.view_screen.show_number_option)
         viewMenu.addAction(nuumbAction)

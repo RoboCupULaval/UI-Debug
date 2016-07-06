@@ -1,7 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
 from math import cos
+from math import atan2
 from math import sin
+from math import pi
 
 from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 from Controller.QtToolBox import QtToolBox
@@ -17,8 +19,16 @@ class RobotMob(BaseMobileObject):
         self._display_number = False
         self._display_select = False
         self._display_vector = False
-        self._vector = (0, 0)
         self._radius = 180 / 2
+
+    def show_speed_vector(self):
+        self._display_vector = True
+
+    def hide_speed_vector(self):
+        self._display_vector = False
+
+    def speed_vector_isVisible(self):
+        return self._display_vector
 
     def draw(self, painter):
         # TODO Ajouter vecteur de direction
@@ -44,6 +54,29 @@ class RobotMob(BaseMobileObject):
 
             if self._display_number:
                 painter.drawText(x + radius, y + radius * 2, str(self._id))
+            if self.speed_vector_isVisible():
+                v_x, v_y = self._speed_vector
+                x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x + v_x * 180, self._y + v_y * 180)
+                painter.setPen(QtToolBox.create_pen(color=(255, 0, 0),
+                                                    width=3))
+                painter.drawLine(x, y, x2, y2)
+                if (v_x ** 2 + v_y ** 2) > 0.05:
+                    self._draw_vector_speed(painter)
+
+    def _draw_vector_speed(self, painter):
+        v_x, v_y = self._speed_vector
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x + v_x * 180, self._y + v_y * 180)
+        angle = atan2(v_y, v_x) + pi / 2
+
+        # flèche gauche
+        arrow_x = x2 - 5 * sin(angle + pi / 4)
+        arrow_y = y2 - 5 * cos(angle + pi / 4)
+        painter.drawLine(x2, y2, arrow_x, arrow_y)
+
+        # flèche droite
+        arrow_x = x2 - 5 * sin(angle - pi / 4)
+        arrow_y = y2 - 5 * cos(angle - pi / 4)
+        painter.drawLine(x2, y2, arrow_x, arrow_y)
 
     def select(self):
         self._display_select = True

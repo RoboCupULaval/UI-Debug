@@ -12,7 +12,7 @@ __author__ = 'RoboCupULaval'
 
 
 class FieldView(QtGui.QWidget):
-    frame_rate = 60
+    frame_rate = 30
 
     def __init__(self, controller):
         QtGui.QWidget.__init__(self)
@@ -27,6 +27,7 @@ class FieldView(QtGui.QWidget):
         # Option
         self.option_vanishing = True
         self.option_show_number = False
+        self.option_show_vector = False
         self.option_target_mode = False
 
         # Targeting
@@ -132,15 +133,11 @@ class FieldView(QtGui.QWidget):
     def set_bot_pos(self, bot_id, x, y, theta):
         """ Modifie la position et l'orientation d'un robot sur la fenêtre du terrain """
         if 0 <= bot_id < 6:
-            if not self.graph_mobs['robots_yellow'][bot_id].getX() == x and \
-                    not self.graph_mobs['robots_yellow'][bot_id].getY() == y:
-                self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
-                self.graph_mobs['robots_yellow'][bot_id].setRotation(theta)
+            self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
+            self.graph_mobs['robots_yellow'][bot_id].setRotation(theta)
         elif 6 <= bot_id < 12:
-            if not self.graph_mobs['robots_blue'][bot_id - 6].getX() == x and \
-                    not self.graph_mobs['robots_blue'][bot_id - 6].getY() == y:
-                self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
-                self.graph_mobs['robots_blue'][bot_id - 6].setRotation(theta)
+            self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
+            self.graph_mobs['robots_blue'][bot_id - 6].setRotation(theta)
         self.show_bot(bot_id)
 
     def hide_ball(self):
@@ -177,6 +174,15 @@ class FieldView(QtGui.QWidget):
 
     def change_vanish_option(self):
         self.option_vanishing = not self.option_vanishing
+
+    def change_vector_option(self):
+        self.option_show_vector = not self.option_show_vector
+        for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
+            if self.option_show_vector:
+                mob.show_speed_vector()
+            else:
+                mob.hide_speed_vector()
+
 
     def update_tactic_targeting(self):
         # TODO refaire en passant par une méthode du MainController
