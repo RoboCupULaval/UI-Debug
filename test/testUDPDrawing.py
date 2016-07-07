@@ -118,7 +118,7 @@ def test_strat():
     ex.send_message(pkg)
 
 
-def test_text(msg=''):
+def test_logging(msg=''):
     pkg = create_basic_pkg()
     pkg['type'] = 2
     pkg['data']['level'] = 2
@@ -143,15 +143,42 @@ def stress_test():
 
 
 def test_tree():
+    def build_tree(n):
+        tree = []
+        last_line = [tuple([tuple([randint(-4500, 0), randint(-3000, 0)]),
+                     tuple([randint(-4500, 0), randint(-3000, 0)])])]
+        for i in range(0, n):
+            line = last_line.copy()
+            last_line.clear()
+            for node in line:
+                for x, y in node[1:]:
+                    for _ in range(2):
+                        parent = x, y
+                        child = randint(x, x + 1000), randint(y, y + 1000)
+                        new_node = parent, child
+                        last_line.append(new_node)
+                        tree.append(new_node)
+        return tree
+
+
     pkg = create_basic_pkg()
     pkg['type'] = 3009
-    pkg['data']['timeout'] = 5
-    pkg['data']['tree'] = [((0, 0), (100, 100)),
-                           ((100, 100), (200, 100)),
-                           ((100, 100), (100, 150))]
+    pkg['data']['timeout'] = randint(5, 10)
+    pkg['data']['tree'] = build_tree(5)
+    pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
+    ex.send_message(pkg)
+
+
+def test_text_draw():
+    pkg = create_basic_pkg()
+    pkg['type'] = 3008
+    pkg['data']['position'] = 0, 0
+    pkg['data']['timeout'] = randint(5, 10)
+    pkg['data']['text'] = 'HelloWorld !'
     ex.send_message(pkg)
 
 if __name__ == '__main__':
     # stress_test()
-    test_tree()
+    # test_tree()
+    test_text_draw()
 

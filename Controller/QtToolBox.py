@@ -17,7 +17,20 @@ class QtToolBox:
                   'DotLine': Qt.DotLine
                   }
 
+    font_style = {'Arial': 'SansSerif',
+                  'Courier New': 'TypeWriter',
+                  'Verdana': 'Serif'}
+
     field_ctrl = FieldController()
+
+    @staticmethod
+    def create_font(style='Arial', width=10, is_bold=False, is_italic=False):
+        font = QtGui.QFont()
+        font.setFamily(QtToolBox.font_style[style])
+        font.setBold(is_bold)
+        font.setItalic(is_italic)
+        font.setPixelSize(width)
+        return font
 
     @staticmethod
     def create_pen(color=(0, 0, 0), style='SolidLine', width=1, is_hide=False):
