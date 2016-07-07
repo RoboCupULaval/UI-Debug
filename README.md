@@ -161,6 +161,15 @@ data = {'position': tuple(int, int)     # Position de l'affichage du texte
         'has_italic': bool,             # Si le texte est en italic
         'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
         }
+
+# Type 3009 - Dessine un Arbre
+data = {'tree': list(tuple(tuple(int, int), tuple(int, int)), ...)
+                                        # Liste de toutes les arêtes
+        # === Options supplémentaires ===
+        'width': int                    # Épaisseur du trait
+        'color': tuple(int, int, int),  # Couleur RGB
+        'timeout': int}                 # Temps d'affichage en seconde (0 étant un temps infini)
+        }
         
 """ ... """
 
