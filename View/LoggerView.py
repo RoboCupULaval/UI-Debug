@@ -138,9 +138,24 @@ class LoggerView(QWidget):
             if self._model is not None:
                 messages = self._model.get_last_log(0)
                 if messages is not None:
+                    messages = list(filter(self._filter_with_checkbox, messages))
                     self._widget_logger.setPlainText('\n'.join(map(str, messages[::-1])))
         finally:
             QMutexLocker(self._mutex).unlock()
+
+    def _filter_with_checkbox(self, logging):
+        link_level_checkbox = {1: self.filter_debug,
+                               2: self.filter_info,
+                               3: self.filter_warn,
+                               4: self.filter_err,
+                               5: self.filter_crit}
+        try:
+            if link_level_checkbox[logging.data['level']].isChecked():
+                return True
+            return False
+        except Exception as e:
+            return False
+
 
     def set_model(self, model):
         if isinstance(model, DataInModel):
