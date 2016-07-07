@@ -88,6 +88,13 @@ class LoggerView(QWidget):
         self.btn_media_ctrl.clicked.connect(self.pauseEvent)
         layout_btn.addWidget(self.btn_media_ctrl)
 
+        self.btn_refresh_data = QPushButton()
+        self.btn_refresh_data.setIcon(QIcon('Img/database_refresh.png'))
+        self.btn_refresh_data.setIconSize(QSize(16, 16))
+        self.btn_refresh_data.setDisabled(True)
+        self.btn_refresh_data.clicked.connect(self.reload_all_database)
+        layout_btn.addWidget(self.btn_refresh_data)
+
         self.btn_save = QPushButton()
         self.btn_save.setIcon(QIcon('Img/disk.png'))
         self.btn_save.setIconSize(QSize(16, 16))
@@ -115,13 +122,25 @@ class LoggerView(QWidget):
         self.pause = not self.pause
         if self.pause:
             self.btn_media_ctrl.setIcon(QIcon('Img/control_play.png'))
+            self.btn_refresh_data.setDisabled(False)
             self.btn_clear.setDisabled(False)
             self.btn_save.setDisabled(False)
         else:
             self.btn_media_ctrl.setIcon(QIcon('Img/control_pause.png'))
             self.btn_clear.setDisabled(True)
+            self.btn_refresh_data.setDisabled(True)
             self.btn_save.setDisabled(True)
             self.update()
+
+    def reload_all_database(self):
+        try:
+            QMutexLocker(self._mutex).relock()
+            if self._model is not None:
+                messages = self._model.get_last_log(0)
+                if messages is not None:
+                    self._widget_logger.setPlainText('\n'.join(map(str, messages[::-1])))
+        finally:
+            QMutexLocker(self._mutex).unlock()
 
     def set_model(self, model):
         if isinstance(model, DataInModel):
