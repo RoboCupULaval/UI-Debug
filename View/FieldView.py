@@ -94,7 +94,7 @@ class FieldView(QtGui.QWidget):
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             mob.draw(painter)
 
-    def mousePressEvent(self, event):
+    def mouseDoubleClickEvent(self, event):
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             x, y = self.controller.field_handler.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.controller.model_dataout.target = (x, y)
@@ -197,3 +197,15 @@ class FieldView(QtGui.QWidget):
             self.graph_map = draw
         else:
             self.graph_draw['notset'].append(draw)
+
+    def mouseReleaseEvent(self, event):
+        QtToolBox.field_ctrl._cursor_last_pst = None
+
+    def mouseMoveEvent(self, event):
+        QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
+
+    def wheelEvent(self, event):
+        if event.delta() > 0:
+            QtToolBox.field_ctrl.zoom()
+        else:
+            QtToolBox.field_ctrl.dezoom()

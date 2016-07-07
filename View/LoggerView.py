@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QListWidget
+from PyQt4.QtGui import QTextEdit
 from PyQt4.QtGui import QHBoxLayout
 from PyQt4.QtGui import QVBoxLayout
 from PyQt4.QtGui import QPushButton
@@ -10,6 +10,10 @@ from PyQt4.QtGui import QGroupBox
 from PyQt4.QtGui import QCheckBox
 from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QFileDialog
+
+from PyQt4.QtCore import QTimer
+from PyQt4.QtCore import QMutex
+from PyQt4.QtCore import QMutexLocker
 
 from PyQt4.QtCore import QSize
 
@@ -22,14 +26,37 @@ class LoggerView(QWidget):
     def __init__(self, controller=None):
         QWidget.__init__(self, controller)
         self._controller = controller
+        self._queue_string_log = []
+        self._widget_logger = QTextEdit(self)
+
         self._model = None
         self._count = 0
+        self._max_logger_line = 10
         self.pause = False
         self.init_ui()
 
+        # Mutex
+        self._mutex = QMutex()
+
+        # Timer
+        self._timer_update = QTimer()
+        self._timer_update.timeout.connect(self.update_logger)
+        self._timer_update.start(100)
+
+    def update_logger(self):
+        if not self.pause:
+            try:
+                QMutexLocker(self._mutex).relock()
+                display_msg = self._queue_string_log + self._widget_logger.toPlainText().splitlines()
+                self._widget_logger.setPlainText('\n'.join(display_msg[:self._max_logger_line]))
+                self._queue_string_log.clear()
+            finally:
+                QMutexLocker(self._mutex).unlock()
+
+
     def init_ui(self):
         self.setFixedHeight(200)
-        self.log_queue = QListWidget(self)
+        self._widget_logger.setReadOnly(True)
         layout = QHBoxLayout()
 
         layout_ctrl = QVBoxLayout()
@@ -78,7 +105,7 @@ class LoggerView(QWidget):
 
         # Initialisation Layout
         layout.addLayout(layout_ctrl)
-        layout.addWidget(self.log_queue)
+        layout.addWidget(self._widget_logger)
 
         self.setLayout(layout)
 
@@ -105,13 +132,16 @@ class LoggerView(QWidget):
     def refresh(self):
         # TODO: Implémenter le filtre via les checkbox
         if not self.pause:
-            if self._model is not None:
-                messages = self._model.get_last_log(self._count)
-                if messages is not None:
-                    self._count += len(messages)
-                    for msg in messages:
-                        self.log_queue.addItem(str(msg))
-                    self.log_queue.scrollToBottom()
+            try:
+                QMutexLocker(self._mutex).relock()
+                if self._model is not None:
+                    messages = self._model.get_last_log(self._count)
+                    if messages is not None:
+                        self._count += len(messages)
+                        for msg in messages:
+                            self._queue_string_log.append(str(msg))
+            finally:
+                QMutexLocker(self._mutex).unlock()
 
     def get_count(self):
         return self._count
@@ -120,7 +150,7 @@ class LoggerView(QWidget):
         reply = QMessageBox.question(self, 'Suppression de la fil', 'Êtes-vous sûr de vouloir effacer la fil de'
                                      ' logging ?  ', QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
-            self.log_queue.clear()
+            self._widget_logger.clear()
 
     def save(self):
         path = QFileDialog.getSaveFileName(self, 'Enregistrer sous', '', '.txt')
