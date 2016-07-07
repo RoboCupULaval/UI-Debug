@@ -85,12 +85,14 @@ class LoggerView(QWidget):
         self.btn_media_ctrl = QPushButton()
         self.btn_media_ctrl.setIcon(QIcon('Img/control_pause.png'))
         self.btn_media_ctrl.setIconSize(QSize(16, 16))
+        self.btn_media_ctrl.setToolTip('Lecture/Pause')
         self.btn_media_ctrl.clicked.connect(self.pauseEvent)
         layout_btn.addWidget(self.btn_media_ctrl)
 
         self.btn_refresh_data = QPushButton()
         self.btn_refresh_data.setIcon(QIcon('Img/database_refresh.png'))
         self.btn_refresh_data.setIconSize(QSize(16, 16))
+        self.btn_refresh_data.setToolTip('Recharger tout')
         self.btn_refresh_data.setDisabled(True)
         self.btn_refresh_data.clicked.connect(self.reload_all_database)
         layout_btn.addWidget(self.btn_refresh_data)
@@ -98,6 +100,7 @@ class LoggerView(QWidget):
         self.btn_save = QPushButton()
         self.btn_save.setIcon(QIcon('Img/disk.png'))
         self.btn_save.setIconSize(QSize(16, 16))
+        self.btn_save.setToolTip('Sauvegarder')
         self.btn_save.setDisabled(True)
         self.btn_save.clicked.connect(self.save)
         layout_btn.addWidget(self.btn_save)
@@ -106,6 +109,7 @@ class LoggerView(QWidget):
         self.btn_clear = QPushButton()
         self.btn_clear.setIcon(QIcon('Img/table_delete.png'))
         self.btn_clear.setIconSize(QSize(16, 16))
+        self.btn_clear.setToolTip('Effacer')
         self.btn_clear.setDisabled(True)
         self.btn_clear.clicked.connect(self.clear)
         layout_btn.addWidget(self.btn_clear)
@@ -164,7 +168,6 @@ class LoggerView(QWidget):
             raise TypeError('Logger should get data in model argument.')
 
     def refresh(self):
-        # TODO: Implémenter le filtre via les checkbox
         if not self.pause:
             try:
                 QMutexLocker(self._mutex).relock()
