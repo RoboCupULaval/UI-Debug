@@ -33,14 +33,13 @@ class FieldController(object):
         return x, y, atan2(rot_y, rot_x)
 
     def convert_screen_to_real_pst(self, x, y):
-        x = (x / self.ratio_screen - self.size[0] / 2 - self.marge)
-        y = (y / self.ratio_screen - self.size[1] / 2 - self.marge)
-
+        x_2 = (x - self.camera_position[0]) / self.ratio_screen - self.size[0] / 2 - self.marge
+        y_2 = (y - self.camera_position[1]) / self.ratio_screen - self.size[1] / 2 - self.marge
         if self.is_x_axe_flipped:
-            x *= -1
+            x_2 *= -1
         if self.is_y_axe_flipped:
-            y *= -1
-        return x, y
+            y_2 *= -1
+        return x_2, y_2
 
     def flip_x_axe(self):
         # Retourne l'axe des X du terrain

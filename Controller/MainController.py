@@ -126,7 +126,8 @@ class MainController(QWidget):
         self.close()
 
     def resize_window(self):
-        self.setFixedSize(self.minimumSizeHint())
+        # self.setFixedSize(self.minimumSizeHint())
+        pass
 
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """

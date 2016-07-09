@@ -15,11 +15,9 @@ class FieldView(QtGui.QWidget):
     frame_rate = 30
 
     def __init__(self, controller):
-        QtGui.QWidget.__init__(self)
-        self.init_window()
+        QtGui.QWidget.__init__(self, controller)
         self.controller = controller
         self.last_frame = 0
-        self.timer_screen_update = QtCore.QTimer()
         self.graph_mobs = dict()
         self.graph_draw = dict()
         self.graph_map = None
@@ -33,11 +31,13 @@ class FieldView(QtGui.QWidget):
         # Targeting
         self.last_target = None
 
-        # Thread
+        # Thread Core
         self._emit_signal = QtCore.pyqtSignal
         self._mutex = QtCore.QMutex()
+        self.timer_screen_update = QtCore.QTimer()
 
         # Initialisation de l'interface
+        self.init_window()
         self.init_graph_mobs()
         self.init_view_event()
         self.show()
@@ -96,7 +96,7 @@ class FieldView(QtGui.QWidget):
 
     def mouseDoubleClickEvent(self, event):
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
-            x, y = self.controller.field_handler.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+            x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.controller.model_dataout.target = (x, y)
             self.graph_mobs['target'].setPos(x, y)
 
@@ -139,6 +139,9 @@ class FieldView(QtGui.QWidget):
             self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
             self.graph_mobs['robots_blue'][bot_id - 6].setRotation(theta)
         self.show_bot(bot_id)
+
+    def set_target_pos(self, x, y):
+        self.graph_mobs['target'].setPos(x, y)
 
     def hide_ball(self):
         """ Cache la balle dans la fenêtre de terrain """
