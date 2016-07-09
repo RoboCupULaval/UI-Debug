@@ -4,6 +4,7 @@ from time import sleep
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import Qt
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
@@ -101,6 +102,13 @@ class MainController(QWidget):
         nuumbAction.triggered.connect(self.view_screen.show_number_option)
         viewMenu.addAction(nuumbAction)
 
+        viewMenu.addSeparator()
+
+        fullscreenAction = QAction('Fenêtre en Plein écran', self, checkable=True)
+        fullscreenAction.triggered.connect(self.toggle_fullscreen)
+        fullscreenAction.setShortcut(Qt.Key_F2)
+        viewMenu.addAction(fullscreenAction)
+
         # => Menu Outil
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
         StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
@@ -166,3 +174,9 @@ class MainController(QWidget):
 
     def get_drawing_object(self, index):
         return self.draw_handler.get_specific_draw_object(index)
+
+    def toggle_fullscreen(self):
+        if not self.windowState() == Qt.WindowFullScreen:
+            self.setWindowState(Qt.WindowFullScreen)
+        else:
+            self.setWindowState(Qt.WindowActive)
