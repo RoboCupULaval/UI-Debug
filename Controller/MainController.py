@@ -27,7 +27,6 @@ class MainController(QWidget):
 
         # Création des Contrôleurs
         self.draw_handler = QtObjectFactory(self)
-        self.field_handler = FieldController()
 
         # Création des Vues
         self.main_window = MainWindow()
@@ -51,6 +50,7 @@ class MainController(QWidget):
         # Initialisation de la fenêtre
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
+        self.resize(975, 750)
 
         # Initialisation des Layouts
         # => Field | StratController (Horizontal)
@@ -128,7 +128,6 @@ class MainController(QWidget):
     def resize_window(self):
         # self.setFixedSize(self.minimumSizeHint())
         pass
-
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """
         # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement

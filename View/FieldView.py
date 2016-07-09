@@ -16,6 +16,7 @@ class FieldView(QtGui.QWidget):
 
     def __init__(self, controller):
         QtGui.QWidget.__init__(self, controller)
+        self.tool_bar = QtGui.QToolBar(self)
         self.controller = controller
         self.last_frame = 0
         self.graph_mobs = dict()
@@ -40,6 +41,7 @@ class FieldView(QtGui.QWidget):
         self.init_window()
         self.init_graph_mobs()
         self.init_view_event()
+        self.init_tool_bar()
         self.show()
 
     def init_view_event(self):
@@ -102,8 +104,29 @@ class FieldView(QtGui.QWidget):
 
     def init_window(self):
         """ Initialisation de la fenêtre du widget qui affiche le terrain"""
-        self.setFixedSize(950, 650)
-        self.setGeometry(0, 0, 950, 650)
+        #self.setFixedSize(950, 650)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+
+    def init_tool_bar(self):
+        """ Initialisation de la barre d'outils de la vue du terrain """
+        self.tool_bar.setOrientation(QtCore.Qt.Vertical)
+        self.tool_bar.autoFillBackground()
+
+        self._action_lock_camera = QtGui.QAction(self)
+        self._action_lock_camera.setToolTip('Verrouiller Caméra')
+        self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
+        self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
+        self.tool_bar.addAction(self._action_lock_camera)
+
+    def toggle_lock_camera(self):
+        QtToolBox.field_ctrl.toggle_lock_camera()
+        if QtToolBox.field_ctrl.camera_is_locked():
+            self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock.png'))
+            self._action_lock_camera.setToolTip('Déverrouiller Caméra')
+        else:
+            self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
+            self._action_lock_camera.setToolTip('Verrouiller Caméra')
+
 
     def init_graph_mobs(self):
         """ Initialisation des objets graphiques """
