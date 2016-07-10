@@ -105,3 +105,7 @@ class FieldController(object):
 
     def camera_is_locked(self):
         return self._lock_camera
+
+    def reset_camera(self):
+        self._camera_position = (0, 0)
+        self.ratio_screen = 1 / 10

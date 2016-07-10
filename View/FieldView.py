@@ -127,6 +127,9 @@ class FieldView(QtGui.QWidget):
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
             self._action_lock_camera.setToolTip('Verrouiller Caméra')
 
+    def reset_camera(self):
+        QtToolBox.field_ctrl.reset_camera()
+
 
     def init_graph_mobs(self):
         """ Initialisation des objets graphiques """

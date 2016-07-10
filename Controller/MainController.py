@@ -16,7 +16,7 @@ from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 
 from .QtObjectFactory import QtObjectFactory
-from .FieldController import FieldController
+from .QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
 
@@ -90,6 +90,28 @@ class MainController(QWidget):
         fileMenu.addAction(exitAction)
 
         # => Menu Vue
+        camMenu = viewMenu.addMenu('Camera')
+
+        resetCamAction = QAction("Réinitialiser la caméra", self)
+        resetCamAction.triggered.connect(self.view_screen.reset_camera)
+        camMenu.addAction(resetCamAction)
+
+        lockCamAction = QAction("Bloquer la caméra", self)
+        lockCamAction.triggered.connect(self.view_screen.toggle_lock_camera)
+        camMenu.addAction(lockCamAction)
+
+        camMenu.addSeparator()
+
+        flipXAction = QAction("Changer l'axe des X", self, checkable=True)
+        flipXAction.triggered.connect(self.flip_screen_x_axe)
+        camMenu.addAction(flipXAction)
+
+        flipYAction = QAction("Changer l'axe des Y", self, checkable=True)
+        flipYAction.triggered.connect(self.flip_screen_y_axe)
+        camMenu.addAction(flipYAction)
+
+        viewMenu.addSeparator()
+
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
         vanishAction.triggered.connect(self.view_screen.change_vanish_option)
         viewMenu.addAction(vanishAction)
@@ -141,7 +163,7 @@ class MainController(QWidget):
     def resize_window(self):
         # self.setFixedSize(self.minimumSizeHint())
         pass
-    
+
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """
         # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement
@@ -186,3 +208,9 @@ class MainController(QWidget):
             self.setWindowState(Qt.WindowFullScreen)
         else:
             self.setWindowState(Qt.WindowActive)
+
+    def flip_screen_x_axe(self):
+        QtToolBox.field_ctrl.flip_x_axe()
+
+    def flip_screen_y_axe(self):
+        QtToolBox.field_ctrl.flip_y_axe()
