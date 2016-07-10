@@ -50,11 +50,11 @@ class FieldController(object):
 
     def flip_x_axe(self):
         # Retourne l'axe des X du terrain
-        self.is_x_axe_flipped = not self.is_x_axe_flipped
+        self.is_y_axe_flipped = not self.is_y_axe_flipped
 
     def flip_y_axe(self):
         # Retourne l'axe des Y du terrain
-        self.is_y_axe_flipped = not self.is_y_axe_flipped
+        self.is_x_axe_flipped = not self.is_x_axe_flipped
 
     def get_top_left_to_screen(self):
         x = self.marge * self.ratio_screen + self._camera_position[0]
