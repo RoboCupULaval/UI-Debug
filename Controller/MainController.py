@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from time import sleep
+from signal import signal, SIGINT
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL
@@ -119,6 +119,7 @@ class MainController(QWidget):
         toolMenu.addAction(loggerAction)
 
     def init_signals(self):
+        signal(SIGINT, self.signal_handle)
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
 
     def update_logging(self):
@@ -133,9 +134,14 @@ class MainController(QWidget):
     def closeEvent(self, event):
         self.close()
 
+    def signal_handle(self, *args):
+        """ Responsable du traitement des signaux """
+        self.close()
+
     def resize_window(self):
         # self.setFixedSize(self.minimumSizeHint())
         pass
+    
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """
         # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement
