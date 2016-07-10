@@ -12,6 +12,9 @@ __author__ = 'RoboCupULaval'
 
 
 class FieldView(QtGui.QWidget):
+    """
+    FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
+    """
     frame_rate = 30
 
     def __init__(self, controller):
@@ -45,62 +48,9 @@ class FieldView(QtGui.QWidget):
         self.show()
 
     def init_view_event(self):
-        self.timer_screen_update.timeout.connect(self.update_custom)
+        """ Initialise les boucles de rafraîchissement des dessins """
+        self.timer_screen_update.timeout.connect(self.emit_painting_signal)
         self.timer_screen_update.start((1 / self.frame_rate) * 1000)
-
-    def update_custom(self):
-        self._emit_signal()
-        self.update()
-
-    def paintEvent(self, e):
-        self.timeout_manager()
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        painter.setBackground(QtToolBox.create_brush())
-        self.draw_field_ground(painter)
-        self.draw_map(painter)
-        self.draw_effects(painter)
-        self.draw_field_lines(painter)
-        self.draw_mobs(painter)
-        painter.end()
-
-    def timeout_manager(self):
-        ref_time = time()
-        if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
-            self.graph_map = None
-
-        temp_list_draw = []
-        for elem in self.graph_draw['notset']:
-            if not elem.time_is_up(ref_time):
-                temp_list_draw.append(elem)
-        self.graph_draw['notset'] = temp_list_draw
-
-
-    def draw_map(self, painter):
-        if self.graph_map is not None:
-            self.graph_map.draw(painter)
-
-    def draw_field_lines(self, painter):
-        self.graph_draw['field-lines'].draw(painter)
-
-    def draw_effects(self, painter):
-        for effect in self.graph_draw['notset']:
-            effect.draw(painter)
-
-    def draw_field_ground(self, painter):
-        self.graph_draw['field-ground'].draw(painter)
-
-    def draw_mobs(self, painter):
-        self.graph_mobs['ball'].draw(painter)
-        self.graph_mobs['target'].draw(painter)
-        for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
-            mob.draw(painter)
-
-    def mouseDoubleClickEvent(self, event):
-        if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
-            x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
-            self.controller.model_dataout.target = (x, y)
-            self.graph_mobs['target'].setPos(x, y)
 
     def init_window(self):
         """ Initialisation de la fenêtre du widget qui affiche le terrain"""
@@ -122,8 +72,50 @@ class FieldView(QtGui.QWidget):
         self._action_delete_draws.triggered.connect(self.delete_all_draw)
         self.tool_bar.addAction(self._action_delete_draws)
 
+    def emit_painting_signal(self):
+        """ Émet un signal pour bloquer les ressources et afficher les éléments """
+        self._emit_signal()
+        self.update()
+
+    def timeout_handler(self):
+        """ Gère la durée d'affichage des éléments avec le timeout de ces derniers """
+        ref_time = time()
+        if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
+            self.graph_map = None
+
+        temp_list_draw = []
+        for elem in self.graph_draw['notset']:
+            if not elem.time_is_up(ref_time):
+                temp_list_draw.append(elem)
+        self.graph_draw['notset'] = temp_list_draw
+
+    def draw_map(self, painter):
+        """ Dessine une InfuenceMap unique """
+        if self.graph_map is not None:
+            self.graph_map.draw(painter)
+
+    def draw_field_lines(self, painter):
+        """ Dessine les lignes du terrains """
+        self.graph_draw['field-lines'].draw(painter)
+
+    def draw_effects(self, painter):
+        """ Dessine les effets """
+        for effect in self.graph_draw['notset']:
+            effect.draw(painter)
+
+    def draw_field_ground(self, painter):
+        """ Dessine le sol du terrain """
+        self.graph_draw['field-ground'].draw(painter)
+
+    def draw_mobs(self, painter):
+        """ Dessine les objets mobiles """
+        self.graph_mobs['ball'].draw(painter)
+        self.graph_mobs['target'].draw(painter)
+        for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
+            mob.draw(painter)
 
     def toggle_lock_camera(self):
+        """ Déverrouille/Verrouille la position et le zoom de la caméra """
         QtToolBox.field_ctrl.toggle_lock_camera()
         if QtToolBox.field_ctrl.camera_is_locked():
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock.png'))
@@ -133,8 +125,8 @@ class FieldView(QtGui.QWidget):
             self._action_lock_camera.setToolTip('Verrouiller Caméra')
 
     def reset_camera(self):
+        """ Réinitialise la position et le zoom de la caméra """
         QtToolBox.field_ctrl.reset_camera()
-
 
     def init_graph_mobs(self):
         """ Initialisation des objets graphiques """
@@ -155,6 +147,11 @@ class FieldView(QtGui.QWidget):
         self.graph_mobs['target'] = self.controller.get_drawing_object('target')()
         # TODO : show // init setters
 
+    def delete_all_draw(self):
+        """ Efface tous les dessins enregistrés """
+        self.graph_map = None
+        self.graph_draw['notset'].clear()
+
     def set_ball_pos(self, x, y):
         """ Modifie la position de la balle sur la fenêtre du terrain """
         if not self.graph_mobs['ball'].getX() == x and not self.graph_mobs['ball'].getY() == y:
@@ -172,6 +169,7 @@ class FieldView(QtGui.QWidget):
         self.show_bot(bot_id)
 
     def set_target_pos(self, x, y):
+        """ Modifie la position de la cible """
         self.graph_mobs['target'].setPos(x, y)
 
     def hide_ball(self):
@@ -199,17 +197,19 @@ class FieldView(QtGui.QWidget):
             self.graph_mobs['robots_blue'][bot_id - 6].show()
 
     def show_number_option(self):
-        ''' Affiche les numéros des robots '''
+        """ Affiche les numéros des robots """
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             if mob.number_isVisible():
                 mob.hide_number()
             else:
                 mob.show_number()
 
-    def change_vanish_option(self):
+    def toggle_vanish_option(self):
+        """ Active/Désactive l'option pour afficher le vanishing sur les objets mobiles """
         self.option_vanishing = not self.option_vanishing
 
-    def change_vector_option(self):
+    def toggle_vector_option(self):
+        """ Active/Désactive l'option pour afficher les vecteurs de direction des robots """
         self.option_show_vector = not self.option_show_vector
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             if self.option_show_vector:
@@ -217,7 +217,8 @@ class FieldView(QtGui.QWidget):
             else:
                 mob.hide_speed_vector()
 
-    def update_tactic_targeting(self):
+    def auto_toggle_visible_target(self):
+        """ Met à jour la vue de la cible en fonction des onglets ouverts """
         # TODO refaire en passant par une méthode du MainController
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             self.graph_mobs['target'].show()
@@ -225,24 +226,44 @@ class FieldView(QtGui.QWidget):
             self.graph_mobs['target'].hide()
 
     def load_draw(self, draw):
+        """ Charge un dessin sur l'écran """
         draw.show()
         if isinstance(draw, InfluenceMapQtObject):
             self.graph_map = draw
         else:
             self.graph_draw['notset'].append(draw)
 
+    def mouseDoubleClickEvent(self, event):
+        """ Gère l'événement double-clic de la souris """
+        if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
+            x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+            self.controller.model_dataout.target = (x, y)
+            self.graph_mobs['target'].setPos(x, y)
+
     def mouseReleaseEvent(self, event):
+        """ Gère l'événement de relâchement de la touche de la souris """
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
+        """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
         QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
 
     def wheelEvent(self, event):
+        """ Gère l'événement de la molette de la souris """
         if event.delta() > 0:
             QtToolBox.field_ctrl.zoom()
         else:
             QtToolBox.field_ctrl.dezoom()
 
-    def delete_all_draw(self):
-        self.graph_map = None
-        self.graph_draw['notset'].clear()
+    def paintEvent(self, e):
+        """ Gère l'événement du signal pour dessiner les éléments du terrain """
+        self.timeout_handler()
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        painter.setBackground(QtToolBox.create_brush())
+        self.draw_field_ground(painter)
+        self.draw_map(painter)
+        self.draw_effects(painter)
+        self.draw_field_lines(painter)
+        self.draw_mobs(painter)
+        painter.end()
