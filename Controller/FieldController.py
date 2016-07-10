@@ -25,6 +25,10 @@ class FieldController(object):
         # Dimension du terrain
         self.marge = 250
         self.size = 9000, 6000
+        self.goal_size = 200, 1000
+        self.goal_radius = 1000
+        self.goal_line = 500
+        self.radius_center = 500
 
     def convert_real_to_scene_pst(self, x, y, theta=0.0):
         rot_x = cos(theta)
