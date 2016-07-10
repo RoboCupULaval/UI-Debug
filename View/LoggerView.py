@@ -85,12 +85,22 @@ class LoggerView(QWidget):
         self.btn_media_ctrl = QPushButton()
         self.btn_media_ctrl.setIcon(QIcon('Img/control_pause.png'))
         self.btn_media_ctrl.setIconSize(QSize(16, 16))
+        self.btn_media_ctrl.setToolTip('Lecture/Pause')
         self.btn_media_ctrl.clicked.connect(self.pauseEvent)
         layout_btn.addWidget(self.btn_media_ctrl)
+
+        self.btn_refresh_data = QPushButton()
+        self.btn_refresh_data.setIcon(QIcon('Img/database_refresh.png'))
+        self.btn_refresh_data.setIconSize(QSize(16, 16))
+        self.btn_refresh_data.setToolTip('Recharger tout')
+        self.btn_refresh_data.setDisabled(True)
+        self.btn_refresh_data.clicked.connect(self.reload_all_database)
+        layout_btn.addWidget(self.btn_refresh_data)
 
         self.btn_save = QPushButton()
         self.btn_save.setIcon(QIcon('Img/disk.png'))
         self.btn_save.setIconSize(QSize(16, 16))
+        self.btn_save.setToolTip('Sauvegarder')
         self.btn_save.setDisabled(True)
         self.btn_save.clicked.connect(self.save)
         layout_btn.addWidget(self.btn_save)
@@ -99,6 +109,7 @@ class LoggerView(QWidget):
         self.btn_clear = QPushButton()
         self.btn_clear.setIcon(QIcon('Img/table_delete.png'))
         self.btn_clear.setIconSize(QSize(16, 16))
+        self.btn_clear.setToolTip('Effacer')
         self.btn_clear.setDisabled(True)
         self.btn_clear.clicked.connect(self.clear)
         layout_btn.addWidget(self.btn_clear)
@@ -115,13 +126,40 @@ class LoggerView(QWidget):
         self.pause = not self.pause
         if self.pause:
             self.btn_media_ctrl.setIcon(QIcon('Img/control_play.png'))
+            self.btn_refresh_data.setDisabled(False)
             self.btn_clear.setDisabled(False)
             self.btn_save.setDisabled(False)
         else:
             self.btn_media_ctrl.setIcon(QIcon('Img/control_pause.png'))
             self.btn_clear.setDisabled(True)
+            self.btn_refresh_data.setDisabled(True)
             self.btn_save.setDisabled(True)
             self.update()
+
+    def reload_all_database(self):
+        try:
+            QMutexLocker(self._mutex).relock()
+            if self._model is not None:
+                messages = self._model.get_last_log(0)
+                if messages is not None:
+                    messages = list(filter(self._filter_with_checkbox, messages))
+                    self._widget_logger.setPlainText('\n'.join(map(str, messages[::-1])))
+        finally:
+            QMutexLocker(self._mutex).unlock()
+
+    def _filter_with_checkbox(self, logging):
+        link_level_checkbox = {1: self.filter_debug,
+                               2: self.filter_info,
+                               3: self.filter_warn,
+                               4: self.filter_err,
+                               5: self.filter_crit}
+        try:
+            if link_level_checkbox[logging.data['level']].isChecked():
+                return True
+            return False
+        except Exception as e:
+            return False
+
 
     def set_model(self, model):
         if isinstance(model, DataInModel):
@@ -130,7 +168,6 @@ class LoggerView(QWidget):
             raise TypeError('Logger should get data in model argument.')
 
     def refresh(self):
-        # TODO: Implémenter le filtre via les checkbox
         if not self.pause:
             try:
                 QMutexLocker(self._mutex).relock()

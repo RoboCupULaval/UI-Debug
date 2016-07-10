@@ -13,7 +13,7 @@ class FieldGroundQtObject(BaseDrawObject):
         if self.isVisible():
             # Dessine la pelouze
             painter.setBrush(QtToolBox.create_brush(color=(0, 150, 0)))
-            painter.drawRect(0, 0, 950, 650)
+            painter.drawRect(0, 0, 9500, 6500)
 
     @staticmethod
     def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):

@@ -4,6 +4,7 @@ from time import sleep
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import Qt
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
@@ -27,7 +28,6 @@ class MainController(QWidget):
 
         # Création des Contrôleurs
         self.draw_handler = QtObjectFactory(self)
-        self.field_handler = FieldController()
 
         # Création des Vues
         self.main_window = MainWindow()
@@ -51,6 +51,7 @@ class MainController(QWidget):
         # Initialisation de la fenêtre
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
+        self.resize(975, 750)
 
         # Initialisation des Layouts
         # => Field | StratController (Horizontal)
@@ -101,6 +102,13 @@ class MainController(QWidget):
         nuumbAction.triggered.connect(self.view_screen.show_number_option)
         viewMenu.addAction(nuumbAction)
 
+        viewMenu.addSeparator()
+
+        fullscreenAction = QAction('Fenêtre en Plein écran', self, checkable=True)
+        fullscreenAction.triggered.connect(self.toggle_fullscreen)
+        fullscreenAction.setShortcut(Qt.Key_F2)
+        viewMenu.addAction(fullscreenAction)
+
         # => Menu Outil
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
         StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
@@ -126,8 +134,8 @@ class MainController(QWidget):
         self.close()
 
     def resize_window(self):
-        self.setFixedSize(self.minimumSizeHint())
-
+        # self.setFixedSize(self.minimumSizeHint())
+        pass
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """
         # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement
@@ -166,3 +174,9 @@ class MainController(QWidget):
 
     def get_drawing_object(self, index):
         return self.draw_handler.get_specific_draw_object(index)
+
+    def toggle_fullscreen(self):
+        if not self.windowState() == Qt.WindowFullScreen:
+            self.setWindowState(Qt.WindowFullScreen)
+        else:
+            self.setWindowState(Qt.WindowActive)
