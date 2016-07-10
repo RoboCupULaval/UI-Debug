@@ -113,11 +113,11 @@ class MainController(QWidget):
         viewMenu.addSeparator()
 
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
-        vanishAction.triggered.connect(self.view_screen.change_vanish_option)
+        vanishAction.triggered.connect(self.view_screen.toggle_vanish_option)
         viewMenu.addAction(vanishAction)
 
         vectorAction = QAction('Afficher Vecteur vitesse des robots', self, checkable=True)
-        vectorAction.triggered.connect(self.view_screen.change_vector_option)
+        vectorAction.triggered.connect(self.view_screen.toggle_vector_option)
         viewMenu.addAction(vectorAction)
 
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
@@ -193,7 +193,7 @@ class MainController(QWidget):
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """
         try:
-            self.view_screen.update_tactic_targeting()
+            self.view_screen.auto_toggle_visible_target()
         except:
             pass
 

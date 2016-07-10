@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 
 from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
 from Controller.QtToolBox import QtToolBox
@@ -45,7 +45,7 @@ class FieldLineQtObject(BaseDrawObject):
                                          y_rad_goal - rad_width,
                                          rad_width * 2,
                                          rad_width * 2),
-                             0, 90 * 16)
+                            0, 90 * 16)
 
             y_rad_goal = y + height / 2 + QtToolBox.field_ctrl.goal_line / 2 * QtToolBox.field_ctrl.ratio_screen
             # => BotLeft
