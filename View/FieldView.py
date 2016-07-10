@@ -104,19 +104,24 @@ class FieldView(QtGui.QWidget):
 
     def init_window(self):
         """ Initialisation de la fenêtre du widget qui affiche le terrain"""
-        #self.setFixedSize(950, 650)
         self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     def init_tool_bar(self):
         """ Initialisation de la barre d'outils de la vue du terrain """
-        self.tool_bar.setOrientation(QtCore.Qt.Vertical)
-        self.tool_bar.autoFillBackground()
+        self.tool_bar.setOrientation(QtCore.Qt.Horizontal)
 
         self._action_lock_camera = QtGui.QAction(self)
         self._action_lock_camera.setToolTip('Verrouiller Caméra')
         self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
         self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
         self.tool_bar.addAction(self._action_lock_camera)
+
+        self._action_delete_draws = QtGui.QAction(self)
+        self._action_delete_draws.setToolTip('Effacer tous les dessins')
+        self._action_delete_draws.setIcon(QtGui.QIcon('Img/map_delete.png'))
+        self._action_delete_draws.triggered.connect(self.delete_all_draw)
+        self.tool_bar.addAction(self._action_delete_draws)
+
 
     def toggle_lock_camera(self):
         QtToolBox.field_ctrl.toggle_lock_camera()
@@ -212,7 +217,6 @@ class FieldView(QtGui.QWidget):
             else:
                 mob.hide_speed_vector()
 
-
     def update_tactic_targeting(self):
         # TODO refaire en passant par une méthode du MainController
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
@@ -238,3 +242,7 @@ class FieldView(QtGui.QWidget):
             QtToolBox.field_ctrl.zoom()
         else:
             QtToolBox.field_ctrl.dezoom()
+
+    def delete_all_draw(self):
+        self.graph_map = None
+        self.graph_draw['notset'].clear()
