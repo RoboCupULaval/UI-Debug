@@ -48,8 +48,7 @@ class DataInModel(object):
     def _get_data_in(self):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
         while True:
-            QMutexLocker(self._mutex)
-            self._mutex.lock()
+            QMutexLocker(self._mutex).relock()
             package = self._udp_receiver.get_last_data()
             try:
                 if package is not None:
@@ -71,7 +70,7 @@ class DataInModel(object):
                             self.show_draw(self._data_draw['notset'][-1])
             finally:
                 self._last_packet = package[0] if package is not None else None
-                self._mutex.unlock()
+                QMutexLocker(self._mutex).unlock()
 
     def _append_logging_datain(self, data):
         self._data_logging.append(data)
@@ -89,8 +88,7 @@ class DataInModel(object):
 
     def _get_data(self, type=0):
         # TODO: A refactor
-        QMutexLocker(self._mutex)
-        self._mutex.lock()
+        QMutexLocker(self._mutex).relock()
         try:
             if type == 1:
                 if len(self._data_logging):
@@ -106,7 +104,7 @@ class DataInModel(object):
             else:
                 raise NotImplemented
         finally:
-            self._mutex.unlock()
+            QMutexLocker(self._mutex).unlock()
 
     def get_last_message(self):
         try:
