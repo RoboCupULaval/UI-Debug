@@ -147,8 +147,8 @@ class MainController(QWidget):
     def update_logging(self):
         self.view_logger.refresh()
 
-    def save_logging(self, path):
-        self.model_datain.save_logging(path)
+    def save_logging(self, path, texte):
+        self.model_datain.save_logging(path, texte)
 
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')

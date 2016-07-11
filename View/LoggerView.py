@@ -191,7 +191,7 @@ class LoggerView(QWidget):
 
     def save(self):
         path = QFileDialog.getSaveFileName(self, 'Enregistrer sous', '', '.txt')
-        self._controller.save_logging(path)
+        self._controller.save_logging(path, self._widget_logger.toPlainText())
 
     def show_hide(self):
         if self.isVisible():

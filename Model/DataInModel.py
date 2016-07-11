@@ -134,6 +134,7 @@ class DataInModel(object):
         if isinstance(draw, BaseDataInDraw):
             self._controller.add_draw_on_screen(draw)
 
-    def save_logging(self, path):
-        # TODO: Enregistrer les logs dans un fichier texte
-        print(path)
+    def save_logging(self, path, texte):
+        with open(path, 'w') as f:
+            texte = '##### LOGGING FROM UI #####\n' + texte
+            f.write(texte)
