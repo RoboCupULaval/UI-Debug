@@ -90,3 +90,12 @@ class DataInObject:
 
 class FormatPackageError(Exception):
     pass
+
+
+def catch_format_error(funct):
+    def error_caught(*args):
+        try:
+            return funct(*args)
+        except Exception as e:
+            raise FormatPackageError('{}'.format(e))
+    return error_caught

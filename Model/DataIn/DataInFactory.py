@@ -46,33 +46,15 @@ class DataInFactory(object):
         for key, item in sorted(kargs.items()):
             if numb:
                 bad_log.data['message'] += '\n'
-                numb = True
+                numb = False
             bad_log.data['message'] += '{}: {}'.format(key, item)
+            numb = True
         return bad_log
-
-    def reconstruction_handler(self, data_in):
-        # TODO - Revoir reconstructor
-        if data_in['type'] == 2000:
-            if not data_in['data']['id'] in self._storage.keys():
-                self._storage[data_in['data']['id']] = dict()
-            self._storage[data_in['data']['id']][data_in['data']['piece_number']] = data_in['data']['binary']
-            if len(self._storage[data_in['data']['id']].keys()) == data_in['data']['total_pieces']:
-                binary = b''
-                for numb in range(1, data_in['data']['total_pieces'] + 1):
-                    binary += self._storage[data_in['data']['id']][numb]
-                result = pickle.loads(binary)
-                return result
-            else:
-                return None
-        else:
-            return data_in
 
     def get_datain_object(self, data_in):
         """ Génère un DataIn en fonction du paquet reçu """
         try:
             DataInObject.package_is_valid(data_in)
-            data_in = self.reconstruction_handler(data_in)
-            if data_in is not None:
-                return self._catalog_from_type_to_data_in_object[data_in['type']](data_in)
+            return self._catalog_from_type_to_data_in_object[data_in['type']](data_in)
         except Exception as e:
             return self.get_msg_bad_format(FormatPackageError=str(e), PaquetBrute=data_in)
