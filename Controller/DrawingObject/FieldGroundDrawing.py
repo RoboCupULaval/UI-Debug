@@ -1,13 +1,13 @@
 # Under MIT License, see LICENSE.txt
-from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
 
 
-class FieldGroundQtObject(BaseDrawObject):
+class FieldGroundDrawing(BaseDrawingObject):
     def __init__(self):
-        BaseDrawObject.__init__(self)
+        BaseDrawingObject.__init__(self)
 
     def draw(self, painter):
         if self.isVisible():
@@ -21,11 +21,6 @@ class FieldGroundQtObject(BaseDrawObject):
             painter.setBrush(QtToolBox.create_brush(color=(0, 125, 0)))
             for i in range(0, 10, 2):
                 painter.drawRect(x + width * i, y, width, height)
-
-
-    @staticmethod
-    def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
-        return
 
     @staticmethod
     def get_datain_associated():

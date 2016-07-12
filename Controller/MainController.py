@@ -15,7 +15,7 @@ from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 
-from .QtObjectFactory import QtObjectFactory
+from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
@@ -27,7 +27,7 @@ class MainController(QWidget):
         QWidget.__init__(self)
 
         # Création des Contrôleurs
-        self.draw_handler = QtObjectFactory(self)
+        self.draw_handler = DrawingObjectFactory(self)
 
         # Création des Vues
         self.main_window = MainWindow()

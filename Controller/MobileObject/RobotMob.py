@@ -106,9 +106,5 @@ class RobotMob(BaseMobileObject):
         return self._display_effects
 
     @staticmethod
-    def get_qt_item(drawing_data_in):
-        return
-
-    @staticmethod
     def get_datain_associated():
         return 'robot'

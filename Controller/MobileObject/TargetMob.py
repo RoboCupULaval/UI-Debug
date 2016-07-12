@@ -20,10 +20,6 @@ class TargetMob(BaseMobileObject):
             painter.drawPixmap(x - size / 2, y - size / 2, size, size, self._pixmap_obj)
 
     @staticmethod
-    def get_qt_item(drawing_data_in):
-        pass
-
-    @staticmethod
     def get_datain_associated():
         return 'target'
 

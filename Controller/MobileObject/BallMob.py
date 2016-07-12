@@ -25,9 +25,5 @@ class BallMob(BaseMobileObject):
                                 radius * 2)
 
     @staticmethod
-    def get_qt_item(drawing_data_in):
-        return
-
-    @staticmethod
     def get_datain_associated():
         return 'ball'

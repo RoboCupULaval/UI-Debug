@@ -1,15 +1,15 @@
 # Under MIT License, see LICENSE.txt
 
-from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
 from Model.DataIn.DrawingDataIn.DrawTextDataIn import DrawTextDataIn
 
 __author__ = 'RoboCupULaval'
 
 
-class RectQtObject(BaseDrawObject):
+class TextDrawing(BaseDrawingObject):
     def __init__(self, data_in):
-        BaseDrawObject.__init__(self, data_in)
+        BaseDrawingObject.__init__(self, data_in)
 
     def draw(self, painter):
         # TODO Add alignment
@@ -25,11 +25,6 @@ class RectQtObject(BaseDrawObject):
 
             x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*data['position'])
             painter.drawText(x, y, data['text'])
-
-
-    @staticmethod
-    def get_qt_item(drawing_data_in):
-        raise NotImplementedError()
 
     @staticmethod
     def get_datain_associated():

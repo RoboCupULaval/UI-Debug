@@ -6,7 +6,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 from Controller.QtToolBox import QtToolBox
-from Controller.DrawQtObject.InfluenceMapQtObject import InfluenceMapQtObject
+from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 
 __author__ = 'RoboCupULaval'
 
@@ -228,7 +228,7 @@ class FieldView(QtGui.QWidget):
     def load_draw(self, draw):
         """ Charge un dessin sur l'écran """
         draw.show()
-        if isinstance(draw, InfluenceMapQtObject):
+        if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
         else:
             self.graph_draw['notset'].append(draw)

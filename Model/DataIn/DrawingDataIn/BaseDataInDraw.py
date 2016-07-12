@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from Controller.BaseQtObject import BaseQtObject
+from Controller.AbstractDrawingObject import AbstractDrawingObject
 from Model.DataIn.DataInObject import DataInObject
 
 __author__ = 'RoboCupULaval'
@@ -8,7 +8,7 @@ __author__ = 'RoboCupULaval'
 
 class BaseDataInDraw(DataInObject):
     """ Données entrantes pour les paquets de données pour dessiner """
-    line_style_allowed = BaseQtObject.line_style_allowed
+    line_style_allowed = AbstractDrawingObject.line_style_allowed
 
     def __init__(self, data_in):
         DataInObject.__init__(self, data_in)
