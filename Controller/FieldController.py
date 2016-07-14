@@ -26,8 +26,8 @@ class FieldController(object):
         # TODO - Possible de récupérer ces informations dans les paquets des frames
         # TODO - Faire que ces paramètres soient paramétrables depuis le GUI
         self.marge = 250
-        self.size = 9000, 6000
-        self.goal_size = 200, 1000
+        self.size = [9000, 6000]
+        self.goal_size = [200, 1000]
         self.goal_radius = 1000
         self.goal_line = 500
         self.radius_center = 500

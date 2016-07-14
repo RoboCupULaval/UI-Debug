@@ -61,9 +61,8 @@ class FieldView(QtGui.QWidget):
         self.tool_bar.setOrientation(QtCore.Qt.Horizontal)
 
         self._action_lock_camera = QtGui.QAction(self)
-        self._action_lock_camera.setToolTip('Verrouiller Caméra')
-        self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
         self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
+        self.toggle_lock_camera()
         self.tool_bar.addAction(self._action_lock_camera)
 
         self._action_delete_draws = QtGui.QAction(self)
