@@ -222,7 +222,6 @@ class MainController(QWidget):
         self.param_w = QDialog()
         param_w = self.param_w
         param_w.setWindowTitle('Paramètres')
-        print(self.width(), self.height())
         param_w.move(self.width() * 0.9, self.height() * 0.9)
 
         layout_main = QVBoxLayout()

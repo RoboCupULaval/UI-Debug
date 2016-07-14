@@ -25,6 +25,7 @@ class FieldView(QtGui.QWidget):
         self.graph_mobs = dict()
         self.graph_draw = dict()
         self.graph_map = None
+        self.setCursor(QtCore.Qt.OpenHandCursor)
 
         # Option
         self.option_vanishing = True
@@ -117,9 +118,11 @@ class FieldView(QtGui.QWidget):
         """ Déverrouille/Verrouille la position et le zoom de la caméra """
         QtToolBox.field_ctrl.toggle_lock_camera()
         if QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.ArrowCursor)
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock.png'))
             self._action_lock_camera.setToolTip('Déverrouiller Caméra')
         else:
+            self.setCursor(QtCore.Qt.OpenHandCursor)
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
             self._action_lock_camera.setToolTip('Verrouiller Caméra')
 
@@ -234,6 +237,8 @@ class FieldView(QtGui.QWidget):
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """
+        if not QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.ClosedHandCursor)
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.controller.model_dataout.target = (x, y)
@@ -241,10 +246,14 @@ class FieldView(QtGui.QWidget):
 
     def mouseReleaseEvent(self, event):
         """ Gère l'événement de relâchement de la touche de la souris """
+        if not QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
         """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
+        if not QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.ClosedHandCursor)
         QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
 
     def wheelEvent(self, event):
