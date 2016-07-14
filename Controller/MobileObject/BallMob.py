@@ -11,6 +11,9 @@ class BallMob(BaseMobileObject):
         BaseMobileObject.__init__(self, x, y)
         self._radius = 43 / 2
 
+    def get_radius(self):
+        return self._radius * QtToolBox.field_ctrl.ratio_field_mobs
+
     def draw(self, painter):
         if self.isVisible():
             painter.setBrush(QtToolBox.create_brush(color=(255, 100, 0)))
@@ -18,15 +21,11 @@ class BallMob(BaseMobileObject):
                                                 style='SolidLine',
                                                 width=1))
             x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y)
-            radius = self._radius * QtToolBox.field_ctrl.ratio_screen
+            radius = self.get_radius() * QtToolBox.field_ctrl.ratio_screen
             painter.drawEllipse(x - radius,
                                 y - radius,
                                 radius * 2,
                                 radius * 2)
-
-    @staticmethod
-    def get_qt_item(drawing_data_in):
-        return
 
     @staticmethod
     def get_datain_associated():

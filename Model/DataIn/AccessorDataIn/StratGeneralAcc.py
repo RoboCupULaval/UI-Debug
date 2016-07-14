@@ -1,14 +1,14 @@
 # Under MIT License, see LICENSE.txt
 
 from Model.DataIn.DataInObject import FormatPackageError
-from Model.DataIn.StratDataIn.BaseDataInStrat import BaseDataInStrat
+from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
 
 __author__ = 'RoboCupULaval'
 
 
-class StratGeneral(BaseDataInStrat):
+class StratGeneralAcc(BaseDataAccessor):
     def __init__(self, data_in):
-        BaseDataInStrat.__init__(self, data_in)
+        BaseDataAccessor.__init__(self, data_in)
         self._format_data()
 
     def _check_obligatory_data(self):

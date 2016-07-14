@@ -21,6 +21,9 @@ class RobotMob(BaseMobileObject):
         self._display_vector = False
         self._radius = 180 / 2
 
+    def get_radius(self):
+        return self._radius * QtToolBox.field_ctrl.ratio_field_mobs
+
     def show_speed_vector(self):
         self._display_vector = True
 
@@ -48,7 +51,7 @@ class RobotMob(BaseMobileObject):
                                                     style='SolidLine',
                                                     width=1))
 
-            radius = self._radius * QtToolBox.field_ctrl.ratio_screen
+            radius = self.get_radius() * QtToolBox.field_ctrl.ratio_screen
             painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
             painter.drawLine(x, y, x + cos(theta) * radius, y + sin(theta) * radius)
 
@@ -104,10 +107,6 @@ class RobotMob(BaseMobileObject):
 
     def effects_isVisible(self):
         return self._display_effects
-
-    @staticmethod
-    def get_qt_item(drawing_data_in):
-        return
 
     @staticmethod
     def get_datain_associated():

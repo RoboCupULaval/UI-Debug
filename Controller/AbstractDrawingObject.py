@@ -7,7 +7,7 @@ from Controller.QtToolBox import QtToolBox
 __author__ = 'RoboCupULaval'
 
 
-class BaseQtObject(object):
+class AbstractDrawingObject(object):
     line_style_allowed = QtToolBox.line_style
 
     def __init__(self):
@@ -21,13 +21,6 @@ class BaseQtObject(object):
 
     def show(self):
         self._visible = True
-
-    @staticmethod
-    @abstractmethod
-    def get_qt_item(drawing_data_in):
-        """ Génère un object Qt en fonction des données du DrawDataIn """
-        raise NotImplementedError()
-
 
     @staticmethod
     @abstractmethod

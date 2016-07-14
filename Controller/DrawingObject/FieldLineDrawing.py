@@ -2,15 +2,15 @@
 
 from PyQt4 import QtCore
 
-from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
 
 
-class FieldLineQtObject(BaseDrawObject):
+class FieldLineDrawing(BaseDrawingObject):
     def __init__(self):
-        BaseDrawObject.__init__(self)
+        BaseDrawingObject.__init__(self)
 
     def draw(self, painter):
         if self.isVisible():
@@ -90,10 +90,6 @@ class FieldLineQtObject(BaseDrawObject):
             radius = QtToolBox.field_ctrl.radius_center * QtToolBox.field_ctrl.ratio_screen
             x, y = x + width / 2, y + height / 2
             painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
-
-    @staticmethod
-    def get_qt_item(drawing_data_in, screen_ratio=0.1, screen_width=9000, screen_height=6000):
-        return
 
     @staticmethod
     def get_datain_associated():

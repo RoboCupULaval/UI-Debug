@@ -3,14 +3,14 @@
 from math import cos, sin, atan2
 from time import time
 from abc import abstractmethod
-from Controller.BaseQtObject import BaseQtObject
+from Controller.AbstractDrawingObject import AbstractDrawingObject
 
 __author__ = 'jbecirovski'
 
 
-class BaseMobileObject(BaseQtObject):
+class BaseMobileObject(AbstractDrawingObject):
     def __init__(self, x=-9999, y=-9999, theta=0):
-        BaseQtObject.__init__(self)
+        AbstractDrawingObject.__init__(self)
         self._x = x
         self._y = y
         self._last_vector_time = time()

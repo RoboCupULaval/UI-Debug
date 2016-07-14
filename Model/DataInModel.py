@@ -11,7 +11,9 @@ from PyQt4.QtCore import QMutex
 from Communication.UDPCommunication import UDPReceiving
 from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
 from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
-from Model.DataIn.StratDataIn.BaseDataInStrat import BaseDataInStrat
+from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
+from Model.DataIn.AccessorDataIn.StratGeneralAcc import StratGeneralAcc
+from Model.DataIn.AccessorDataIn.VeryLargeDataAcc import VeryLargeDataAcc
 from .DataIn.DataInFactory import DataInFactory
 
 __author__ = 'RoboCupULaval'
@@ -48,30 +50,38 @@ class DataInModel(object):
     def _get_data_in(self):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
         while True:
-            QMutexLocker(self._mutex)
-            self._mutex.lock()
+            QMutexLocker(self._mutex).relock()
             package = self._udp_receiver.get_last_data()
             try:
-                if package is not None:
-                    data_in = pickle.loads(package[1])
-                    if data_in is not None:
-                        data = self._datain_factory.get_datain_object(data_in)
-                        if isinstance(data, BaseDataInLog):
-                            self._append_logging_datain(data)
-                        elif isinstance(data, BaseDataInStrat):
-                            if self._data_STA is not None:
-                                for key in data.data.keys():
-                                    self._data_STA.data[key] = data.data[key]
-                            else:
-                                self._data_STA = data
-                            self._controller.view_controller.refresh_strat(self._data_STA.data['strategy'])
-                            self._controller.view_controller.refresh_tactic(self._data_STA.data['tactic'])
-                        elif isinstance(data, BaseDataInDraw):
-                            self._data_draw['notset'].append(data)
-                            self.show_draw(self._data_draw['notset'][-1])
+                self._extract_and_distribute_data(package)
             finally:
                 self._last_packet = package[0] if package is not None else None
-                self._mutex.unlock()
+                QMutexLocker(self._mutex).unlock()
+
+    def _extract_and_distribute_data(self, package):
+        if package is not None:
+            if isinstance(package, (tuple, list)):
+                package = package[1]
+            data_in = pickle.loads(package)
+            if data_in is not None:
+                data = self._datain_factory.get_datain_object(data_in)
+                if isinstance(data, BaseDataInLog):
+                    self._append_logging_datain(data)
+                elif isinstance(data, BaseDataAccessor):
+                    if isinstance(data, StratGeneralAcc):
+                        if self._data_STA is not None:
+                            for key in data.data.keys():
+                                self._data_STA.data[key] = data.data[key]
+                        else:
+                            self._data_STA = data
+                        self._controller.view_controller.refresh_strat(self._data_STA.data['strategy'])
+                        self._controller.view_controller.refresh_tactic(self._data_STA.data['tactic'])
+                    elif data.__class__.__name__ == VeryLargeDataAcc.__name__:
+                        data.store()
+                        self._extract_and_distribute_data(data.rebuild())
+                elif isinstance(data, BaseDataInDraw):
+                    self._data_draw['notset'].append(data)
+                    self.show_draw(self._data_draw['notset'][-1])
 
     def _append_logging_datain(self, data):
         self._data_logging.append(data)
@@ -89,8 +99,7 @@ class DataInModel(object):
 
     def _get_data(self, type=0):
         # TODO: A refactor
-        QMutexLocker(self._mutex)
-        self._mutex.lock()
+        QMutexLocker(self._mutex).relock()
         try:
             if type == 1:
                 if len(self._data_logging):
@@ -106,7 +115,7 @@ class DataInModel(object):
             else:
                 raise NotImplemented
         finally:
-            self._mutex.unlock()
+            QMutexLocker(self._mutex).unlock()
 
     def get_last_message(self):
         try:
@@ -136,6 +145,7 @@ class DataInModel(object):
         if isinstance(draw, BaseDataInDraw):
             self._controller.add_draw_on_screen(draw)
 
-    def save_logging(self, path):
-        # TODO: Enregistrer les logs dans un fichier texte
-        print(path)
+    def save_logging(self, path, texte):
+        with open(path, 'w') as f:
+            texte = '##### LOGGING FROM UI #####\n' + texte
+            f.write(texte)

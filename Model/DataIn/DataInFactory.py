@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+
+import pickle
 from .DataInObject import DataInObject
 
 __author__ = 'RoboCupULaval'
@@ -7,6 +9,7 @@ __author__ = 'RoboCupULaval'
 class DataInFactory(object):
     def __init__(self):
         self._name = DataInFactory.__name__
+        self._storage = dict()
         self._catalog_from_type_to_data_in_object = dict()
         self._init_object_catalog()
 
@@ -43,8 +46,9 @@ class DataInFactory(object):
         for key, item in sorted(kargs.items()):
             if numb:
                 bad_log.data['message'] += '\n'
-                numb = True
+                numb = False
             bad_log.data['message'] += '{}: {}'.format(key, item)
+            numb = True
         return bad_log
 
     def get_datain_object(self, data_in):

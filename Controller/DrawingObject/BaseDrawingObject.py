@@ -1,14 +1,14 @@
 # Under GNU GPLv3 License, see LICENSE.txt
 
 from time import time
-from Controller.BaseQtObject import BaseQtObject
+from Controller.AbstractDrawingObject import AbstractDrawingObject
 
 __author__ = 'jbecirovski'
 
 
-class BaseDrawObject(BaseQtObject):
+class BaseDrawingObject(AbstractDrawingObject):
     def __init__(self, data_in=None):
-        BaseQtObject.__init__(self)
+        AbstractDrawingObject.__init__(self)
         try:
             if data_in.data['timeout'] == 0:
                 self._timeout = None

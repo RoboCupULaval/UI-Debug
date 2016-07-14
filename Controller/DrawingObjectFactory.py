@@ -1,22 +1,22 @@
 # Under MIT License, see LICENSE.txt
 
-from Controller.DrawQtObject.BaseDrawObject import BaseDrawObject
+from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 
 __author__ = 'RoboCupULaval'
 
 
-class QtObjectFactory:
+class DrawingObjectFactory:
     def __init__(self, controller):
         self._controller = controller
-        self._name = QtObjectFactory.__name__
+        self._name = DrawingObjectFactory.__name__
         self._catalog_from_datain_class_to_qt_object = dict()
         self._init_object_catalog()
 
     def _init_object_catalog(self):
         """ Initialise le catalogue d'objet pour la factory """
         self._import_data_in_classes()
-        for subclass in BaseDrawObject.__subclasses__() + BaseMobileObject.__subclasses__():
+        for subclass in BaseDrawingObject.__subclasses__() + BaseMobileObject.__subclasses__():
             self._catalog_from_datain_class_to_qt_object[subclass.get_datain_associated()] = subclass
 
     def _import_data_in_classes(self):
@@ -25,7 +25,7 @@ class QtObjectFactory:
         from os.path import isfile, join, isdir
         from importlib.machinery import SourceFileLoader
 
-        path_current_dir = __file__.replace(QtObjectFactory.__name__ + '.py', '')
+        path_current_dir = __file__.replace(DrawingObjectFactory.__name__ + '.py', '')
         folders_inside_current_dir = [f for f in listdir(path_current_dir)
                                       if isdir(join(path_current_dir, f)) and f.count('_') == 0]
         for folder in folders_inside_current_dir:

@@ -6,7 +6,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 from Controller.QtToolBox import QtToolBox
-from Controller.DrawQtObject.InfluenceMapQtObject import InfluenceMapQtObject
+from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 
 __author__ = 'RoboCupULaval'
 
@@ -61,9 +61,8 @@ class FieldView(QtGui.QWidget):
         self.tool_bar.setOrientation(QtCore.Qt.Horizontal)
 
         self._action_lock_camera = QtGui.QAction(self)
-        self._action_lock_camera.setToolTip('Verrouiller Caméra')
-        self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
         self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
+        self.toggle_lock_camera()
         self.tool_bar.addAction(self._action_lock_camera)
 
         self._action_delete_draws = QtGui.QAction(self)
@@ -228,7 +227,7 @@ class FieldView(QtGui.QWidget):
     def load_draw(self, draw):
         """ Charge un dessin sur l'écran """
         draw.show()
-        if isinstance(draw, InfluenceMapQtObject):
+        if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
         else:
             self.graph_draw['notset'].append(draw)
