@@ -13,6 +13,7 @@ class BaseDataInDraw(DataInObject):
     def __init__(self, data_in):
         DataInObject.__init__(self, data_in)
         self.data = data_in['data']
+        self.filter = data_in['link']
 
     @staticmethod
     def _colorRGB_is_valid(color):

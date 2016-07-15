@@ -24,6 +24,8 @@ class FieldView(QtGui.QWidget):
         self.last_frame = 0
         self.graph_mobs = dict()
         self.graph_draw = dict()
+        self.draw_filterable = dict()
+        self.list_filter = ['notset']
         self.graph_map = None
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
@@ -79,6 +81,7 @@ class FieldView(QtGui.QWidget):
 
     def timeout_handler(self):
         """ Gère la durée d'affichage des éléments avec le timeout de ces derniers """
+        # TODO - Faire timeout pour le reste des éléments
         ref_time = time()
         if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
             self.graph_map = None
@@ -100,8 +103,14 @@ class FieldView(QtGui.QWidget):
 
     def draw_effects(self, painter):
         """ Dessine les effets """
-        for effect in self.graph_draw['notset']:
-            effect.draw(painter)
+        if 'notset' in self.list_filter:
+            for effect in self.graph_draw['notset']:
+                effect.draw(painter)
+
+        for key, list_effect in self.draw_filterable.items():
+            if key in self.list_filter:
+                for effect in list_effect:
+                    effect.draw(painter)
 
     def draw_field_ground(self, painter):
         """ Dessine le sol du terrain """
@@ -153,6 +162,7 @@ class FieldView(QtGui.QWidget):
         """ Efface tous les dessins enregistrés """
         self.graph_map = None
         self.graph_draw['notset'].clear()
+        self.draw_filterable = dict()
 
     def set_ball_pos(self, x, y):
         """ Modifie la position de la balle sur la fenêtre du terrain """
@@ -233,7 +243,10 @@ class FieldView(QtGui.QWidget):
         if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
         else:
-            self.graph_draw['notset'].append(draw)
+            if draw.filter in self.draw_filterable.keys():
+                self.draw_filterable[draw.filter].append(draw)
+            else:
+                self.draw_filterable[draw.filter] = [draw]
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """

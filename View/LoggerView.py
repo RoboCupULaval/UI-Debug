@@ -119,7 +119,6 @@ class LoggerView(QWidget):
         layout.addWidget(self._widget_logger)
 
         self.setLayout(layout)
-
         self.hide()
 
     def pauseEvent(self):
@@ -159,7 +158,6 @@ class LoggerView(QWidget):
             return False
         except Exception as e:
             return False
-
 
     def set_model(self, model):
         if isinstance(model, DataInModel):
