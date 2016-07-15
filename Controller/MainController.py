@@ -11,6 +11,7 @@ from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
 
 from View.FieldView import FieldView
+from View.FilterCtrlView import FilterCtrlView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
@@ -35,6 +36,7 @@ class MainController(QWidget):
         self.view_logger = LoggerView(self)
         self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
+        self.view_filter = FilterCtrlView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -57,6 +59,7 @@ class MainController(QWidget):
         # => Field | StratController (Horizontal)
         sub_layout = QHBoxLayout()
         sub_layout.addWidget(self.view_screen)
+        sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
 
         # => Menu | SubLayout | Logger (Vertical)
@@ -138,6 +141,10 @@ class MainController(QWidget):
         viewMenu.addAction(fullscreenAction)
 
         # => Menu Outil
+        filterAction = QAction('Afficher le filtre des dessins', self, checkable=True)
+        filterAction.triggered.connect(self.view_filter.show_hide)
+        toolMenu.addAction(filterAction)
+
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
         StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
         toolMenu.addAction(StrategyControllerAction)
@@ -222,7 +229,6 @@ class MainController(QWidget):
         self.param_w = QDialog()
         param_w = self.param_w
         param_w.setWindowTitle('Paramètres')
-        print(self.width(), self.height())
         param_w.move(self.width() * 0.9, self.height() * 0.9)
 
         layout_main = QVBoxLayout()
@@ -357,3 +363,14 @@ class MainController(QWidget):
 
     def flip_screen_y_axe(self):
         QtToolBox.field_ctrl.flip_y_axe()
+
+    def get_list_of_filters(self):
+        name_filter = set(self.view_screen.draw_filterable.keys())
+        name_filter.add('None')
+        return name_filter
+
+    def set_filter(self, list_filter):
+        self.view_screen.list_filter = list_filter
+
+    def load_new_filters(self, list_filter):
+        self.view_filter.load_new_filter(list_filter)

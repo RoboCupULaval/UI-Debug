@@ -68,10 +68,8 @@ class DataInObject:
             assert 'link' in keys, \
                 "package['link'] 'link' n'existe pas."
             if data_in['link'] is not None:
-                assert isinstance(data_in['link'], int), \
+                assert isinstance(data_in['link'], (int, str)), \
                     "paquet['link']: {} n'a pas le bon format (int).".format(type(data_in['link']))
-                assert 0 <= data_in['link'] < 12, \
-                    "paquet['link']: {} n'a pas la bonne valeur (0 <= link < 12)".format(data_in['link'])
             else:
                 assert data_in['link'] is None, \
                     "paquet['link']: {} n'a pas le bon format (None).".format(type(data_in['link']))

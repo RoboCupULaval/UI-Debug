@@ -17,6 +17,7 @@ class BaseDrawingObject(AbstractDrawingObject):
         except Exception as e:
             self._timeout = None
         self.data = data_in if data_in is None else data_in.data
+        self.filter = data_in if data_in is None else str(data_in.filter)
 
     def time_is_up(self, p_time):
         if self._timeout is None:

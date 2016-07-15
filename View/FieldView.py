@@ -24,7 +24,10 @@ class FieldView(QtGui.QWidget):
         self.last_frame = 0
         self.graph_mobs = dict()
         self.graph_draw = dict()
+        self.draw_filterable = dict()
+        self.list_filter = ['notset']
         self.graph_map = None
+        self.setCursor(QtCore.Qt.OpenHandCursor)
 
         # Option
         self.option_vanishing = True
@@ -78,6 +81,7 @@ class FieldView(QtGui.QWidget):
 
     def timeout_handler(self):
         """ Gère la durée d'affichage des éléments avec le timeout de ces derniers """
+        # TODO - Faire timeout pour le reste des éléments
         ref_time = time()
         if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
             self.graph_map = None
@@ -87,6 +91,13 @@ class FieldView(QtGui.QWidget):
             if not elem.time_is_up(ref_time):
                 temp_list_draw.append(elem)
         self.graph_draw['notset'] = temp_list_draw
+
+        for key, list_effects in self.draw_filterable.items():
+            temp_list_draw = []
+            for effect in list_effects:
+                if not effect.time_is_up(ref_time):
+                    temp_list_draw.append(effect)
+            self.draw_filterable[key] = temp_list_draw
 
     def draw_map(self, painter):
         """ Dessine une InfuenceMap unique """
@@ -99,8 +110,14 @@ class FieldView(QtGui.QWidget):
 
     def draw_effects(self, painter):
         """ Dessine les effets """
-        for effect in self.graph_draw['notset']:
-            effect.draw(painter)
+        if 'notset' in self.list_filter:
+            for effect in self.graph_draw['notset']:
+                effect.draw(painter)
+
+        for key, list_effect in self.draw_filterable.items():
+            if key in self.list_filter:
+                for effect in list_effect:
+                    effect.draw(painter)
 
     def draw_field_ground(self, painter):
         """ Dessine le sol du terrain """
@@ -117,9 +134,11 @@ class FieldView(QtGui.QWidget):
         """ Déverrouille/Verrouille la position et le zoom de la caméra """
         QtToolBox.field_ctrl.toggle_lock_camera()
         if QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.ArrowCursor)
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock.png'))
             self._action_lock_camera.setToolTip('Déverrouiller Caméra')
         else:
+            self.setCursor(QtCore.Qt.OpenHandCursor)
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
             self._action_lock_camera.setToolTip('Verrouiller Caméra')
 
@@ -150,6 +169,7 @@ class FieldView(QtGui.QWidget):
         """ Efface tous les dessins enregistrés """
         self.graph_map = None
         self.graph_draw['notset'].clear()
+        self.draw_filterable = dict()
 
     def set_ball_pos(self, x, y):
         """ Modifie la position de la balle sur la fenêtre du terrain """
@@ -230,10 +250,15 @@ class FieldView(QtGui.QWidget):
         if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
         else:
-            self.graph_draw['notset'].append(draw)
+            if draw.filter in self.draw_filterable.keys():
+                self.draw_filterable[draw.filter].append(draw)
+            else:
+                self.draw_filterable[draw.filter] = [draw]
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """
+        if not QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.ClosedHandCursor)
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.controller.model_dataout.target = (x, y)
@@ -241,10 +266,14 @@ class FieldView(QtGui.QWidget):
 
     def mouseReleaseEvent(self, event):
         """ Gère l'événement de relâchement de la touche de la souris """
+        if not QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
         """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
+        if not QtToolBox.field_ctrl.camera_is_locked():
+            self.setCursor(QtCore.Qt.ClosedHandCursor)
         QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
 
     def wheelEvent(self, event):

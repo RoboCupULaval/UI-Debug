@@ -39,7 +39,6 @@ class DrawingObjectFactory:
         try:
             return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__](data_draw)
         except Exception as e:
-            print(type(e).__name__, e)
             msg = "Problème lors de la création de l'objet Qt avec " + str(e)
             self._controller.add_logging_message(self._name, msg, level=3)
 
