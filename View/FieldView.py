@@ -25,7 +25,7 @@ class FieldView(QtGui.QWidget):
         self.graph_mobs = dict()
         self.graph_draw = dict()
         self.draw_filterable = dict()
-        self.list_filter = ['notset']
+        self.list_filter = ['None']
         self.graph_map = None
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
@@ -86,12 +86,6 @@ class FieldView(QtGui.QWidget):
         if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
             self.graph_map = None
 
-        temp_list_draw = []
-        for elem in self.graph_draw['notset']:
-            if not elem.time_is_up(ref_time):
-                temp_list_draw.append(elem)
-        self.graph_draw['notset'] = temp_list_draw
-
         for key, list_effects in self.draw_filterable.items():
             temp_list_draw = []
             for effect in list_effects:
@@ -101,7 +95,7 @@ class FieldView(QtGui.QWidget):
 
     def draw_map(self, painter):
         """ Dessine une InfuenceMap unique """
-        if self.graph_map is not None:
+        if self.graph_map is not None and 'None' in self.list_filter:
             self.graph_map.draw(painter)
 
     def draw_field_lines(self, painter):
@@ -110,10 +104,6 @@ class FieldView(QtGui.QWidget):
 
     def draw_effects(self, painter):
         """ Dessine les effets """
-        if 'notset' in self.list_filter:
-            for effect in self.graph_draw['notset']:
-                effect.draw(painter)
-
         for key, list_effect in self.draw_filterable.items():
             if key in self.list_filter:
                 for effect in list_effect:
@@ -154,7 +144,6 @@ class FieldView(QtGui.QWidget):
         self.graph_draw['field-ground'].show()
         self.graph_draw['field-lines'] = self.controller.get_drawing_object('field-lines')()
         self.graph_draw['field-lines'].show()
-        self.graph_draw['notset'] = list()
         self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
         self.graph_draw['robots_blue'] = [list() for _ in range(6)]
 
@@ -168,7 +157,6 @@ class FieldView(QtGui.QWidget):
     def delete_all_draw(self):
         """ Efface tous les dessins enregistrés """
         self.graph_map = None
-        self.graph_draw['notset'].clear()
         self.draw_filterable = dict()
 
     def set_ball_pos(self, x, y):
