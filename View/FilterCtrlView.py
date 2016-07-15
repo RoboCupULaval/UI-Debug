@@ -72,7 +72,7 @@ class FilterCtrlView(QtGui.QWidget):
                     self._layout_v.removeWidget(widget)
                     del widget
             except Exception as e:
-                print(e)
+                pass
 
     def reset_layout(self):
         """ Efface les widgets contenu dans le layout """

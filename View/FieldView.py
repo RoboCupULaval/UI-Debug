@@ -92,6 +92,13 @@ class FieldView(QtGui.QWidget):
                 temp_list_draw.append(elem)
         self.graph_draw['notset'] = temp_list_draw
 
+        for key, list_effects in self.draw_filterable.items():
+            temp_list_draw = []
+            for effect in list_effects:
+                if not effect.time_is_up(ref_time):
+                    temp_list_draw.append(effect)
+            self.draw_filterable[key] = temp_list_draw
+
     def draw_map(self, painter):
         """ Dessine une InfuenceMap unique """
         if self.graph_map is not None:
