@@ -121,17 +121,19 @@ class MainController(QWidget):
 
         viewMenu.addSeparator()
 
+        botMenu = viewMenu.addMenu('Robot')
+
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
         vanishAction.triggered.connect(self.view_screen.toggle_vanish_option)
-        viewMenu.addAction(vanishAction)
+        botMenu.addAction(vanishAction)
 
         vectorAction = QAction('Afficher Vecteur vitesse des robots', self, checkable=True)
         vectorAction.triggered.connect(self.view_screen.toggle_vector_option)
-        viewMenu.addAction(vectorAction)
+        botMenu.addAction(vectorAction)
 
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
         nuumbAction.triggered.connect(self.view_screen.show_number_option)
-        viewMenu.addAction(nuumbAction)
+        botMenu.addAction(nuumbAction)
 
         viewMenu.addSeparator()
 
@@ -141,7 +143,7 @@ class MainController(QWidget):
         viewMenu.addAction(fullscreenAction)
 
         # => Menu Outil
-        filterAction = QAction('Afficher le filtre des dessins', self, checkable=True)
+        filterAction = QAction('Filtre pour dessins', self, checkable=True)
         filterAction.triggered.connect(self.view_filter.show_hide)
         toolMenu.addAction(filterAction)
 
@@ -149,7 +151,7 @@ class MainController(QWidget):
         StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
         toolMenu.addAction(StrategyControllerAction)
 
-        loggerAction = QAction('Afficher le Logger', self,  checkable=True)
+        loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
 
