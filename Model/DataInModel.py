@@ -57,6 +57,7 @@ class DataInModel(object):
             finally:
                 self._last_packet = package[0] if package is not None else None
                 QMutexLocker(self._mutex).unlock()
+                sleep(0.01)
 
     def _extract_and_distribute_data(self, package):
         if package is not None:
