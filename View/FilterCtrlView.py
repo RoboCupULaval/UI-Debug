@@ -78,7 +78,7 @@ class FilterCtrlView(QtGui.QWidget):
         """ Efface les widgets contenu dans le layout """
         for i in range(self._layout_v.count()):
             self._layout_v.removeWidget(self._layout_v.itemAt(i))
-        self._layout_v.addWidget(QtGui.QLabel('Sélectionner les filtres à afficher: '))
+        self._layout_v.addWidget(QtGui.QLabel('Filtre dessin: '))
 
     def get_checked_box(self):
         """ Récupère la liste des filtres sélectionnés """
