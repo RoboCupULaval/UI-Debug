@@ -15,6 +15,7 @@ from View.FilterCtrlView import FilterCtrlView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
+from View.ParamView import ParamView
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -37,6 +38,7 @@ class MainController(QWidget):
         self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
         self.view_filter = FilterCtrlView(self)
+        self.view_param = ParamView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -89,7 +91,7 @@ class MainController(QWidget):
 
         # => Menu Fichier
         paramAction = QAction('Paramètres', self)
-        paramAction.triggered.connect(self.show_param)
+        paramAction.triggered.connect(self.view_param.show)
         fileMenu.addAction(paramAction)
 
         fileMenu.addSeparator()
@@ -154,142 +156,6 @@ class MainController(QWidget):
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
-
-    def _apply_param(self):
-        is_wrong = False
-        style_bad = "QLineEdit {background: rgb(255, 100, 100)}"
-        style_good = "QLineEdit {background: rgb(255, 255, 255)}"
-
-        try:
-            self.form_field_width.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.size[0] = int(self.form_field_width.text())
-        except Exception as e:
-            self.form_field_width.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_field_height.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.size[1] = int(self.form_field_height.text())
-        except Exception as e:
-            self.form_field_height.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_width.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_size[0] = int(self.form_goal_width.text())
-        except Exception as e:
-            self.form_goal_width.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_height.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_size[1] = int(self.form_goal_height.text())
-        except Exception as e:
-            self.form_goal_height.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_center_radius.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.radius_center = int(self.form_center_radius.text())
-        except Exception as e:
-            self.form_center_radius.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_radius.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_radius = int(self.form_goal_radius.text())
-        except Exception as e:
-            self.form_goal_radius.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_line.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_line = int(self.form_goal_line.text())
-        except Exception as e:
-            self.form_goal_line.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_ratio_mobs.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.ratio_field_mobs = float(self.form_ratio_mobs.text())
-        except Exception as e:
-            self.form_ratio_mobs.setStyleSheet(style_bad)
-            is_wrong = True
-
-        if is_wrong:
-            return False
-        else:
-            return True
-
-    def _apply_param_and_leave(self):
-        if self._apply_param():
-            self.param_w.close()
-
-    def show_param(self):
-        # TODO - Mettre des onglets pour les différentes sections
-        # Paramètres fenêtres
-        self.param_w = QDialog()
-        param_w = self.param_w
-        param_w.setWindowTitle('Paramètres')
-        param_w.move(self.width() * 0.9, self.height() * 0.9)
-
-        layout_main = QVBoxLayout()
-        param_w.setLayout(layout_main)
-
-        # Changement des dimensions du terrain
-        group_field = QGroupBox('Dimensions')
-        layout_main.addWidget(group_field)
-        layout_field = QFormLayout()
-        group_field.setLayout(layout_field)
-
-        # => Taille du terrain (Longueur / Hauteur)
-        layout_field.addRow(QLabel('\nDimension du Terrain'))
-        self.form_field_width = QLineEdit(str(QtToolBox.field_ctrl.size[0]))
-        layout_field.addRow(QLabel('largeur :'), self.form_field_width)
-        self.form_field_height = QLineEdit(str(QtToolBox.field_ctrl.size[1]))
-        layout_field.addRow(QLabel('hauteur :'), self.form_field_height)
-
-        # => Taille du but (Longueur / Hauteur)
-        layout_field.addRow(QLabel('\nDimension des Buts'))
-        self.form_goal_width = QLineEdit(str(QtToolBox.field_ctrl.goal_size[0]))
-        layout_field.addRow(QLabel('largeur :'), self.form_goal_width)
-        self.form_goal_height = QLineEdit(str(QtToolBox.field_ctrl.goal_size[1]))
-        layout_field.addRow(QLabel('hauteur :'), self.form_goal_height)
-
-        # => Taille de la zone de réparation (Rayon / Ligne)
-        layout_field.addRow(QLabel('\nZone des buts'))
-        self.form_goal_radius = QLineEdit(str(QtToolBox.field_ctrl.goal_radius))
-        layout_field.addRow(QLabel('rayon :'), self.form_goal_radius)
-        self.form_goal_line = QLineEdit(str(QtToolBox.field_ctrl.goal_line))
-        layout_field.addRow(QLabel('hauteur :'), self.form_goal_line)
-
-        # => Taille de la zone centrale (Rayon)
-        layout_field.addRow(QLabel('\nRayon central'))
-        self.form_center_radius = QLineEdit(str(QtToolBox.field_ctrl.radius_center))
-        layout_field.addRow(QLabel('rayon :'), self.form_center_radius)
-
-        # Changement de ratio Mobs / Terrain
-        layout_field.addRow(QLabel('\nRatio Terrain/Mobs'))
-        self.form_ratio_mobs = QLineEdit(str(QtToolBox.field_ctrl.ratio_field_mobs))
-        layout_field.addRow(QLabel('ratio :'), self.form_ratio_mobs)
-
-        # Bas de fenêtre
-        layout_bottom = QHBoxLayout()
-        layout_main.addLayout(layout_bottom)
-        # => Bouton OK
-        but_ok = QPushButton('Ok')
-        but_ok.clicked.connect(self._apply_param_and_leave)
-        layout_bottom.addWidget(but_ok)
-        # => Bouton Annuler
-        but_cancel = QPushButton('Annuler')
-        but_cancel.clicked.connect(param_w.close)
-        layout_bottom.addWidget(but_cancel)
-        # => Bouton Appliquer
-        but_apply = QPushButton('Appliquer')
-        but_apply.clicked.connect(self._apply_param)
-        layout_bottom.addWidget(but_apply)
-
-        param_w.exec_()
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
