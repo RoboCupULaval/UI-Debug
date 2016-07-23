@@ -8,7 +8,6 @@ from PyQt4.QtCore import QThread
 from PyQt4.QtCore import QMutexLocker
 from PyQt4.QtCore import QMutex
 
-from Communication.UDPCommunication import UDPReceiving
 from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
 from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
 from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
@@ -23,7 +22,7 @@ class DataInModel(object):
     def __init__(self, controller=None):
         # Initialisation
         self._controller = controller
-        self._udp_receiver = UDPReceiving()
+        self._udp_receiver = None
         self._datain_factory = DataInFactory()
         self._last_packet = None
         self._data_logging = list()
@@ -43,17 +42,23 @@ class DataInModel(object):
         self._data_draw['notset'] = list()
         self._data_draw['robots_yellow'] = [list() for _ in range(6)]
         self._data_draw['robots_blue'] = [list() for _ in range(6)]
-        self._udp_receiver.start()
         self._data_recovery.run = self._get_data_in
         self._data_recovery.start()
+
+    def setup_udp_server(self, udp_server):
+        self._udp_receiver = udp_server
+        self._udp_receiver.start()
 
     def _get_data_in(self):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
         while True:
             QMutexLocker(self._mutex).relock()
-            package = self._udp_receiver.get_last_data()
+            package = None
             try:
+                package = self._udp_receiver.get_last_data()
                 self._extract_and_distribute_data(package)
+            except AttributeError:
+                pass
             finally:
                 self._last_packet = package[0] if package is not None else None
                 QMutexLocker(self._mutex).unlock()

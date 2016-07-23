@@ -1,9 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import socket, pickle
-from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QMutex
-from PyQt4.QtCore import QMutexLocker
+from PyQt4 import QtNetwork, QtGui, QtCore
 
 __author__ = 'RoboCupULaval'
 
@@ -19,49 +17,50 @@ class UDPSending(object):
         self._sock.sendto(binaire, (self._ip, self._port))
 
 
-class UDPReceiving(object):
-    def __init__(self, ip='localhost', port=20021):
-        # Paramètres de connexion
-        self._num = 0
-        self._ip = ip
-        self._port = port
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._thread = QThread()
-        self._mutex = QMutex()
-        self._thread.run = self._run
+class UDPServer(QtCore.QThread):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.prnt = parent
+        self._udp_socket = QtNetwork.QUdpSocket()
+        self._udp_socket.bind(QtNetwork.QHostAddress.LocalHost, 20021)
+        self._udp_socket.readyRead.connect(self.read_udp)
+        self.connect(self._udp_socket,
+                     QtCore.SIGNAL('readyRead()'),
+                     self,
+                     QtCore.SIGNAL('read_upd()'))
 
-        # Données
-        #self._data = deque(maxlen=100)
+        self.STOP = False
+        self._mutex = QtCore.QMutex()
+        self._num = 0
         self._data = []
 
-    def start(self):
-        """ Lance le serveur UDP à l'adresse et au port indiqué """
-        self._sock.bind((self._ip, self._port))
-        self._thread.start()
-
-    def _run(self):
-        """ Boucle de réception de données """
+    def run(self):
+        """ Connexion et autres """
         while True:
-            try:
-                data, addr = self._sock.recvfrom(65565)
-                QMutexLocker(self._mutex)
-                self._mutex.lock()
-                if not len(self._data) or not data == self._data[-1]:
-                    data = self._num, data
-                    self._data.append(data)
-                    self._num += 1
-            except Exception as e:
-                print(type(e).__name__, str(e))
-            finally:
-                self._mutex.unlock()
+            if self._udp_socket is not None and \
+               self._udp_socket.state() == QtNetwork.QAbstractSocket.BoundState:
+                self._udp_socket.waitForReadyRead(1000)
+            else:
+                self.msleep(100)
+            if self.STOP and self._udp_socket is not None:
+                self._udp_socket.close()
+                break
+
+    def stop(self):
+        QtCore.QMutexLocker(self._mutex).relock()
+        self.STOP = True
+        QtCore.QMutexLocker(self._mutex).unlock()
+
+    def read_udp(self):
+        while self._udp_socket.hasPendingDatagrams():
+            datagram, host, port = self._udp_socket.readDatagram(self._udp_socket.pendingDatagramSize())
+            self._data.append(datagram)
+            self._num += 1
 
     def get_last_data(self):
         """ Requête externe afin d'avoir accès aux données récupérées """
         raw_data = None
-        QMutexLocker(self._mutex)
-        self._mutex.lock()
         try:
             raw_data = self._data.pop(0)
         finally:
-            self._mutex.unlock()
             return raw_data

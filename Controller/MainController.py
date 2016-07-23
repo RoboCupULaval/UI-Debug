@@ -17,6 +17,8 @@ from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 from View.ParamView import ParamView
 
+from Communication.UDPCommunication import UDPServer
+
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
 
@@ -30,6 +32,9 @@ class MainController(QWidget):
 
         # Création des Contrôleurs
         self.draw_handler = DrawingObjectFactory(self)
+
+        # Communication
+        self.network_data_in = UDPServer(self)
 
         # Création des Vues
         self.main_window = MainWindow()
@@ -49,7 +54,6 @@ class MainController(QWidget):
         self.init_main_window()
         self.init_menubar()
         self.init_signals()
-        self.resize_window()
 
     def init_main_window(self):
         # Initialisation de la fenêtre
@@ -74,6 +78,7 @@ class MainController(QWidget):
 
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
+        self.model_datain.setup_udp_server(self.network_data_in)
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -90,6 +95,7 @@ class MainController(QWidget):
         helpMenu.addAction(helpAction)
 
         # => Menu Fichier
+
         paramAction = QAction('Paramètres', self)
         paramAction.triggered.connect(self.view_param.show)
         fileMenu.addAction(paramAction)
