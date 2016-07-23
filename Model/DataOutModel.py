@@ -6,7 +6,7 @@ from Communication.UDPCommunication import UDPSending
 __author__ = 'RoboCupULaval'
 
 
-class DataOutModel(object):
+class DataOutModel:
     def __init__(self, controller=None):
         self._controller = controller
         self._name = 'UI'

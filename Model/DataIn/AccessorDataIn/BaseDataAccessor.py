@@ -9,5 +9,5 @@ __author__ = 'RoboCupULaval'
 
 class BaseDataAccessor(DataInObject):
     def __init__(self, data_in):
-        DataInObject.__init__(self, data_in)
+        super().__init__(data_in)
         self.data = data_in['data']

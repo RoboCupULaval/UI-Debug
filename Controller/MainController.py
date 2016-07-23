@@ -28,7 +28,7 @@ __author__ = 'RoboCupULaval'
 class MainController(QWidget):
     # TODO: Dissocier Controller de la fenêtre principale
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
 
         # Création des Contrôleurs
         self.draw_handler = DrawingObjectFactory(self)
@@ -146,7 +146,7 @@ class MainController(QWidget):
         viewMenu.addSeparator()
 
         fullscreenAction = QAction('Fenêtre en Plein écran', self, checkable=True)
-        fullscreenAction.triggered.connect(self.toggle_fullscreen)
+        fullscreenAction.triggered.connect(self.toggle_full_screen)
         fullscreenAction.setShortcut(Qt.Key_F2)
         viewMenu.addAction(fullscreenAction)
 
@@ -171,7 +171,7 @@ class MainController(QWidget):
         self.view_logger.refresh()
 
     def save_logging(self, path, texte):
-        self.model_datain.save_logging(path, texte)
+        self.model_datain.write_logging_file(path, texte)
 
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')
@@ -221,30 +221,38 @@ class MainController(QWidget):
             pass
 
     def add_logging_message(self, name, message, level=2):
+        """ Ajoute un message de logging typé """
         self.model_datain.add_logging(name, message, level=level)
 
     def get_drawing_object(self, index):
+        """ Récupère un dessin spécifique """
         return self.draw_handler.get_specific_draw_object(index)
 
-    def toggle_fullscreen(self):
+    def toggle_full_screen(self):
+        """ Déclenche le plein écran """
         if not self.windowState() == Qt.WindowFullScreen:
             self.setWindowState(Qt.WindowFullScreen)
         else:
             self.setWindowState(Qt.WindowActive)
 
     def flip_screen_x_axe(self):
+        """ Bascule l'axe des X de l'écran """
         QtToolBox.field_ctrl.flip_x_axe()
 
     def flip_screen_y_axe(self):
+        """ Bascule l'axe des Y de l'écran """
         QtToolBox.field_ctrl.flip_y_axe()
 
     def get_list_of_filters(self):
+        """ Récupère la liste des filtres d'affichage """
         name_filter = set(self.view_screen.draw_filterable.keys())
         name_filter.add('None')
         return name_filter
 
-    def set_filter(self, list_filter):
+    def set_list_of_filters(self, list_filter):
+        """ Assigne une liste de filtres d'affichage """
         self.view_screen.list_filter = list_filter
 
     def load_new_filters(self, list_filter):
+        """ Charge les nouveaux filtres """
         self.view_filter.load_new_filter(list_filter)

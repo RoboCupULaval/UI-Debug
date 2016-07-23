@@ -6,7 +6,7 @@ from .DataInObject import DataInObject
 __author__ = 'RoboCupULaval'
 
 
-class DataInFactory(object):
+class DataInFactory:
     def __init__(self):
         self._name = DataInFactory.__name__
         self._storage = dict()

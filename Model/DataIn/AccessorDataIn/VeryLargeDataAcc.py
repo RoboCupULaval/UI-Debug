@@ -10,7 +10,7 @@ class VeryLargeDataAcc(BaseDataAccessor):
     __waiting_pieces = dict()
 
     def __init__(self, data_in):
-        BaseDataAccessor.__init__(self, data_in)
+        super().__init__(data_in)
         self._format_data()
 
     def store(self):

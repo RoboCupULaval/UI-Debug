@@ -20,21 +20,26 @@ __author__ = 'RoboCupULaval'
 
 class DataInModel(object):
     def __init__(self, controller=None):
-        # Initialisation
         self._controller = controller
-        self._udp_receiver = None
-        self._datain_factory = DataInFactory()
-        self._last_packet = None
+
+        # Stockage de données
         self._data_logging = list()
         self._data_config = list()
         self._data_draw = dict()
         self._data_STA = None
+
+        # Système interne
+        self._datain_factory = DataInFactory()
         self._mutex = QMutex()
         self._lock = Lock()
         self._data_recovery = QThread()
-
         self._start_time = time()
 
+        # Réseau
+        self._udp_receiver = None
+        self._last_packet = None
+
+        # Initialisations
         self._initialization()
 
     def _initialization(self):
@@ -46,6 +51,7 @@ class DataInModel(object):
         self._data_recovery.start()
 
     def setup_udp_server(self, udp_server):
+        """ Installer le serveur UDP """
         self._udp_receiver = udp_server
         self._udp_receiver.start()
 
@@ -72,7 +78,7 @@ class DataInModel(object):
             if data_in is not None:
                 data = self._datain_factory.get_datain_object(data_in)
                 if isinstance(data, BaseDataInLog):
-                    self._append_logging_datain(data)
+                    self._store_data_logging(data)
                 elif isinstance(data, BaseDataAccessor):
                     if isinstance(data, StratGeneralAcc):
                         if self._data_STA is not None:
@@ -89,7 +95,8 @@ class DataInModel(object):
                     self._data_draw['notset'].append(data)
                     self.show_draw(self._data_draw['notset'][-1])
 
-    def _append_logging_datain(self, data):
+    def _store_data_logging(self, data):
+        """ Stock les données de logging """
         self._data_logging.append(data)
         self._controller.update_logging()
 
@@ -100,8 +107,7 @@ class DataInModel(object):
                    'link': None,
                    'data': {'level': level, 'message': message}
                    }
-        self._append_logging_datain(self._datain_factory.get_datain_object(data_in))
-
+        self._store_data_logging(self._datain_factory.get_datain_object(data_in))
 
     def _get_data(self, type=0):
         # TODO: A refactor
@@ -142,16 +148,20 @@ class DataInModel(object):
             return None
 
     def get_last_log(self, index=0):
+        """ Récupère les derniers logging"""
         if len(self._data_logging):
             return self._data_logging[index:]
         else:
             return None
 
     def show_draw(self, draw):
+        """ Afficher le dessin sur la fenêtre du terrain """
         if isinstance(draw, BaseDataInDraw):
             self._controller.add_draw_on_screen(draw)
 
-    def save_logging(self, path, texte):
+    @staticmethod
+    def write_logging_file(path, text):
+        """ Écrit le logging dans un fichier texte sur le path déterminé """
         with open(path, 'w') as f:
-            texte = '##### LOGGING FROM UI #####\n' + texte
-            f.write(texte)
+            text = '##### LOGGING FROM UI #####\n' + text
+            f.write(text)

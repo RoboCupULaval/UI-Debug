@@ -26,13 +26,11 @@ class DataInObject:
         """ Vérifie les données optionnelles """
         raise NotImplementedError()
 
+    @catch_format_error
     def _format_data(self):
         """ Vérifie les données et complète les données manquantes avec des valeurs par défauts """
-        try:
-            self._check_obligatory_data()
-            self._check_optional_data()
-        except Exception as e:
-            raise FormatPackageError(e)
+        self._check_obligatory_data()
+        self._check_optional_data()
 
     @staticmethod
     @abstractmethod
@@ -41,56 +39,57 @@ class DataInObject:
         raise NotImplementedError()
 
     @staticmethod
+    @catch_format_error
     def package_is_valid(data_in):
-        try:
-            assert isinstance(data_in, dict), \
-                "package: {} n'est pas un disctionnaire.".format(type(data_in))
-            keys = data_in.keys()
-            assert 'name' in keys, \
-                "package['name'] 'name' n'existe pas."
-            assert isinstance(data_in['name'], str), \
-                "paquet['name']: {} n'a pas le bon format (str).".format(type(data_in['name']))
+        assert isinstance(data_in, dict), \
+            "package: {} n'est pas un disctionnaire.".format(type(data_in))
+        keys = data_in.keys()
+        assert 'name' in keys, \
+            "package['name'] 'name' n'existe pas."
+        assert isinstance(data_in['name'], str), \
+            "paquet['name']: {} n'a pas le bon format (str).".format(type(data_in['name']))
 
-            assert 'type' in keys, \
-                "package['type'] 'type' n'existe pas."
-            assert isinstance(data_in['type'], int), \
-                "paquet['type']: {} n'a pas le bon format (int).".format(type(data_in['type']))
-            assert 0 <= data_in['type'] < 7000, \
-                "paquet['type']: {} n'a pas la bonne valeur (0 <= type < 7000)".format(data_in['type'])
+        assert 'type' in keys, \
+            "package['type'] 'type' n'existe pas."
+        assert isinstance(data_in['type'], int), \
+            "paquet['type']: {} n'a pas le bon format (int).".format(type(data_in['type']))
+        assert 0 <= data_in['type'] < 7000, \
+            "paquet['type']: {} n'a pas la bonne valeur (0 <= type < 7000)".format(data_in['type'])
 
-            assert 'version' in keys, \
-                "package['version'] 'version' n'existe pas."
-            assert isinstance(data_in['version'], str), \
-                "paquet['version']: {} n'a pas le bon format (str).".format(type(data_in['version']))
-            assert data_in['version'] == __version__, \
-                "paquet['version']: {} n'a pas la bonne valeur (version = {})".format(data_in['version'], __version__)
+        assert 'version' in keys, \
+            "package['version'] 'version' n'existe pas."
+        assert isinstance(data_in['version'], str), \
+            "paquet['version']: {} n'a pas le bon format (str).".format(type(data_in['version']))
+        assert data_in['version'] == __version__, \
+            "paquet['version']: {} n'a pas la bonne valeur (version = {})".format(data_in['version'], __version__)
 
-            assert 'link' in keys, \
-                "package['link'] 'link' n'existe pas."
-            if data_in['link'] is not None:
-                assert isinstance(data_in['link'], (int, str)), \
-                    "paquet['link']: {} n'a pas le bon format (int).".format(type(data_in['link']))
-            else:
-                assert data_in['link'] is None, \
-                    "paquet['link']: {} n'a pas le bon format (None).".format(type(data_in['link']))
+        assert 'link' in keys, \
+            "package['link'] 'link' n'existe pas."
+        if data_in['link'] is not None:
+            assert isinstance(data_in['link'], (int, str)), \
+                "paquet['link']: {} n'a pas le bon format (int).".format(type(data_in['link']))
+        else:
+            assert data_in['link'] is None, \
+                "paquet['link']: {} n'a pas le bon format (None).".format(type(data_in['link']))
 
-            assert 'data' in keys, \
-                "package['data'] 'data' n'existe pas."
-            assert isinstance(data_in['data'], dict), \
-                    "paquet['data']: {} n'a pas le bon format (dict).".format(type(data_in['data']))
-
-        except Exception as e:
-            raise FormatPackageError('{}: {}'.format(DataInObject.__name__, e))
+        assert 'data' in keys, \
+            "package['data'] 'data' n'existe pas."
+        assert isinstance(data_in['data'], dict), \
+                "paquet['data']: {} n'a pas le bon format (dict).".format(type(data_in['data']))
 
     def get_time(self):
+        """ Récupère le temps """
         return self.time
 
 
 class FormatPackageError(Exception):
+    """ Exception pour le formatage des paquets """
     pass
 
 
 def catch_format_error(funct):
+    """ Décorateur qui récupère le message d'erreur d'une méthode spécifiquement pour les données
+        entrantes. """
     def error_caught(*args):
         try:
             return funct(*args)

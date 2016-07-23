@@ -54,7 +54,7 @@ class FilterCtrlView(QtGui.QWidget):
         elif len(list_filter) < len(list_current_checkbox):
             for filter_str in list_current_checkbox - list_filter:
                 self.delete_specific_filter(filter_str)
-        self._ctrl.set_filter(self.get_checked_box())
+        self._ctrl.set_list_of_filters(self.get_checked_box())
 
     def add_filter(self, name):
         """ Ajoute une chackbox spécifiée par le nom """
