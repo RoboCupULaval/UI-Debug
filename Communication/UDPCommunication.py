@@ -53,7 +53,6 @@ class UDPServer(QtCore.QThread):
 
     def read_udp(self):
         while self._udp_socket.hasPendingDatagrams():
-            print('DATA INCOMING...')
             datagram, host, port = self._udp_socket.readDatagram(self._udp_socket.pendingDatagramSize())
             self._data.append(datagram)
             self._num += 1
