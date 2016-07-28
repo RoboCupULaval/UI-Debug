@@ -15,7 +15,7 @@ class FieldView(QtGui.QWidget):
     """
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
-    frame_rate = 30
+    frame_rate = 60
 
     def __init__(self, controller):
         QtGui.QWidget.__init__(self, controller)
@@ -42,6 +42,10 @@ class FieldView(QtGui.QWidget):
         self._emit_signal = QtCore.pyqtSignal
         self._mutex = QtCore.QMutex()
         self.timer_screen_update = QtCore.QTimer()
+
+        # Frame
+        self._real_frame_rate = 0
+        self._real_frame_rate_last_time = time()
 
         # Initialisation de l'interface
         self.init_window()
@@ -81,7 +85,6 @@ class FieldView(QtGui.QWidget):
 
     def timeout_handler(self):
         """ Gère la durée d'affichage des éléments avec le timeout de ces derniers """
-        # TODO - Faire timeout pour le reste des éléments
         ref_time = time()
         if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
             self.graph_map = None
@@ -101,6 +104,7 @@ class FieldView(QtGui.QWidget):
     def draw_field_lines(self, painter):
         """ Dessine les lignes du terrains """
         self.graph_draw['field-lines'].draw(painter)
+        self.graph_draw['frame-rate'].draw(painter, self._real_frame_rate)
 
     def draw_effects(self, painter):
         """ Dessine les effets """
@@ -132,6 +136,13 @@ class FieldView(QtGui.QWidget):
             self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
             self._action_lock_camera.setToolTip('Verrouiller Caméra')
 
+    def toggle_frame_rate(self):
+        """ Afficher/Cacher la fréquence de rafraîchissement de l'écran """
+        if self.graph_draw['frame-rate'].isVisible():
+            self.graph_draw['frame-rate'].hide()
+        else:
+            self.graph_draw['frame-rate'].show()
+
     def reset_camera(self):
         """ Réinitialise la position et le zoom de la caméra """
         QtToolBox.field_ctrl.reset_camera()
@@ -144,6 +155,8 @@ class FieldView(QtGui.QWidget):
         self.graph_draw['field-ground'].show()
         self.graph_draw['field-lines'] = self.controller.get_drawing_object('field-lines')()
         self.graph_draw['field-lines'].show()
+        self.graph_draw['frame-rate'] = self.controller.get_drawing_object('frame-rate')()
+        self.graph_draw['frame-rate'].hide()
         self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
         self.graph_draw['robots_blue'] = [list() for _ in range(6)]
 
@@ -271,8 +284,16 @@ class FieldView(QtGui.QWidget):
         else:
             QtToolBox.field_ctrl.dezoom()
 
+    def frame_rate_event(self):
+        """ Met à jour la fréquence de rafraîchissement de l'écran """
+        current_time = time()
+        dt = current_time - self._real_frame_rate_last_time
+        self._real_frame_rate = int(1 / dt)
+        self._real_frame_rate_last_time = current_time
+
     def paintEvent(self, e):
         """ Gère l'événement du signal pour dessiner les éléments du terrain """
+        self.frame_rate_event()
         self.timeout_handler()
         painter = QtGui.QPainter()
         painter.begin(self)

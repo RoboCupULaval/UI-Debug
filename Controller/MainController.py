@@ -107,6 +107,14 @@ class MainController(QWidget):
         fileMenu.addAction(exitAction)
 
         # => Menu Vue
+        fieldMenu = viewMenu.addMenu('Terrain')
+
+        toggleFrameRate = QAction("Afficher/Cacher la fréquence", self, checkable=True)
+        toggleFrameRate.triggered.connect(self.view_screen.toggle_frame_rate)
+        fieldMenu.addAction(toggleFrameRate)
+
+        viewMenu.addSeparator()
+
         camMenu = viewMenu.addMenu('Camera')
 
         resetCamAction = QAction("Réinitialiser la caméra", self)
@@ -117,7 +125,7 @@ class MainController(QWidget):
         lockCamAction.triggered.connect(self.view_screen.toggle_lock_camera)
         camMenu.addAction(lockCamAction)
 
-        camMenu.addSeparator()
+        viewMenu.addSeparator()
 
         flipXAction = QAction("Changer l'axe des X", self, checkable=True)
         flipXAction.triggered.connect(self.flip_screen_x_axe)

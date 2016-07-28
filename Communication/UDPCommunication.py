@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
+import pickle
 import socket
 from PyQt4 import QtNetwork, QtCore
 
@@ -13,6 +14,9 @@ class UDPSending(object):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_message(self, p_object):
+        if isinstance(p_object, dict):
+            p_object = pickle.dumps(p_object)
+
         self._sock.sendto(p_object, (self._ip, self._port))
 
 
