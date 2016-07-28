@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.DataInObject import catch_format_error
-from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
 
 __author__ = 'RoboCupULaval'
 
@@ -33,6 +33,11 @@ class StratGeneralAcc(BaseDataAccessor):
             assert isinstance(self.data['action'], list)
             for value in self.data['action']:
                 assert isinstance(value, str)
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['strategy', 'tactic', 'action'],
+                        ['None', 'None', 'None']))
 
     @staticmethod
     def get_type():

@@ -2,15 +2,15 @@
 
 from datetime import date
 
-from Model.DataIn.DataInObject import catch_format_error
-from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
 
-class LoggingMessage(BaseDataInLog):
+class LoggingMessage(BaseDataLog):
     def __init__(self, data_in):
-        BaseDataInLog.__init__(self, data_in)
+        BaseDataLog.__init__(self, data_in)
         self._format_data()
 
     @catch_format_error
@@ -21,7 +21,7 @@ class LoggingMessage(BaseDataInLog):
             "data['level'] n'existe pas."
         assert isinstance(self.data['level'], int), \
             "data['level']: {} n'est pas un level valide int.".format(type(self.data['level']))
-        assert min(BaseDataInLog.display_type.keys()) <= self.data['level'] <= max(BaseDataInLog.display_type.keys()), \
+        assert min(BaseDataLog.display_type.keys()) <= self.data['level'] <= max(BaseDataLog.display_type.keys()), \
             "data['level']: {} n'est pas un level valide 0 <= level <= 5.".format(type(self.data['level']))
         assert 'message' in keys, "data['message'] n'existe pas."
         assert isinstance(self.data['message'], str), \
@@ -45,6 +45,11 @@ class LoggingMessage(BaseDataInLog):
 
     def get_level(self):
         return self.data['level']
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['level', 'message'],
+                        [1, 'Hello World!']))
 
     @staticmethod
     def get_type():

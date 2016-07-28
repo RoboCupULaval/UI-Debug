@@ -2,7 +2,7 @@
 
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
-from Model.DataIn.DrawingDataIn.DrawTextDataIn import DrawTextDataIn
+from Model.DataModel.DrawingData.DrawTextDataIn import DrawTextDataIn
 
 __author__ = 'RoboCupULaval'
 

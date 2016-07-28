@@ -103,7 +103,7 @@ class StrategyCtrView(QWidget):
     def send_strat(self):
         strat = str(self.selectStrat.currentText())
         if not strat == 'Aucune Stratégie disponible':
-            self.parent.model_dataout.send_strat(strat)
+            self.parent.model_dataout.send_strategy(strat)
 
     def send_tactic(self):
         id_bot = str(self.selectRobot.currentText())
@@ -117,7 +117,7 @@ class StrategyCtrView(QWidget):
             self.parent.model_dataout.send_tactic(id_bot, 'tStop')
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strat('pStop')
+        self.parent.model_dataout.send_strategy('pStop')
 
     def show_hide(self):
         if self.isVisible():

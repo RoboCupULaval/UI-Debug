@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-import socket, pickle
-from PyQt4 import QtNetwork, QtGui, QtCore
+import socket
+from PyQt4 import QtNetwork, QtCore
 
 __author__ = 'RoboCupULaval'
 
@@ -13,16 +13,15 @@ class UDPSending(object):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send_message(self, p_object):
-        binaire = pickle.dumps(p_object)
-        self._sock.sendto(binaire, (self._ip, self._port))
+        self._sock.sendto(p_object, (self._ip, self._port))
 
 
 class UDPServer(QtCore.QThread):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, port=20021):
         super().__init__(parent)
         self.prnt = parent
         self._udp_socket = QtNetwork.QUdpSocket()
-        self._udp_socket.bind(QtNetwork.QHostAddress.LocalHost, 20021)
+        self._udp_socket.bind(QtNetwork.QHostAddress.LocalHost, port)
         self._udp_socket.readyRead.connect(self.read_udp)
         self.connect(self._udp_socket,
                      QtCore.SIGNAL('readyRead()'),
@@ -36,6 +35,7 @@ class UDPServer(QtCore.QThread):
 
     def run(self):
         """ Connexion et autres """
+
         while True:
             if self._udp_socket is not None and \
                self._udp_socket.state() == QtNetwork.QAbstractSocket.BoundState:
@@ -53,6 +53,7 @@ class UDPServer(QtCore.QThread):
 
     def read_udp(self):
         while self._udp_socket.hasPendingDatagrams():
+            print('DATA INCOMING...')
             datagram, host, port = self._udp_socket.readDatagram(self._udp_socket.pendingDatagramSize())
             self._data.append(datagram)
             self._num += 1

@@ -1,19 +1,19 @@
 # Under MIT License, see LICENSE.txt
 
+import pickle
 from threading import Lock
 from time import sleep, time
-import pickle
 
-from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QMutexLocker
 from PyQt4.QtCore import QMutex
+from PyQt4.QtCore import QMutexLocker
+from PyQt4.QtCore import QThread
 
-from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
-from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
-from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
-from Model.DataIn.AccessorDataIn.StratGeneralAcc import StratGeneralAcc
-from Model.DataIn.AccessorDataIn.VeryLargeDataAcc import VeryLargeDataAcc
-from .DataIn.DataInFactory import DataInFactory
+from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
+from Model.DataModel.AccessorData.StratGeneralAcc import StratGeneralAcc
+from Model.DataModel.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
+from Model.DataModel.DataFactory import DataFactory
+from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
+from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
@@ -29,7 +29,7 @@ class DataInModel(object):
         self._data_STA = None
 
         # Système interne
-        self._datain_factory = DataInFactory()
+        self._datain_factory = DataFactory()
         self._mutex = QMutex()
         self._lock = Lock()
         self._data_recovery = QThread()
@@ -76,8 +76,8 @@ class DataInModel(object):
                 package = package[1]
             data_in = pickle.loads(package)
             if data_in is not None:
-                data = self._datain_factory.get_datain_object(data_in)
-                if isinstance(data, BaseDataInLog):
+                data = self._datain_factory.get_data_object(data_in)
+                if isinstance(data, BaseDataLog):
                     self._store_data_logging(data)
                 elif isinstance(data, BaseDataAccessor):
                     if isinstance(data, StratGeneralAcc):
@@ -91,7 +91,7 @@ class DataInModel(object):
                     elif data.__class__.__name__ == VeryLargeDataAcc.__name__:
                         data.store()
                         self._extract_and_distribute_data(data.rebuild())
-                elif isinstance(data, BaseDataInDraw):
+                elif isinstance(data, BaseDataDraw):
                     self._data_draw['notset'].append(data)
                     self.show_draw(self._data_draw['notset'][-1])
 
@@ -107,7 +107,7 @@ class DataInModel(object):
                    'link': None,
                    'data': {'level': level, 'message': message}
                    }
-        self._store_data_logging(self._datain_factory.get_datain_object(data_in))
+        self._store_data_logging(self._datain_factory.get_data_object(data_in))
 
     def _get_data(self, type=0):
         # TODO: A refactor
@@ -156,7 +156,7 @@ class DataInModel(object):
 
     def show_draw(self, draw):
         """ Afficher le dessin sur la fenêtre du terrain """
-        if isinstance(draw, BaseDataInDraw):
+        if isinstance(draw, BaseDataDraw):
             self._controller.add_draw_on_screen(draw)
 
     @staticmethod

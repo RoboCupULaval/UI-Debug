@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
-from Model.DataIn.DataInObject import catch_format_error
+from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
+from Model.DataModel.DataObject import catch_format_error
 
 __author__ = 'RoboCupULaval'
 
 
-class DrawInfluenceMapDataIn(BaseDataInDraw):
+class DrawInfluenceMapDataIn(BaseDataDraw):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -63,7 +63,7 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
             self.data['hottest_numb'] = maxi
 
         if 'hottest_color' in keys:
-            assert BaseDataInDraw._colorRGB_is_valid(self.data['hottest_color'])
+            assert BaseDataDraw._colorRGB_is_valid(self.data['hottest_color'])
         else:
             self.data['hottest_color'] = 255, 0, 0
 
@@ -80,7 +80,7 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
         assert self.data['coldest_numb'] <= self.data['hottest_numb']
 
         if 'coldest_color' in keys:
-            assert BaseDataInDraw._colorRGB_is_valid(self.data['coldest_color'])
+            assert BaseDataDraw._colorRGB_is_valid(self.data['coldest_color'])
         else:
             self.data['coldest_color'] = 0, 255, 0
 
@@ -90,7 +90,7 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
             self.data['has_grid'] = False
 
         if 'grid_color' in keys:
-            assert BaseDataInDraw._colorRGB_is_valid(self.data['grid_color']), \
+            assert BaseDataDraw._colorRGB_is_valid(self.data['grid_color']), \
                 "'grid_color' format non valide (RGB)"
         else:
             self.data['grid_color'] = 0, 0, 0
@@ -103,7 +103,7 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
 
         if 'grid_style' in keys:
             assert isinstance(self.data['grid_style'], str)
-            assert self.data['grid_style'] in BaseDataInDraw.line_style_allowed
+            assert self.data['grid_style'] in BaseDataDraw.line_style_allowed
         else:
             self.data['grid_style'] = 'SolidLine'
 
@@ -118,6 +118,11 @@ class DrawInfluenceMapDataIn(BaseDataInDraw):
                 "data['timeout']: {} n'est pas valide.".format(self.data['timeout'])
         else:
             self.data['timeout'] = 0
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['field_data'],
+                        [[[x + y for x in range(90)] for y in range(60)]]))
 
     @staticmethod
     def get_type():

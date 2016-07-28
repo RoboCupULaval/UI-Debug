@@ -9,7 +9,7 @@ from PyQt4.QtCore import QRect
 
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
-from Model.DataIn.DrawingDataIn.DrawInfluenceMapDataIn import DrawInfluenceMapDataIn
+from Model.DataModel.DrawingData.DrawInfluenceMapDataIn import DrawInfluenceMapDataIn
 
 __author__ = 'RoboCupULaval'
 

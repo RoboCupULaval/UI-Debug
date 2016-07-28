@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.DataInObject import catch_format_error
-from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
 
 __author__ = 'RoboCupULaval'
 
 
-class DrawPointDataIn(BaseDataInDraw):
+class DrawTreeDataIn(BaseDataDraw):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -18,10 +18,18 @@ class DrawPointDataIn(BaseDataInDraw):
             "data: {} n'est pas un dictionnaire.".format(type(self.data))
         keys = self.data.keys()
 
-        assert 'point' in keys, \
-            "data['point'] n'existe pas."
-        assert self._point_is_valid(self.data['point']), \
-            "data['point']: {} n'est pas un point valide.".format(self.data['point'])
+        assert 'tree' in keys, \
+            "data['tree'] n'existe pas."
+        assert isinstance(self.data['tree'], list), \
+            "data['tree']: {} devrait être une liste.".format(self.data['tree'])
+        for i, node in enumerate(self.data['tree']):
+            assert isinstance(node, tuple), \
+                "data['tree'][{}]: {} devrait être un tuple.".format(i, type(node))
+            assert len(node) == 2, \
+                "data['tree'][{}]: {} devrait contenir 2 points.".format(i, len(node))
+            for point in node:
+                assert self._point_is_valid(point), \
+                    "data['tree'][{}]: {} devrait être un point valide.".format(i, point)
 
     @catch_format_error
     def _check_optional_data(self):
@@ -37,7 +45,7 @@ class DrawPointDataIn(BaseDataInDraw):
             assert isinstance(self.data['width'], int), \
                 "data['width']: {} n'est pas du bon type (int)".format(type(self.data['width']))
         else:
-            self.data['width'] = 3
+            self.data['width'] = 2
 
         if 'timeout' in keys:
             assert self.data['timeout'] >= 0, \
@@ -46,5 +54,11 @@ class DrawPointDataIn(BaseDataInDraw):
             self.data['timeout'] = 0
 
     @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['tree'],
+                        [[((0, 0), (100, 100)),
+                          ((0, 0), (100, -100))]]))
+
+    @staticmethod
     def get_type():
-        return 3004
+        return 3009

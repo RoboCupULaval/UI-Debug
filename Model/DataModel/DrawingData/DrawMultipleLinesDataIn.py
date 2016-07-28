@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.DataInObject import catch_format_error
-from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
 
 __author__ = 'RoboCupULaval'
 
 
-class DrawRectDataIn(BaseDataInDraw):
+class DrawMultipleLinesDataIn(BaseDataDraw):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -17,16 +17,10 @@ class DrawRectDataIn(BaseDataInDraw):
         assert isinstance(self.data, dict),\
             "data: {} n'est pas un dictionnaire.".format(type(self.data))
         keys = self.data.keys()
-
-        assert 'top_left' in keys, \
-            "data['top_left'] n'existe pas."
-        assert self._point_is_valid(self.data['top_left']), \
-            "data['top_left']: {} n'est pas un point valide.".format(self.data['top_left'])
-
-        assert 'bottom_right' in keys, \
-            "data['bottom_right'] n'existe pas."
-        assert self._point_is_valid(self.data['bottom_right']), \
-            "data['bottom_right']: {} n'est pas un point valide.".format(self.data['bottom_right'])
+        assert 'points' in keys, "data['points'] n'existe pas."
+        assert isinstance(self.data['points'], list), "data['points'] n'est pas une liste."
+        for point in self.data['points']:
+            assert self._point_is_valid(point), "data['points']: {} n'est pas un point valide.".format(point)
 
     @catch_format_error
     def _check_optional_data(self):
@@ -38,15 +32,9 @@ class DrawRectDataIn(BaseDataInDraw):
         else:
             self.data['color'] = (0, 0, 0)
 
-        if 'is_fill' in keys:
-            assert isinstance(self.data['is_fill'], bool), \
-                "data['is_fill']: {} n'est pas du bon type (bool)".format(type(self.data['is_fill']))
-        else:
-            self.data['is_fill'] = False
-
         if 'width' in keys:
-            assert isinstance(self.data['width'], int), \
-                "data['width']: {} n'est pas du bon type (int)".format(type(self.data['width']))
+            assert 0 < self.data['width'], \
+                "data['width']: {} n'est pas une épaisseur valide".format(self.data['width'])
         else:
             self.data['width'] = 2
 
@@ -63,5 +51,10 @@ class DrawRectDataIn(BaseDataInDraw):
             self.data['timeout'] = 0
 
     @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['points'],
+                        [[(x * 100, 50) for x in range(5)]]))
+
+    @staticmethod
     def get_type():
-        return 3006
+        return 3002

@@ -1,7 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
-from Model.DataIn.DataInObject import catch_format_error
+from time import time
+from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
+from Model.DataModel.DataObject import catch_format_error
 
 __author__ = 'RoboCupULaval'
 
@@ -62,6 +63,11 @@ class VeryLargeDataAcc(BaseDataAccessor):
     @catch_format_error
     def _check_optional_data(self):
         pass
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['id', 'total_pieces', 'piece_number', 'binary'],
+                        [str(time()), 1, 1, b'']))
 
     @staticmethod
     def get_type():

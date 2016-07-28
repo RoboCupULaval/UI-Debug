@@ -2,13 +2,13 @@
 
 from datetime import date
 
-from Model.DataIn.DataInObject import catch_format_error
-from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
 
-class LoggingData(BaseDataInLog):
+class LoggingData(BaseDataLog):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -29,6 +29,11 @@ class LoggingData(BaseDataInLog):
         for key, item in sorted(self.data.items()):
             message += '{} = {}'.format(key, item) + '\n'
         return message[:-1]
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['data'],
+                        ['None']))
 
     @staticmethod
     def get_type():

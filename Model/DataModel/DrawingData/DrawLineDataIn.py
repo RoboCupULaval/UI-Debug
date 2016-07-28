@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataIn.DataInObject import catch_format_error
-from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
 
 __author__ = 'RoboCupULaval'
 
 
-class DrawLineDataIn(BaseDataInDraw):
+class DrawLineDataIn(BaseDataDraw):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -53,6 +53,11 @@ class DrawLineDataIn(BaseDataInDraw):
                 "data['timeout']: {} n'est pas valide.".format(self.data['timeout'])
         else:
             self.data['timeout'] = 0
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['start', 'end'],
+                        [(-250, -250), (250, 250)]))
 
     @staticmethod
     def get_type():
