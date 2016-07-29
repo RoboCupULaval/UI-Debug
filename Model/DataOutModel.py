@@ -23,6 +23,8 @@ class DataOutModel:
         self._controller.update_target_on_screen()
 
     def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0)):
+        target = int(target[0]), int(target[1])
+        goal = int(goal[0]), int(goal[1])
         pkg = SendingTactic().set_data(tactic=tactic,
                                        id=id_bot,
                                        target=target,
