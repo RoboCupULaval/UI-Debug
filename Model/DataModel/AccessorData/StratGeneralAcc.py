@@ -23,16 +23,22 @@ class StratGeneralAcc(BaseDataAccessor):
             assert isinstance(self.data['strategy'], list)
             for value in self.data['strategy']:
                 assert isinstance(value, str)
+        else:
+            self.data['strategy'] = None
 
         if 'tactic' in keys:
             assert isinstance(self.data['tactic'], list)
             for value in self.data['tactic']:
                 assert isinstance(value, str)
+        else:
+            self.data['tactic'] = None
 
         if 'action' in keys:
             assert isinstance(self.data['action'], list)
             for value in self.data['action']:
                 assert isinstance(value, str)
+        else:
+            self.data['action'] = None
 
     @staticmethod
     def get_default_data_dict():

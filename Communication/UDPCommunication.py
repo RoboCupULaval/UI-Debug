@@ -16,7 +16,6 @@ class UDPSending(object):
     def send_message(self, p_object):
         if isinstance(p_object, dict):
             p_object = pickle.dumps(p_object)
-
         self._sock.sendto(p_object, (self._ip, self._port))
 
 

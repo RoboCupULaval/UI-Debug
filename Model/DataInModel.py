@@ -80,14 +80,12 @@ class DataInModel(object):
                 if isinstance(data, BaseDataLog):
                     self._store_data_logging(data)
                 elif isinstance(data, BaseDataAccessor):
-                    if isinstance(data, StratGeneralAcc):
+                    if type(data).__name__ == StratGeneralAcc.__name__:
                         if self._data_STA is not None:
                             for key in data.data.keys():
                                 self._data_STA.data[key] = data.data[key]
                         else:
                             self._data_STA = data
-                        self._controller.view_controller.refresh_strat(self._data_STA.data['strategy'])
-                        self._controller.view_controller.refresh_tactic(self._data_STA.data['tactic'])
                     elif data.__class__.__name__ == VeryLargeDataAcc.__name__:
                         data.store()
                         self._extract_and_distribute_data(data.rebuild())
@@ -119,7 +117,7 @@ class DataInModel(object):
                 else:
                     return None
             elif type == 2:
-                if isinstance(self._data_STA, DataInSTA):
+                if isinstance(self._data_STA, StratGeneralAcc):
                     return self._data_STA.data
                 return None
             elif type == 3:
