@@ -11,11 +11,11 @@ from Communication.vision import Vision
 __author__ = 'RoboCupULaval'
 
 
-class FrameModel(object):
+class FrameModel:
     """ FrameModel est un modèle qui gère les données provenant du système de vision. FrameModel possède
         un récupérateur de données du module de vision (Frame Catcher) pour ensuite mettre à jour les
         positions des objets mobiles sur la vue du terrain (Screen View). """
-    def __init__(self, controller):
+    def __init__(self, controller=None):
         self._controller = controller
         self._vision = Vision()
 

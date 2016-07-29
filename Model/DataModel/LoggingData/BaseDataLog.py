@@ -2,12 +2,12 @@
 
 from abc import abstractmethod
 
-from Model.DataIn.DataInObject import DataInObject
+from Model.DataModel.DataObject import DataObject
 
 __author__ = 'RoboCupULaval'
 
 
-class BaseDataInLog(DataInObject):
+class BaseDataLog(DataObject):
     display_type = {0: 'NOTSET',
                     1: 'DEBUG',
                     2: 'INFO',
@@ -16,8 +16,13 @@ class BaseDataInLog(DataInObject):
                     5: 'FATAL'}
 
     def __init__(self, data_in):
-        DataInObject.__init__(self, data_in)
-        self.data = data_in['data']
+        super().__init__(data_in)
+
+    @staticmethod
+    @abstractmethod
+    def get_default_data_dict():
+        """ Retourne une dictionnaire de données par défaut """
+        raise NotImplementedError()
 
     @abstractmethod
     def __str__(self):

@@ -2,17 +2,18 @@
 
 from PyQt4.QtCore import QTimer
 from Communication.UDPCommunication import UDPSending
+from Model.DataModel.SendingData.SendingStrategy import SendingStrategy
+from Model.DataModel.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
+from Model.DataModel.SendingData.SendingTactic import SendingTactic
 
 __author__ = 'RoboCupULaval'
 
 
-class DataOutModel(object):
+class DataOutModel:
     def __init__(self, controller=None):
         self._controller = controller
-        self._name = 'UI'
-        self._version = 'v1.0'
         self._udp_sender = UDPSending()
-        self.target = (0, 0)
+        self.target = 0, 0
 
         self.frame_timer = QTimer()
         self.frame_timer.timeout.connect(self.update_screen)
@@ -22,23 +23,18 @@ class DataOutModel(object):
         self._controller.update_target_on_screen()
 
     def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0)):
-        package = self.get_empty_package()
-        package['type'] = 5003
-        package['link'] = id_bot
-        package['data'] = {'tactic': tactic, 'target': target, 'goal': goal}
-        self._udp_sender.send_message(package)
+        target = int(target[0]), int(target[1])
+        goal = int(goal[0]), int(goal[1])
+        pkg = SendingTactic().set_data(tactic=tactic,
+                                       id=id_bot,
+                                       target=target,
+                                       goal=goal)
+        self._udp_sender.send_message(pkg.get_binary())
 
-    def send_strat(self, strat):
-        package = self.get_empty_package()
-        package['type'] = 5002
-        package['data'] = {'strategy': strat}
-        self._udp_sender.send_message(package)
+    def send_strategy(self, strat):
+        pkg = SendingStrategy().set_data(strategy=strat)
+        self._udp_sender.send_message(pkg.get_binary())
 
     def send_toggle_human_control(self, result):
-        package = self.get_empty_package()
-        package['type'] = 5001
-        package['data'] = {'is_human_control': result}
-        self._udp_sender.send_message(package)
-
-    def get_empty_package(self):
-        return {'name': self._name, 'type': None, 'data': None, 'version': self._version, 'link': None}
+        pkg = SendingToggleHumanCtrl().set_data(is_human_control=result)
+        self._udp_sender.send_message(pkg.get_binary())

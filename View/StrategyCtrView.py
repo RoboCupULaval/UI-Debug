@@ -13,6 +13,10 @@ class StrategyCtrView(QWidget):
         self.init_ui()
         self.hide()
 
+        self.update_timer = QTimer()
+        self.update_timer.timeout.connect(self.update_combobox)
+        self.update_timer.start(500)
+
     def init_ui(self):
         self.setFixedWidth(300)
         # Création des pages d'onglet
@@ -84,6 +88,38 @@ class StrategyCtrView(QWidget):
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
 
+    def update_combobox(self):
+        if self.parent.model_datain._data_STA is not None:
+            data = self.parent.model_datain._data_STA.data
+
+            if data['tactic'] is not None:
+                tactics = self.get_tactic_list()
+                for tact in data['tactic']:
+                    if not tact in tactics:
+                        self.refresh_tactic(data['tactic'])
+                        break
+
+            if data['strategy'] is not None:
+                strats = self.get_strat_list()
+                for strat in data['strategy']:
+                    if not strat in strats:
+                        self.refresh_strat(data['strategy'])
+                        break
+
+    def get_strat_list(self):
+        strat = []
+        for i in range(self.selectStrat.count()):
+            if not self.selectStrat.count() == 1:
+                strat.append(self.selectStrat.itemText(i))
+        return strat
+
+    def get_tactic_list(self):
+        tactics = []
+        for i in range(self.selectTactic.count()):
+            if not self.selectTactic.count() == 1:
+                tactics.append(self.selectTactic.itemText(i))
+        return tactics
+
     def refresh_tactic(self, tactics):
         self.selectTactic.clear()
         if tactics is not None:
@@ -103,12 +139,12 @@ class StrategyCtrView(QWidget):
     def send_strat(self):
         strat = str(self.selectStrat.currentText())
         if not strat == 'Aucune Stratégie disponible':
-            self.parent.model_dataout.send_strat(strat)
+            self.parent.model_dataout.send_strategy(strat)
 
     def send_tactic(self):
-        id_bot = str(self.selectRobot.currentText())
+        id_bot = int(self.selectRobot.currentText())
         tactic = str(self.selectTactic.currentText())
-        target = str(self.parent.model_dataout.target)
+        target = self.parent.model_dataout.target
         if not tactic == 'Aucune Tactique disponible':
             self.parent.model_dataout.send_tactic(id_bot, tactic, target)
 
@@ -117,7 +153,7 @@ class StrategyCtrView(QWidget):
             self.parent.model_dataout.send_tactic(id_bot, 'tStop')
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strat('pStop')
+        self.parent.model_dataout.send_strategy('pStop')
 
     def show_hide(self):
         if self.isVisible():

@@ -4,7 +4,7 @@ from PyQt4 import QtGui
 
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
-from Model.DataIn.DrawingDataIn.DrawMultiplePointsDataIn import DrawMultiplePointsDataIn
+from Model.DataModel.DrawingData.DrawMultiplePointsDataIn import DrawMultiplePointsDataIn
 
 __author__ = 'RoboCupULaval'
 

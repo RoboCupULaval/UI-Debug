@@ -15,6 +15,9 @@ from View.FilterCtrlView import FilterCtrlView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
+from View.ParamView import ParamView
+
+from Communication.UDPCommunication import UDPServer
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -25,10 +28,13 @@ __author__ = 'RoboCupULaval'
 class MainController(QWidget):
     # TODO: Dissocier Controller de la fenêtre principale
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
 
         # Création des Contrôleurs
         self.draw_handler = DrawingObjectFactory(self)
+
+        # Communication
+        self.network_data_in = UDPServer(self)
 
         # Création des Vues
         self.main_window = MainWindow()
@@ -37,6 +43,7 @@ class MainController(QWidget):
         self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
         self.view_filter = FilterCtrlView(self)
+        self.view_param = ParamView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -47,7 +54,6 @@ class MainController(QWidget):
         self.init_main_window()
         self.init_menubar()
         self.init_signals()
-        self.resize_window()
 
     def init_main_window(self):
         # Initialisation de la fenêtre
@@ -72,6 +78,7 @@ class MainController(QWidget):
 
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
+        self.model_datain.setup_udp_server(self.network_data_in)
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -88,8 +95,9 @@ class MainController(QWidget):
         helpMenu.addAction(helpAction)
 
         # => Menu Fichier
+
         paramAction = QAction('Paramètres', self)
-        paramAction.triggered.connect(self.show_param)
+        paramAction.triggered.connect(self.view_param.show)
         fileMenu.addAction(paramAction)
 
         fileMenu.addSeparator()
@@ -99,6 +107,14 @@ class MainController(QWidget):
         fileMenu.addAction(exitAction)
 
         # => Menu Vue
+        fieldMenu = viewMenu.addMenu('Terrain')
+
+        toggleFrameRate = QAction("Afficher/Cacher la fréquence", self, checkable=True)
+        toggleFrameRate.triggered.connect(self.view_screen.toggle_frame_rate)
+        fieldMenu.addAction(toggleFrameRate)
+
+        viewMenu.addSeparator()
+
         camMenu = viewMenu.addMenu('Camera')
 
         resetCamAction = QAction("Réinitialiser la caméra", self)
@@ -109,7 +125,7 @@ class MainController(QWidget):
         lockCamAction.triggered.connect(self.view_screen.toggle_lock_camera)
         camMenu.addAction(lockCamAction)
 
-        camMenu.addSeparator()
+        viewMenu.addSeparator()
 
         flipXAction = QAction("Changer l'axe des X", self, checkable=True)
         flipXAction.triggered.connect(self.flip_screen_x_axe)
@@ -138,7 +154,7 @@ class MainController(QWidget):
         viewMenu.addSeparator()
 
         fullscreenAction = QAction('Fenêtre en Plein écran', self, checkable=True)
-        fullscreenAction.triggered.connect(self.toggle_fullscreen)
+        fullscreenAction.triggered.connect(self.toggle_full_screen)
         fullscreenAction.setShortcut(Qt.Key_F2)
         viewMenu.addAction(fullscreenAction)
 
@@ -155,142 +171,6 @@ class MainController(QWidget):
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
 
-    def _apply_param(self):
-        is_wrong = False
-        style_bad = "QLineEdit {background: rgb(255, 100, 100)}"
-        style_good = "QLineEdit {background: rgb(255, 255, 255)}"
-
-        try:
-            self.form_field_width.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.size[0] = int(self.form_field_width.text())
-        except Exception as e:
-            self.form_field_width.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_field_height.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.size[1] = int(self.form_field_height.text())
-        except Exception as e:
-            self.form_field_height.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_width.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_size[0] = int(self.form_goal_width.text())
-        except Exception as e:
-            self.form_goal_width.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_height.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_size[1] = int(self.form_goal_height.text())
-        except Exception as e:
-            self.form_goal_height.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_center_radius.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.radius_center = int(self.form_center_radius.text())
-        except Exception as e:
-            self.form_center_radius.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_radius.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_radius = int(self.form_goal_radius.text())
-        except Exception as e:
-            self.form_goal_radius.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_goal_line.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_line = int(self.form_goal_line.text())
-        except Exception as e:
-            self.form_goal_line.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
-            self.form_ratio_mobs.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.ratio_field_mobs = float(self.form_ratio_mobs.text())
-        except Exception as e:
-            self.form_ratio_mobs.setStyleSheet(style_bad)
-            is_wrong = True
-
-        if is_wrong:
-            return False
-        else:
-            return True
-
-    def _apply_param_and_leave(self):
-        if self._apply_param():
-            self.param_w.close()
-
-    def show_param(self):
-        # TODO - Mettre des onglets pour les différentes sections
-        # Paramètres fenêtres
-        self.param_w = QDialog()
-        param_w = self.param_w
-        param_w.setWindowTitle('Paramètres')
-        param_w.move(self.width() * 0.9, self.height() * 0.9)
-
-        layout_main = QVBoxLayout()
-        param_w.setLayout(layout_main)
-
-        # Changement des dimensions du terrain
-        group_field = QGroupBox('Dimensions')
-        layout_main.addWidget(group_field)
-        layout_field = QFormLayout()
-        group_field.setLayout(layout_field)
-
-        # => Taille du terrain (Longueur / Hauteur)
-        layout_field.addRow(QLabel('\nDimension du Terrain'))
-        self.form_field_width = QLineEdit(str(QtToolBox.field_ctrl.size[0]))
-        layout_field.addRow(QLabel('largeur :'), self.form_field_width)
-        self.form_field_height = QLineEdit(str(QtToolBox.field_ctrl.size[1]))
-        layout_field.addRow(QLabel('hauteur :'), self.form_field_height)
-
-        # => Taille du but (Longueur / Hauteur)
-        layout_field.addRow(QLabel('\nDimension des Buts'))
-        self.form_goal_width = QLineEdit(str(QtToolBox.field_ctrl.goal_size[0]))
-        layout_field.addRow(QLabel('largeur :'), self.form_goal_width)
-        self.form_goal_height = QLineEdit(str(QtToolBox.field_ctrl.goal_size[1]))
-        layout_field.addRow(QLabel('hauteur :'), self.form_goal_height)
-
-        # => Taille de la zone de réparation (Rayon / Ligne)
-        layout_field.addRow(QLabel('\nZone des buts'))
-        self.form_goal_radius = QLineEdit(str(QtToolBox.field_ctrl.goal_radius))
-        layout_field.addRow(QLabel('rayon :'), self.form_goal_radius)
-        self.form_goal_line = QLineEdit(str(QtToolBox.field_ctrl.goal_line))
-        layout_field.addRow(QLabel('hauteur :'), self.form_goal_line)
-
-        # => Taille de la zone centrale (Rayon)
-        layout_field.addRow(QLabel('\nRayon central'))
-        self.form_center_radius = QLineEdit(str(QtToolBox.field_ctrl.radius_center))
-        layout_field.addRow(QLabel('rayon :'), self.form_center_radius)
-
-        # Changement de ratio Mobs / Terrain
-        layout_field.addRow(QLabel('\nRatio Terrain/Mobs'))
-        self.form_ratio_mobs = QLineEdit(str(QtToolBox.field_ctrl.ratio_field_mobs))
-        layout_field.addRow(QLabel('ratio :'), self.form_ratio_mobs)
-
-        # Bas de fenêtre
-        layout_bottom = QHBoxLayout()
-        layout_main.addLayout(layout_bottom)
-        # => Bouton OK
-        but_ok = QPushButton('Ok')
-        but_ok.clicked.connect(self._apply_param_and_leave)
-        layout_bottom.addWidget(but_ok)
-        # => Bouton Annuler
-        but_cancel = QPushButton('Annuler')
-        but_cancel.clicked.connect(param_w.close)
-        layout_bottom.addWidget(but_cancel)
-        # => Bouton Appliquer
-        but_apply = QPushButton('Appliquer')
-        but_apply.clicked.connect(self._apply_param)
-        layout_bottom.addWidget(but_apply)
-
-        param_w.exec_()
-
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
@@ -299,7 +179,7 @@ class MainController(QWidget):
         self.view_logger.refresh()
 
     def save_logging(self, path, texte):
-        self.model_datain.save_logging(path, texte)
+        self.model_datain.write_logging_file(path, texte)
 
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')
@@ -349,30 +229,38 @@ class MainController(QWidget):
             pass
 
     def add_logging_message(self, name, message, level=2):
+        """ Ajoute un message de logging typé """
         self.model_datain.add_logging(name, message, level=level)
 
     def get_drawing_object(self, index):
+        """ Récupère un dessin spécifique """
         return self.draw_handler.get_specific_draw_object(index)
 
-    def toggle_fullscreen(self):
+    def toggle_full_screen(self):
+        """ Déclenche le plein écran """
         if not self.windowState() == Qt.WindowFullScreen:
             self.setWindowState(Qt.WindowFullScreen)
         else:
             self.setWindowState(Qt.WindowActive)
 
     def flip_screen_x_axe(self):
+        """ Bascule l'axe des X de l'écran """
         QtToolBox.field_ctrl.flip_x_axe()
 
     def flip_screen_y_axe(self):
+        """ Bascule l'axe des Y de l'écran """
         QtToolBox.field_ctrl.flip_y_axe()
 
     def get_list_of_filters(self):
+        """ Récupère la liste des filtres d'affichage """
         name_filter = set(self.view_screen.draw_filterable.keys())
         name_filter.add('None')
         return name_filter
 
-    def set_filter(self, list_filter):
+    def set_list_of_filters(self, list_filter):
+        """ Assigne une liste de filtres d'affichage """
         self.view_screen.list_filter = list_filter
 
     def load_new_filters(self, list_filter):
+        """ Charge les nouveaux filtres """
         self.view_filter.load_new_filter(list_filter)

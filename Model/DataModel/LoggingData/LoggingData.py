@@ -2,29 +2,25 @@
 
 from datetime import date
 
-from Model.DataIn.DataInObject import FormatPackageError
-from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
+from Model.DataModel.DataObject import catch_format_error
+from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
 
-class LoggingData(BaseDataInLog):
+class LoggingData(BaseDataLog):
     def __init__(self, data_in):
-        BaseDataInLog.__init__(self, data_in)
+        super().__init__(data_in)
         self._format_data()
 
+    @catch_format_error
     def _check_obligatory_data(self):
-        try:
-            assert isinstance(self.data, dict), \
-                "data: {} n'est pas un dictionnaire.".format(type(self.data))
-        except Exception as e:
-            raise FormatPackageError('{}: {}'.format(self.__name__, e))
+        assert isinstance(self.data, dict), \
+            "data: {} n'est pas un dictionnaire.".format(type(self.data))
 
+    @catch_format_error
     def _check_optional_data(self):
-        try:
-            pass
-        except Exception as e:
-            raise FormatPackageError('{}: {}'.format(self.__name__, e))
+        pass
 
     def __str__(self):
         message = ''
@@ -33,6 +29,11 @@ class LoggingData(BaseDataInLog):
         for key, item in sorted(self.data.items()):
             message += '{} = {}'.format(key, item) + '\n'
         return message[:-1]
+
+    @staticmethod
+    def get_default_data_dict():
+        return dict(zip(['data'],
+                        ['None']))
 
     @staticmethod
     def get_type():

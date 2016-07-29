@@ -1,41 +1,45 @@
 # Under MIT License, see LICENSE.txt
 
+import pickle
 from threading import Lock
 from time import sleep, time
-import pickle
 
-from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QMutexLocker
 from PyQt4.QtCore import QMutex
+from PyQt4.QtCore import QMutexLocker
+from PyQt4.QtCore import QThread
 
-from Communication.UDPCommunication import UDPReceiving
-from Model.DataIn.DrawingDataIn.BaseDataInDraw import BaseDataInDraw
-from Model.DataIn.LoggingDataIn.BaseDataInLog import BaseDataInLog
-from Model.DataIn.AccessorDataIn.BaseDataAccessor import BaseDataAccessor
-from Model.DataIn.AccessorDataIn.StratGeneralAcc import StratGeneralAcc
-from Model.DataIn.AccessorDataIn.VeryLargeDataAcc import VeryLargeDataAcc
-from .DataIn.DataInFactory import DataInFactory
+from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
+from Model.DataModel.AccessorData.StratGeneralAcc import StratGeneralAcc
+from Model.DataModel.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
+from Model.DataModel.DataFactory import DataFactory
+from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
+from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
 
 class DataInModel(object):
     def __init__(self, controller=None):
-        # Initialisation
         self._controller = controller
-        self._udp_receiver = UDPReceiving()
-        self._datain_factory = DataInFactory()
-        self._last_packet = None
+
+        # Stockage de données
         self._data_logging = list()
         self._data_config = list()
         self._data_draw = dict()
         self._data_STA = None
+
+        # Système interne
+        self._datain_factory = DataFactory()
         self._mutex = QMutex()
         self._lock = Lock()
         self._data_recovery = QThread()
-
         self._start_time = time()
 
+        # Réseau
+        self._udp_receiver = None
+        self._last_packet = None
+
+        # Initialisations
         self._initialization()
 
     def _initialization(self):
@@ -43,17 +47,24 @@ class DataInModel(object):
         self._data_draw['notset'] = list()
         self._data_draw['robots_yellow'] = [list() for _ in range(6)]
         self._data_draw['robots_blue'] = [list() for _ in range(6)]
-        self._udp_receiver.start()
         self._data_recovery.run = self._get_data_in
         self._data_recovery.start()
+
+    def setup_udp_server(self, udp_server):
+        """ Installer le serveur UDP """
+        self._udp_receiver = udp_server
+        self._udp_receiver.start()
 
     def _get_data_in(self):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
         while True:
             QMutexLocker(self._mutex).relock()
-            package = self._udp_receiver.get_last_data()
+            package = None
             try:
+                package = self._udp_receiver.get_last_data()
                 self._extract_and_distribute_data(package)
+            except AttributeError:
+                pass
             finally:
                 self._last_packet = package[0] if package is not None else None
                 QMutexLocker(self._mutex).unlock()
@@ -65,26 +76,25 @@ class DataInModel(object):
                 package = package[1]
             data_in = pickle.loads(package)
             if data_in is not None:
-                data = self._datain_factory.get_datain_object(data_in)
-                if isinstance(data, BaseDataInLog):
-                    self._append_logging_datain(data)
+                data = self._datain_factory.get_data_object(data_in)
+                if isinstance(data, BaseDataLog):
+                    self._store_data_logging(data)
                 elif isinstance(data, BaseDataAccessor):
-                    if isinstance(data, StratGeneralAcc):
+                    if type(data).__name__ == StratGeneralAcc.__name__:
                         if self._data_STA is not None:
                             for key in data.data.keys():
                                 self._data_STA.data[key] = data.data[key]
                         else:
                             self._data_STA = data
-                        self._controller.view_controller.refresh_strat(self._data_STA.data['strategy'])
-                        self._controller.view_controller.refresh_tactic(self._data_STA.data['tactic'])
                     elif data.__class__.__name__ == VeryLargeDataAcc.__name__:
                         data.store()
                         self._extract_and_distribute_data(data.rebuild())
-                elif isinstance(data, BaseDataInDraw):
+                elif isinstance(data, BaseDataDraw):
                     self._data_draw['notset'].append(data)
                     self.show_draw(self._data_draw['notset'][-1])
 
-    def _append_logging_datain(self, data):
+    def _store_data_logging(self, data):
+        """ Stock les données de logging """
         self._data_logging.append(data)
         self._controller.update_logging()
 
@@ -95,8 +105,7 @@ class DataInModel(object):
                    'link': None,
                    'data': {'level': level, 'message': message}
                    }
-        self._append_logging_datain(self._datain_factory.get_datain_object(data_in))
-
+        self._store_data_logging(self._datain_factory.get_data_object(data_in))
 
     def _get_data(self, type=0):
         # TODO: A refactor
@@ -108,7 +117,7 @@ class DataInModel(object):
                 else:
                     return None
             elif type == 2:
-                if isinstance(self._data_STA, DataInSTA):
+                if isinstance(self._data_STA, StratGeneralAcc):
                     return self._data_STA.data
                 return None
             elif type == 3:
@@ -137,16 +146,20 @@ class DataInModel(object):
             return None
 
     def get_last_log(self, index=0):
+        """ Récupère les derniers logging"""
         if len(self._data_logging):
             return self._data_logging[index:]
         else:
             return None
 
     def show_draw(self, draw):
-        if isinstance(draw, BaseDataInDraw):
+        """ Afficher le dessin sur la fenêtre du terrain """
+        if isinstance(draw, BaseDataDraw):
             self._controller.add_draw_on_screen(draw)
 
-    def save_logging(self, path, texte):
+    @staticmethod
+    def write_logging_file(path, text):
+        """ Écrit le logging dans un fichier texte sur le path déterminé """
         with open(path, 'w') as f:
-            texte = '##### LOGGING FROM UI #####\n' + texte
-            f.write(texte)
+            text = '##### LOGGING FROM UI #####\n' + text
+            f.write(text)
