@@ -23,13 +23,16 @@ class DataOutModel:
         self._controller.update_target_on_screen()
 
     def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0)):
-        self._udp_sender.send_message(SendingTactic().set_data(tactic=tactic,
-                                                               id=id_bot,
-                                                               target=target,
-                                                               goal=goal).get_binary())
+        pkg = SendingTactic().set_data(tactic=tactic,
+                                       id=id_bot,
+                                       target=target,
+                                       goal=goal)
+        self._udp_sender.send_message(pkg.get_binary())
 
     def send_strategy(self, strat):
-        self._udp_sender.send_message(SendingStrategy().set_data(strategy=strat).get_binary())
+        pkg = SendingStrategy().set_data(strategy=strat)
+        self._udp_sender.send_message(pkg.get_binary())
 
     def send_toggle_human_control(self, result):
-        self._udp_sender.send_message(SendingToggleHumanCtrl().set_data(is_human_control=result).get_binary())
+        pkg = SendingToggleHumanCtrl().set_data(is_human_control=result)
+        self._udp_sender.send_message(pkg.get_binary())

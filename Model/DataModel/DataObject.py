@@ -109,7 +109,9 @@ class DataObject:
 
     def get_dict(self):
         """ Retourne une copie des données de l'objet sous forme de dictionnaire """
-        return self._data.copy()
+        data_copy = self._data.copy()
+        del data_copy['time']
+        return data_copy
 
     def get_binary(self):
         """ Retourne le un version binaire des données de l'objet """
