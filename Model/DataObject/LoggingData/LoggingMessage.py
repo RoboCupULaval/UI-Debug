@@ -2,8 +2,8 @@
 
 from datetime import date
 
-from Model.DataModel.DataObject import catch_format_error
-from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
+from Model.DataObject.BaseDataObject import catch_format_error
+from Model.DataObject.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 

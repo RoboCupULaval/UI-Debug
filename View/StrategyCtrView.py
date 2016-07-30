@@ -103,10 +103,12 @@ class StrategyCtrView(QWidget):
     def tab_selected(self, index):
         if index == 0:
             self.parent.deselect_all_robots()
+        elif index == 1:
+            self.parent.select_robot(self.selectRobot.currentIndex())
 
-    def hideEvent(self, hide_event):
+    def hideEvent(self, event):
         self.parent.deselect_all_robots()
-        super().hideEvent(hide_event)
+        super().hideEvent(event)
 
     def update_combobox(self):
         if self.parent.model_datain._data_STA is not None:

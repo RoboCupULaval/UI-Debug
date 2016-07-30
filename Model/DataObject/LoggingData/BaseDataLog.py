@@ -2,12 +2,12 @@
 
 from abc import abstractmethod
 
-from Model.DataModel.DataObject import DataObject
+from Model.DataObject.BaseDataObject import BaseDataObject
 
 __author__ = 'RoboCupULaval'
 
 
-class BaseDataLog(DataObject):
+class BaseDataLog(BaseDataObject):
     display_type = {0: 'NOTSET',
                     1: 'DEBUG',
                     2: 'INFO',

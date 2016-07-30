@@ -2,12 +2,12 @@
 
 from abc import abstractmethod
 from Controller.AbstractDrawingObject import AbstractDrawingObject
-from Model.DataModel.DataObject import DataObject
+from Model.DataObject.BaseDataObject import BaseDataObject
 
 __author__ = 'RoboCupULaval'
 
 
-class BaseDataDraw(DataObject):
+class BaseDataDraw(BaseDataObject):
     """ Données entrantes pour les paquets de données pour dessiner """
     line_style_allowed = AbstractDrawingObject.line_style_allowed
 

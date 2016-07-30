@@ -1,8 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
 from time import time
-from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
-from Model.DataModel.DataObject import catch_format_error
+from Model.DataObject.AccessorData.BaseDataAccessor import BaseDataAccessor
+from Model.DataObject.BaseDataObject import catch_format_error
 
 __author__ = 'RoboCupULaval'
 
