@@ -8,12 +8,12 @@ from PyQt4.QtCore import QMutex
 from PyQt4.QtCore import QMutexLocker
 from PyQt4.QtCore import QThread
 
-from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
-from Model.DataModel.AccessorData.StratGeneralAcc import StratGeneralAcc
-from Model.DataModel.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
-from Model.DataModel.DataFactory import DataFactory
-from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
-from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
+from Model.DataObject.AccessorData.BaseDataAccessor import BaseDataAccessor
+from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
+from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
+from Model.DataObject.DataFactory import DataFactory
+from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
+from Model.DataObject.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
