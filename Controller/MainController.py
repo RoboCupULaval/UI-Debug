@@ -17,6 +17,7 @@ from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
+from View.StatusBarView import StatusBarView
 
 from Communication.UDPCommunication import UDPServer
 
@@ -46,6 +47,7 @@ class MainController(QWidget):
         self.view_param = ParamView(self)
         self.view_controller = StrategyCtrView(self)
         self.view_media = MediaControllerView(self)
+        self.view_status = StatusBarView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -69,13 +71,17 @@ class MainController(QWidget):
         sub_layout.addWidget(self.view_screen)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
+        sub_layout.setContentsMargins(0, 0, 0, 0)
 
-        # => Menu | SubLayout | Logger (Vertical)
+        # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
         top_layout.addWidget(self.view_media)
         top_layout.addWidget(self.view_logger)
+        top_layout.addWidget(self.view_status)
+        top_layout.setContentsMargins(0, 0, 0, 0)
+        top_layout.setMargin(0)
 
         self.setLayout(top_layout)
 
@@ -293,3 +299,9 @@ class MainController(QWidget):
         """ Réactive la réception de données des modèles """
         self.model_datain.play()
         self.model_frame.play()
+
+    def get_cursor_position_from_screen(self):
+        # TODO - Finir la fonction
+        x, y = self.view_screen.get_cursor_position()
+        coord_x, coord_y = QtToolBox.field_ctrl.convert_screen_to_real_pst(x, y)
+        return int(coord_x), int(coord_y)

@@ -37,6 +37,7 @@ class FieldView(QtGui.QWidget):
 
         # Targeting
         self.last_target = None
+        self._cursor_position = 0, 0
 
         # Thread Core
         self._emit_signal = QtCore.pyqtSignal
@@ -62,6 +63,8 @@ class FieldView(QtGui.QWidget):
     def init_window(self):
         """ Initialisation de la fenêtre du widget qui affiche le terrain"""
         self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.setMouseTracking(True)
+        self.installEventFilter(self)
 
     def init_tool_bar(self):
         """ Initialisation de la barre d'outils de la vue du terrain """
@@ -276,6 +279,14 @@ class FieldView(QtGui.QWidget):
             mob_ordered = distance, i, mob
             nearest.append(mob_ordered)
         return min(nearest)
+
+    def get_cursor_position(self):
+        return self._cursor_position
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.MouseMove:
+            self._cursor_position = event.pos().x(), event.pos().y()
+        return super().eventFilter(source, event)
 
     def mousePressEvent(self, event):
         """ Gère l'événement du clic simple de la souris """
