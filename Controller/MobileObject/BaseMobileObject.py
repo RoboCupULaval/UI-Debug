@@ -4,6 +4,7 @@ from math import cos, sin, atan2
 from time import time
 from abc import abstractmethod
 from Controller.AbstractDrawingObject import AbstractDrawingObject
+from Controller.QtToolBox import QtToolBox
 
 __author__ = 'jbecirovski'
 
@@ -43,6 +44,9 @@ class BaseMobileObject(AbstractDrawingObject):
 
     def getRotate(self):
         return self._theta
+
+    def get_position_on_screen(self):
+        return QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y, self._theta)
 
     @abstractmethod
     def draw(self, painter):

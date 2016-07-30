@@ -261,12 +261,18 @@ class MainController(QWidget):
         """ Assigne une liste de filtres d'affichage """
         self.view_screen.list_filter = list_filter
 
-    def load_new_filters(self, list_filter):
-        """ Charge les nouveaux filtres """
-        self.view_filter.load_new_filter(list_filter)
-
     def deselect_all_robots(self):
+        """ Désélectionne tous les robots sur le terrain """
         self.view_screen.deselect_all_robots()
 
     def select_robot(self, index):
+        """ Sélectionne le robot spécifié par l'index sur le terrain """
         self.view_screen.select_robot(index)
+
+    def get_tactic_controller_is_visible(self):
+        """ Requête pour savoir le l'onglet de la page tactique est visible """
+        return self.view_controller.page_tactic.isVisible()
+
+    def force_tactic_controller_select_robot(self, index):
+        """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
+        self.view_controller.selectRobot.setCurrentIndex(index)

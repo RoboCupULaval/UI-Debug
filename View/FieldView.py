@@ -229,8 +229,11 @@ class FieldView(QtGui.QWidget):
             mob.deselect()
 
     def select_robot(self, index):
-        robots = self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']
-        robots[index].select()
+        for i, mob in enumerate(self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']):
+            if i == index:
+                mob.select()
+            else:
+                mob.deselect()
 
     def toggle_vanish_option(self):
         """ Active/Désactive l'option pour afficher le vanishing sur les objets mobiles """
@@ -263,6 +266,24 @@ class FieldView(QtGui.QWidget):
                 self.draw_filterable[draw.filter].append(draw)
             else:
                 self.draw_filterable[draw.filter] = [draw]
+
+    def get_nearest_mob_from_position(self, x, y):
+        """ Requête pour obtenir la distance, le numéro et le dessin du robot le plus près d'une position """
+        nearest = []
+        for i, mob in enumerate(self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']):
+            mob_x, mob_y, _ = mob.get_position_on_screen()
+            distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
+            mob_ordered = distance, i, mob
+            nearest.append(mob_ordered)
+        return min(nearest)
+
+    def mousePressEvent(self, event):
+        """ Gère l'événement du clic simple de la souris """
+        if self.controller.get_tactic_controller_is_visible():
+            distance, number, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
+            if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen:
+                self.select_robot(number)
+                self.controller.force_tactic_controller_select_robot(number)
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """
