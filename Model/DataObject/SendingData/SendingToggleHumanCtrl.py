@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataModel.DataObject import catch_format_error
-from Model.DataModel.SendingData.BaseDataSending import BaseDataSending
+from Model.DataObject.BaseDataObject import catch_format_error
+from Model.DataObject.SendingData.BaseDataSending import BaseDataSending
 
 __author__ = 'RoboCupULaval'
 

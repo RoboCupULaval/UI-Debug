@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 import pickle
-from Model.DataModel.DataObject import DataObject
+from Model.DataObject.BaseDataObject import BaseDataObject
 
 __author__ = 'RoboCupULaval'
 
@@ -16,13 +16,13 @@ class DataFactory:
     def _init_object_catalog(self):
         """ Initialise le catalogue d'objet pour la factory """
         self._import_data_classes()
-        for subclass in DataObject.__subclasses__():
+        for subclass in BaseDataObject.__subclasses__():
             for subsubclass in subclass.__subclasses__():
                 self._catalog_from_type_to_data_in_object[subsubclass.get_type()] = subsubclass
 
     @staticmethod
     def _import_data_classes():
-        """ Importe les objets dans les sous-dossiers de Model.DataModel """
+        """ Importe les objets dans les sous-dossiers de Model.DataObject """
         from os import listdir
         from os.path import isfile, join, isdir
         from importlib.machinery import SourceFileLoader
@@ -53,9 +53,9 @@ class DataFactory:
         return bad_log
 
     def get_data_object(self, data_in):
-        """ Génère un DataModel en fonction du paquet reçu """
+        """ Génère un DataObject en fonction du paquet reçu """
         try:
-            DataObject.package_is_valid(data_in)
+            BaseDataObject.package_is_valid(data_in)
             return self._catalog_from_type_to_data_in_object[data_in['type']](data_in)
         except Exception as e:
             return self.get_msg_bad_format(FormatPackageError=str(e), PaquetBrute=data_in)

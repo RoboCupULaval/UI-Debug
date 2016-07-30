@@ -20,7 +20,7 @@ class DrawingObjectFactory:
             self._catalog_from_datain_class_to_qt_object[subclass.get_datain_associated()] = subclass
 
     def _import_data_in_classes(self):
-        """ Importe les objets dans les sous-dossiers de Model.DataModel """
+        """ Importe les objets dans les sous-dossiers de Model.DataObject """
         from os import listdir
         from os.path import isfile, join, isdir
         from importlib.machinery import SourceFileLoader
@@ -35,7 +35,7 @@ class DrawingObjectFactory:
                 SourceFileLoader("", join(path_current_dir, folder, file)).load_module()
 
     def get_qt_draw_object(self, data_draw):
-        """ Génère un DataModel en fonction data_draw paquet reçu """
+        """ Génère un DataObject en fonction data_draw paquet reçu """
         try:
             return self._catalog_from_datain_class_to_qt_object[type(data_draw).__name__](data_draw)
         except Exception as e:

@@ -2,9 +2,9 @@
 
 from PyQt4.QtCore import QTimer
 from Communication.UDPCommunication import UDPSending
-from Model.DataModel.SendingData.SendingStrategy import SendingStrategy
-from Model.DataModel.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
-from Model.DataModel.SendingData.SendingTactic import SendingTactic
+from Model.DataObject.SendingData.SendingStrategy import SendingStrategy
+from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
+from Model.DataObject.SendingData.SendingTactic import SendingTactic
 
 __author__ = 'RoboCupULaval'
 

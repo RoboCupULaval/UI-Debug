@@ -20,7 +20,7 @@ class FrameModel:
         self._vision = Vision()
 
         # Initialisation des variables de données
-        self._max_data_queue = 100
+        self._max_data_queue = 3000
         self._data_queue_received = deque(maxlen=self._max_data_queue)
 
         # Initialisation des variables pour le frame catcher
@@ -28,6 +28,9 @@ class FrameModel:
         self._frame_catcher_update_rate = 60.0        # Fréquence d'update en Hz
         self._frame_catcher_timer = QTimer()
         self._init_frame_catcher()
+
+        # Contrôleur
+        self._pause = False
 
     def _init_frame_catcher(self):
         """ Initialise le timer pour récupérer """
@@ -51,11 +54,12 @@ class FrameModel:
 
     def _catching_frame(self):
         """ Récupère le dernier frame reçu, le met à jour et le sauvegarde """
-        if not self._update_is_in_progress():
-            frame = self._vision.get_latest_frame()
-            if not self._frame_has_been_processed(frame):
-                self._last_frame_catched_time = datetime.now()
-                self._update_view_screen_mobs(frame)
+        if not self._pause:
+            if not self._update_is_in_progress():
+                frame = self._vision.get_latest_frame()
+                if not self._frame_has_been_processed(frame):
+                    self._last_frame_catched_time = datetime.now()
+                    self._update_view_screen_mobs(frame)
 
     def _update_view_screen_mobs(self, frame):
         """ Mise à jour des données de la vue des objets mobiles  """
@@ -70,7 +74,7 @@ class FrameModel:
             x = self._data_queue_received[-1].detection.balls[0].x
             y = self._data_queue_received[-1].detection.balls[0].y
             self._controller.set_ball_pos_on_screen(x, y)
-        except BaseException:
+        except Exception as e:
             self._controller.hide_mob()
 
     def _update_view_screen_team_yellow(self):
@@ -87,7 +91,7 @@ class FrameModel:
 
             for bot_id in list_bot_id:
                 self._controller.hide_mob(bot_id)
-        except BaseException:
+        except Exception as e:
             pass
 
     def _update_view_screen_team_blue(self):
@@ -104,8 +108,17 @@ class FrameModel:
 
             for bot_id in list_bot_id:
                 self._controller.hide_mob(bot_id + 6)
-        except BaseException:
+        except Exception as e:
             pass
+
+    def pause(self):
+        self._pause = True
+
+    def play(self):
+        self._pause = False
+
+    def is_pause(self):
+        return self._pause
 
     def is_connected(self):
         """ Détermine si le modèle a reçu des données de la vision depuis au moins 1 seconde """

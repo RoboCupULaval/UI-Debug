@@ -8,12 +8,12 @@ from PyQt4.QtCore import QMutex
 from PyQt4.QtCore import QMutexLocker
 from PyQt4.QtCore import QThread
 
-from Model.DataModel.AccessorData.BaseDataAccessor import BaseDataAccessor
-from Model.DataModel.AccessorData.StratGeneralAcc import StratGeneralAcc
-from Model.DataModel.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
-from Model.DataModel.DataFactory import DataFactory
-from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
-from Model.DataModel.LoggingData.BaseDataLog import BaseDataLog
+from Model.DataObject.AccessorData.BaseDataAccessor import BaseDataAccessor
+from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
+from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
+from Model.DataObject.DataFactory import DataFactory
+from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
+from Model.DataObject.LoggingData.BaseDataLog import BaseDataLog
 
 __author__ = 'RoboCupULaval'
 
@@ -39,6 +39,9 @@ class DataInModel(object):
         self._udp_receiver = None
         self._last_packet = None
 
+        # Contrôleur
+        self._pause = False
+
         # Initialisations
         self._initialization()
 
@@ -58,17 +61,18 @@ class DataInModel(object):
     def _get_data_in(self):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
         while True:
-            QMutexLocker(self._mutex).relock()
-            package = None
-            try:
-                package = self._udp_receiver.get_last_data()
-                self._extract_and_distribute_data(package)
-            except AttributeError:
-                pass
-            finally:
-                self._last_packet = package[0] if package is not None else None
-                QMutexLocker(self._mutex).unlock()
-                sleep(0.01)
+            if not self._pause:
+                QMutexLocker(self._mutex).relock()
+                package = None
+                try:
+                    package = self._udp_receiver.get_last_data()
+                    self._extract_and_distribute_data(package)
+                except AttributeError:
+                    pass
+                finally:
+                    self._last_packet = package[0] if package is not None else None
+                    QMutexLocker(self._mutex).unlock()
+            sleep(0.01)
 
     def _extract_and_distribute_data(self, package):
         if package is not None:
@@ -163,3 +167,15 @@ class DataInModel(object):
         with open(path, 'w') as f:
             text = '##### LOGGING FROM UI #####\n' + text
             f.write(text)
+
+    def pause(self):
+        """ Met le modèle en pause """
+        self._pause = True
+
+    def play(self):
+        """ Met le modèle en lecture """
+        self._pause = False
+
+    def is_pause(self):
+        """ Requete pour savoir si le modèle est en pause """
+        return self._pause

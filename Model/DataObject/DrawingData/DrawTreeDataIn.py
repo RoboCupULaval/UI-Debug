@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from Model.DataModel.DataObject import catch_format_error
-from Model.DataModel.DrawingData.BaseDataDraw import BaseDataDraw
+from Model.DataObject.BaseDataObject import catch_format_error
+from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
 
 __author__ = 'RoboCupULaval'
 

@@ -16,6 +16,8 @@ from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 from View.ParamView import ParamView
+from View.MediaControllerView import MediaControllerView
+from View.StatusBarView import StatusBarView
 
 from Communication.UDPCommunication import UDPServer
 
@@ -40,10 +42,12 @@ class MainController(QWidget):
         self.main_window = MainWindow()
         self.view_menu = QMenuBar(self)
         self.view_logger = LoggerView(self)
-        self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
         self.view_filter = FilterCtrlView(self)
         self.view_param = ParamView(self)
+        self.view_controller = StrategyCtrView(self)
+        self.view_media = MediaControllerView(self)
+        self.view_status = StatusBarView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -67,12 +71,17 @@ class MainController(QWidget):
         sub_layout.addWidget(self.view_screen)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
+        sub_layout.setContentsMargins(0, 0, 0, 0)
 
-        # => Menu | SubLayout | Logger (Vertical)
+        # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
+        top_layout.addWidget(self.view_media)
         top_layout.addWidget(self.view_logger)
+        top_layout.addWidget(self.view_status)
+        top_layout.setContentsMargins(0, 0, 0, 0)
+        top_layout.setMargin(0)
 
         self.setLayout(top_layout)
 
@@ -164,8 +173,12 @@ class MainController(QWidget):
         toolMenu.addAction(filterAction)
 
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
-        StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
+        StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
         toolMenu.addAction(StrategyControllerAction)
+
+        mediaAction = QAction('Contrôleur Média', self, checkable=True)
+        mediaAction.triggered.connect(self.view_media.toggle_visibility)
+        toolMenu.addAction(mediaAction)
 
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
@@ -261,6 +274,34 @@ class MainController(QWidget):
         """ Assigne une liste de filtres d'affichage """
         self.view_screen.list_filter = list_filter
 
-    def load_new_filters(self, list_filter):
-        """ Charge les nouveaux filtres """
-        self.view_filter.load_new_filter(list_filter)
+    def deselect_all_robots(self):
+        """ Désélectionne tous les robots sur le terrain """
+        self.view_screen.deselect_all_robots()
+
+    def select_robot(self, index):
+        """ Sélectionne le robot spécifié par l'index sur le terrain """
+        self.view_screen.select_robot(index)
+
+    def get_tactic_controller_is_visible(self):
+        """ Requête pour savoir le l'onglet de la page tactique est visible """
+        return self.view_controller.page_tactic.isVisible()
+
+    def force_tactic_controller_select_robot(self, index):
+        """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
+        self.view_controller.selectRobot.setCurrentIndex(index)
+
+    def pause_models(self):
+        """ Met sur pause la réception de données des modèles """
+        self.model_datain.pause()
+        self.model_frame.pause()
+
+    def play_models(self):
+        """ Réactive la réception de données des modèles """
+        self.model_datain.play()
+        self.model_frame.play()
+
+    def get_cursor_position_from_screen(self):
+        # TODO - Finir la fonction
+        x, y = self.view_screen.get_cursor_position()
+        coord_x, coord_y = QtToolBox.field_ctrl.convert_screen_to_real_pst(x, y)
+        return int(coord_x), int(coord_y)

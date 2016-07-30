@@ -25,10 +25,10 @@ def catch_format_error(funct):
     return error_caught
 
 
-class DataObject:
+class BaseDataObject:
     def __init__(self, data_in):
         if data_in is not None:
-            DataObject.package_is_valid(data_in)
+            BaseDataObject.package_is_valid(data_in)
             self._data = data_in
         else:
             self._data = self.get_default_dict()
@@ -90,7 +90,7 @@ class DataObject:
     @staticmethod
     @abstractmethod
     def get_type():
-        """ Associe un object DrawDataIn avec un DataModel à destination de la clé du catalogue de la DataInFactory """
+        """ Associe un object DrawDataIn avec un DataObject à destination de la clé du catalogue de la DataInFactory """
         raise NotImplementedError()
 
     @staticmethod
