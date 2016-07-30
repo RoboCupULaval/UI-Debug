@@ -224,6 +224,14 @@ class FieldView(QtGui.QWidget):
             else:
                 mob.show_number()
 
+    def deselect_all_robots(self):
+        for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
+            mob.deselect()
+
+    def select_robot(self, index):
+        robots = self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']
+        robots[index].select()
+
     def toggle_vanish_option(self):
         """ Active/Désactive l'option pour afficher le vanishing sur les objets mobiles """
         self.option_vanishing = not self.option_vanishing

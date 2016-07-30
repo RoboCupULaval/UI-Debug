@@ -84,9 +84,29 @@ class StrategyCtrView(QWidget):
 
         self.page_tactic.setLayout(self.page_tact_vbox)
 
-        # + Onglet
+        # + Onglets
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
+
+        # SIGNAL / SLOT
+        self.connect(self.page_controller, SIGNAL('currentChanged(int)'),
+                     self, SLOT('tab_selected(int)'))
+        self.connect(self.selectRobot, SIGNAL('currentIndexChanged(int)'),
+                     self, SLOT('handle_selection_robot_event(int)'))
+
+    @pyqtSlot(int)
+    def handle_selection_robot_event(self, index):
+        self.parent.deselect_all_robots()
+        self.parent.select_robot(index)
+
+    @pyqtSlot(int)
+    def tab_selected(self, index):
+        if index == 0:
+            self.parent.deselect_all_robots()
+
+    def hideEvent(self, hide_event):
+        self.parent.deselect_all_robots()
+        super().hideEvent(hide_event)
 
     def update_combobox(self):
         if self.parent.model_datain._data_STA is not None:
@@ -155,7 +175,7 @@ class StrategyCtrView(QWidget):
     def send_strat_stop(self):
         self.parent.model_dataout.send_strategy('pStop')
 
-    def show_hide(self):
+    def toggle_show_hide(self):
         if self.isVisible():
             self.hide()
         else:

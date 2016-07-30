@@ -40,10 +40,10 @@ class MainController(QWidget):
         self.main_window = MainWindow()
         self.view_menu = QMenuBar(self)
         self.view_logger = LoggerView(self)
-        self.view_controller = StrategyCtrView(self)
         self.view_screen = FieldView(self)
         self.view_filter = FilterCtrlView(self)
         self.view_param = ParamView(self)
+        self.view_controller = StrategyCtrView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -164,7 +164,7 @@ class MainController(QWidget):
         toolMenu.addAction(filterAction)
 
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
-        StrategyControllerAction.triggered.connect(self.view_controller.show_hide)
+        StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
         toolMenu.addAction(StrategyControllerAction)
 
         loggerAction = QAction('Loggeur', self,  checkable=True)
@@ -264,3 +264,9 @@ class MainController(QWidget):
     def load_new_filters(self, list_filter):
         """ Charge les nouveaux filtres """
         self.view_filter.load_new_filter(list_filter)
+
+    def deselect_all_robots(self):
+        self.view_screen.deselect_all_robots()
+
+    def select_robot(self, index):
+        self.view_screen.select_robot(index)
