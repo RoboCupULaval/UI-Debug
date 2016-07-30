@@ -16,6 +16,7 @@ from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
 from View.ParamView import ParamView
+from View.MediaControllerView import MediaControllerView
 
 from Communication.UDPCommunication import UDPServer
 
@@ -44,6 +45,7 @@ class MainController(QWidget):
         self.view_filter = FilterCtrlView(self)
         self.view_param = ParamView(self)
         self.view_controller = StrategyCtrView(self)
+        self.view_media = MediaControllerView(self)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -72,6 +74,7 @@ class MainController(QWidget):
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
+        top_layout.addWidget(self.view_media)
         top_layout.addWidget(self.view_logger)
 
         self.setLayout(top_layout)
@@ -166,6 +169,10 @@ class MainController(QWidget):
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
         StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
         toolMenu.addAction(StrategyControllerAction)
+
+        mediaAction = QAction('Contrôleur Média', self, checkable=True)
+        mediaAction.triggered.connect(self.view_media.toggle_visibility)
+        toolMenu.addAction(mediaAction)
 
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
@@ -276,3 +283,13 @@ class MainController(QWidget):
     def force_tactic_controller_select_robot(self, index):
         """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
         self.view_controller.selectRobot.setCurrentIndex(index)
+
+    def pause_models(self):
+        """ Met sur pause la réception de données des modèles """
+        self.model_datain.pause()
+        self.model_frame.pause()
+
+    def play_models(self):
+        """ Réactive la réception de données des modèles """
+        self.model_datain.play()
+        self.model_frame.play()
