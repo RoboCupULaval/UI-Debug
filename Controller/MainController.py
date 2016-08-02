@@ -9,6 +9,7 @@ from PyQt4.QtCore import Qt
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
+from Model.RecorderModel import RecorderModel
 
 from View.FieldView import FieldView
 from View.FilterCtrlView import FilterCtrlView
@@ -38,6 +39,12 @@ class MainController(QWidget):
         # Communication
         self.network_data_in = UDPServer(self)
 
+        # Création des Modèles
+        self.model_frame = FrameModel(self)
+        self.model_datain = DataInModel(self)
+        self.model_dataout = DataOutModel(self)
+        self.model_recorder = RecorderModel()
+
         # Création des Vues
         self.main_window = MainWindow()
         self.view_menu = QMenuBar(self)
@@ -48,11 +55,6 @@ class MainController(QWidget):
         self.view_controller = StrategyCtrView(self)
         self.view_media = MediaControllerView(self)
         self.view_status = StatusBarView(self)
-
-        # Création des Modèles
-        self.model_frame = FrameModel(self)
-        self.model_datain = DataInModel(self)
-        self.model_dataout = DataOutModel(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -88,6 +90,7 @@ class MainController(QWidget):
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
         self.model_datain.setup_udp_server(self.network_data_in)
+        self.model_frame.set_recorder(self.model_recorder)
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -289,18 +292,15 @@ class MainController(QWidget):
         """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
         self.view_controller.selectRobot.setCurrentIndex(index)
 
-    def pause_models(self):
-        """ Met sur pause la réception de données des modèles """
-        self.model_datain.pause()
-        self.model_frame.enable_recorder()
-
-    def play_models(self):
-        """ Réactive la réception de données des modèles """
-        self.model_datain.play()
-        self.model_frame.disable_rewind()
-
     def get_cursor_position_from_screen(self):
         """ Récupère la position du curseur depuis le terrain """
         x, y = self.view_screen.get_cursor_position()
         coord_x, coord_y = QtToolBox.field_ctrl.convert_screen_to_real_pst(x, y)
         return int(coord_x), int(coord_y)
+
+    def toggle_recorder(self, p_bool):
+        """ Active/Désactive le Recorder """
+        if p_bool:
+            self.model_frame.enable_recorder()
+        else:
+            self.model_frame.disable_recorder()

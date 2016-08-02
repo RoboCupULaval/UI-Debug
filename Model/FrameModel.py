@@ -62,8 +62,7 @@ class FrameModel:
             frame = self._get_last_frame()
             if not self._frame_has_been_processed(frame):
                 self._last_frame_caught_time = datetime.now()
-                setattr(frame, 'time', self._last_frame_caught_time)
-                self._update_view_screen_mobs(frame)
+                self._update_view_screen_mobs(datetime.now(), frame)
 
     def _get_last_frame(self):
         """ Récupère le dernier frame de la vision ou de l'enregistreur """
@@ -72,10 +71,11 @@ class FrameModel:
         else:
             return self._recorder.get_last_frame()
 
-    def _update_view_screen_mobs(self, frame):
+    def _update_view_screen_mobs(self, ftime, frame):
         """ Mise à jour des données de la vue des objets mobiles  """
         if not self._recorder_is_enable:
-            self._data_queue_received.append(frame)
+            frame_pkg = ftime, frame
+            self._data_queue_received.append(frame_pkg)
         self._current_frame = frame
         self._update_view_screen_ball()
         self._update_view_screen_team_yellow()
