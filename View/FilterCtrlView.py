@@ -11,6 +11,7 @@ class FilterCtrlView(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self._ctrl = controller
         self._layout_v = QtGui.QVBoxLayout()
+        self._layout_v.setContentsMargins(0, 0, 0, 0)
 
         # Timer
         # TODO - Changer par emit signal stateChanged()
