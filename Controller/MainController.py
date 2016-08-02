@@ -66,12 +66,12 @@ class MainController(QWidget):
         self.resize(975, 750)
 
         # Initialisation des Layouts
-        # => Field | StratController (Horizontal)
+        # => Field | Filter | StratController (Horizontal)
         sub_layout = QHBoxLayout()
+        sub_layout.setContentsMargins(0, 0, 0, 0)
         sub_layout.addWidget(self.view_screen)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
-        sub_layout.setContentsMargins(0, 0, 0, 0)
 
         # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
@@ -210,7 +210,6 @@ class MainController(QWidget):
 
     def add_draw_on_screen(self, draw):
         """ Ajout un dessin sur la fenêtre du terrain """
-        # TODO - Trouver un moyen de formater les coordonnées / taille pour la vue autrement
         try:
             qt_draw = self.draw_handler.get_qt_draw_object(draw)
             if qt_draw is not None:
@@ -293,15 +292,15 @@ class MainController(QWidget):
     def pause_models(self):
         """ Met sur pause la réception de données des modèles """
         self.model_datain.pause()
-        self.model_frame.pause()
+        self.model_frame.enable_recorder()
 
     def play_models(self):
         """ Réactive la réception de données des modèles """
         self.model_datain.play()
-        self.model_frame.play()
+        self.model_frame.disable_rewind()
 
     def get_cursor_position_from_screen(self):
-        # TODO - Finir la fonction
+        """ Récupère la position du curseur depuis le terrain """
         x, y = self.view_screen.get_cursor_position()
         coord_x, coord_y = QtToolBox.field_ctrl.convert_screen_to_real_pst(x, y)
         return int(coord_x), int(coord_y)

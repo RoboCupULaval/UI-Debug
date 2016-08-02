@@ -63,6 +63,7 @@ class LoggerView(QWidget):
 
         group_box = QGroupBox('Filtre')
         layout_filter = QVBoxLayout()
+        layout_filter.setContentsMargins(0, 0, 0, 0)
         group_box.setLayout(layout_filter)
         self.filter_debug = QCheckBox('Debug')
         self.filter_debug.setChecked(True)
