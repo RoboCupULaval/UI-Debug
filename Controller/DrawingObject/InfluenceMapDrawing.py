@@ -39,16 +39,15 @@ class InfluenceMapDrawing(BaseDrawingObject):
                                                                                self.data['coldest_color'],
                                                                                self.data['hottest_color'])
                 image.setPixel(nb_line, nb_col, QColor(*rgb_value).rgb())
-        self._pixmap = image
+        self._pixmap = image.transformed(QTransform().rotate(90))
 
     def draw(self, painter):
         if self._pixmap is not None and self.isVisible():
             x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
             width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen
             height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen
-            pixmap = self._pixmap.mirrored(horizontal=QtToolBox.field_ctrl.is_y_axe_flipped,
-                                           vertical=QtToolBox.field_ctrl.is_x_axe_flipped)
-            pixmap = pixmap.transformed(QTransform().rotate(90))
+            pixmap = self._pixmap.mirrored(horizontal=QtToolBox.field_ctrl.is_x_axe_flipped,
+                                           vertical=QtToolBox.field_ctrl.is_y_axe_flipped)
             painter.drawImage(QRect(x, y, width, height),
                               pixmap)
 

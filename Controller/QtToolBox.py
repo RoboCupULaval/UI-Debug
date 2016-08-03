@@ -55,7 +55,7 @@ class QtToolBox:
     @staticmethod
     def create_line(pst_start, pst_end, pen):
         """ Génère une ligne avec les paramètres entrants """
-        qt_line = QtGui.QGraphicsLineItem(*pst_start, *pst_end)
+        qt_line = QtGui.QGraphicsLineItem(pst_start[0], pst_start[1], pst_end[0], pst_end[1])
         qt_line.setPen(pen)
         return qt_line
 
