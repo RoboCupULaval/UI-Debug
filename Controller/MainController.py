@@ -125,6 +125,16 @@ class MainController(QWidget):
         toggleFrameRate.triggered.connect(self.view_screen.toggle_frame_rate)
         fieldMenu.addAction(toggleFrameRate)
 
+        fieldMenu.addSeparator()
+
+        flipXAction = QAction("Changer l'axe des X", self, checkable=True)
+        flipXAction.triggered.connect(self.flip_screen_x_axe)
+        fieldMenu.addAction(flipXAction)
+
+        flipYAction = QAction("Changer l'axe des Y", self, checkable=True)
+        flipYAction.triggered.connect(self.flip_screen_y_axe)
+        fieldMenu.addAction(flipYAction)
+
         viewMenu.addSeparator()
 
         camMenu = viewMenu.addMenu('Camera')
@@ -136,16 +146,6 @@ class MainController(QWidget):
         lockCamAction = QAction("Bloquer la caméra", self)
         lockCamAction.triggered.connect(self.view_screen.toggle_lock_camera)
         camMenu.addAction(lockCamAction)
-
-        viewMenu.addSeparator()
-
-        flipXAction = QAction("Changer l'axe des X", self, checkable=True)
-        flipXAction.triggered.connect(self.flip_screen_x_axe)
-        camMenu.addAction(flipXAction)
-
-        flipYAction = QAction("Changer l'axe des Y", self, checkable=True)
-        flipYAction.triggered.connect(self.flip_screen_y_axe)
-        camMenu.addAction(flipYAction)
 
         viewMenu.addSeparator()
 
@@ -226,7 +226,7 @@ class MainController(QWidget):
 
     def set_robot_pos_on_screen(self, bot_id, pst, theta):
         """ Modifie la position et l'orientation d'un robot sur le terrain """
-        self.view_screen.set_bot_pos(bot_id, *pst, theta)
+        self.view_screen.set_bot_pos(bot_id, pst[0], pst[1], theta)
 
     def hide_mob(self, bot_id=None):
         """ Cache l'objet mobile si l'information n'est pas update """
