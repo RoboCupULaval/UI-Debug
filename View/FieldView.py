@@ -281,9 +281,15 @@ class FieldView(QtGui.QWidget):
         return min(nearest)
 
     def get_cursor_position(self):
+        """ Récupère la position du curseur """
         return self._cursor_position
 
+    def get_fps(self):
+        """ Récupère la fréquence de rafraîchissement de l'écran """
+        return self._real_frame_rate
+
     def eventFilter(self, source, event):
+        """ Gère l'événement filtré """
         if event.type() == QtCore.QEvent.MouseMove:
             self._cursor_position = event.pos().x(), event.pos().y()
         return super().eventFilter(source, event)

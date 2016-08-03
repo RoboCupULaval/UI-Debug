@@ -4,6 +4,7 @@ from PyQt4.QtGui import QPixmap
 from PyQt4.QtGui import QPainter
 from PyQt4.QtGui import QImage
 from PyQt4.QtGui import QColor
+from PyQt4.QtGui import QTransform
 from PyQt4.QtCore import QThread
 from PyQt4.QtCore import QRect
 
@@ -45,9 +46,11 @@ class InfluenceMapDrawing(BaseDrawingObject):
             x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
             width = QtToolBox.field_ctrl.size[0] * QtToolBox.field_ctrl.ratio_screen
             height = QtToolBox.field_ctrl.size[1] * QtToolBox.field_ctrl.ratio_screen
+            pixmap = self._pixmap.mirrored(horizontal=QtToolBox.field_ctrl.is_y_axe_flipped,
+                                           vertical=QtToolBox.field_ctrl.is_x_axe_flipped)
+            pixmap = pixmap.transformed(QTransform().rotate(90))
             painter.drawImage(QRect(x, y, width, height),
-                              self._pixmap.mirrored(horizontal=QtToolBox.field_ctrl.is_x_axe_flipped,
-                       vertical=QtToolBox.field_ctrl.is_y_axe_flipped))
+                              pixmap)
 
     @staticmethod
     def _convert_rgb_value_with_minmax(value, value_min, value_max, rgb_min, rgb_max):
