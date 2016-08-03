@@ -68,7 +68,9 @@ class MediaControllerView(QtGui.QWidget):
 
     def pause(self):
         self.controller.model_recorder.pause()
-        self._media_slider.setValue(self.controller.model_recorder.get_cursor_percentage())
+        value = self.controller.model_recorder.get_cursor_percentage()
+        if value is not None:
+            self._media_slider.setValue(value)
         self._media_slider.setDisabled(False)
 
     def play(self):
@@ -77,15 +79,21 @@ class MediaControllerView(QtGui.QWidget):
 
     def back(self):
         self.controller.model_recorder.back()
-        self._media_slider.setValue(self.controller.model_recorder.get_cursor_percentage())
+        value = self.controller.model_recorder.get_cursor_percentage()
+        if value is not None:
+            self._media_slider.setValue(value)
 
     def rewind(self):
         self.controller.model_recorder.rewind()
-        self._media_slider.setValue(self.controller.model_recorder.get_cursor_percentage())
+        value = self.controller.model_recorder.get_cursor_percentage()
+        if value is not None:
+            self._media_slider.setValue(value)
 
     def forward(self):
         self.controller.model_recorder.forward()
-        self._media_slider.setValue(self.controller.model_recorder.get_cursor_percentage())
+        value = self.controller.model_recorder.get_cursor_percentage()
+        if value is not None:
+            self._media_slider.setValue(value)
 
     @QtCore.pyqtSlot()
     def sliderReleased(self):
@@ -93,7 +101,6 @@ class MediaControllerView(QtGui.QWidget):
 
     @QtCore.pyqtSlot()
     def sliderMoved(self):
-        print('YO')
         self.controller.model_recorder.skip_to(self._media_slider.value())
 
     def toggle_visibility(self):
