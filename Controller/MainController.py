@@ -308,3 +308,4 @@ class MainController(QWidget):
     def get_fps(self):
         """ Récupère la fréquence de rafraîchissement de l'écran """
         return self.view_screen.get_fps()
+
