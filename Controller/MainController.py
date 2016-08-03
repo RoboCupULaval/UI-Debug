@@ -304,3 +304,7 @@ class MainController(QWidget):
             self.model_frame.enable_recorder()
         else:
             self.model_frame.disable_recorder()
+
+    def get_fps(self):
+        """ Récupère la fréquence de rafraîchissement de l'écran """
+        return self.view_screen.get_fps()
