@@ -33,7 +33,7 @@ class StatusBarView(QtGui.QWidget):
 
     def update_coord_cursor(self):
         x, y = self._controller.get_cursor_position_from_screen()
-        self.label_coord_mouse.setText("[X: {: >5} | Y: {: >5}]".format(str(x), str(y)))
+        self.label_coord_mouse.setText("[X: {:>5} | Y: {:>5}]".format(str(x), str(y)))
 
     def init_ui(self):
         layout = QtGui.QHBoxLayout()
