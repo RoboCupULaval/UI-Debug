@@ -281,9 +281,9 @@ class MainController(QWidget):
         """ Désélectionne tous les robots sur le terrain """
         self.view_screen.deselect_all_robots()
 
-    def select_robot(self, index):
+    def select_robot(self, index, is_yellow):
         """ Sélectionne le robot spécifié par l'index sur le terrain """
-        self.view_screen.select_robot(index)
+        self.view_screen.select_robot(index, is_yellow)
 
     def get_tactic_controller_is_visible(self):
         """ Requête pour savoir le l'onglet de la page tactique est visible """
@@ -291,7 +291,12 @@ class MainController(QWidget):
 
     def force_tactic_controller_select_robot(self, index):
         """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
-        self.view_controller.selectRobot.setCurrentIndex(index)
+        if index > 5:
+            self.view_controller.selectTeam.setCurrentIndex(1)
+            self.view_controller.selectRobot.setCurrentIndex(index - 6)
+        else:
+            self.view_controller.selectTeam.setCurrentIndex(0)
+            self.view_controller.selectRobot.setCurrentIndex(index)
 
     def get_cursor_position_from_screen(self):
         """ Récupère la position du curseur depuis le terrain """

@@ -26,7 +26,7 @@ class DataOutModel:
         target = int(target[0]), int(target[1])
         goal = int(goal[0]), int(goal[1])
         pkg = SendingTactic().set_data(tactic=tactic,
-                                       id=id_bot,
+                                       id=id_bot % 6,
                                        target=target,
                                        goal=goal)
         self._udp_sender.send_message(pkg.get_binary())

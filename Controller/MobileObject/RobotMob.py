@@ -14,7 +14,7 @@ __author__ = 'RoboCupULaval'
 class RobotMob(BaseMobileObject):
     def __init__(self, bot_id, x=0, y=0, theta=0, is_yellow=True):
         BaseMobileObject.__init__(self, x, y, theta)
-        self._id = bot_id
+        self._id = 'b{}'.format(bot_id - 6) if bot_id > 5 else 'y{}'.format(bot_id)
         self._is_yellow = is_yellow
         self._display_number = False
         self._display_select = False
