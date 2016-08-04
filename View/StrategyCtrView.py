@@ -61,8 +61,15 @@ class StrategyCtrView(QWidget):
 
         group_vbox.addWidget(QLabel('ID du robot :'))
         self.selectRobot = QComboBox()
-        [self.selectRobot.addItem(str(x)) for x in range(12)]
+        [self.selectRobot.addItem(str(x)) for x in range(6)]
         group_vbox.addWidget(self.selectRobot)
+
+        group_vbox.addWidget(QLabel('Équipe :'))
+        self.selectTeam = QComboBox()
+        self.selectTeam.addItem('Yellow')
+        self.selectTeam.addItem('Blue')
+        group_vbox.addWidget(self.selectTeam)
+
         group_vbox.addWidget(QLabel('Tactique à appliquer :'))
         self.selectTactic = QComboBox()
         self.selectTactic.addItem('Aucune Tactique disponible')
@@ -92,19 +99,27 @@ class StrategyCtrView(QWidget):
         self.connect(self.page_controller, SIGNAL('currentChanged(int)'),
                      self, SLOT('tab_selected(int)'))
         self.connect(self.selectRobot, SIGNAL('currentIndexChanged(int)'),
-                     self, SLOT('handle_selection_robot_event(int)'))
+                     self, SLOT('handle_selection_robot_event_id(int)'))
+        self.connect(self.selectTeam, SIGNAL('currentIndexChanged(int)'),
+                     self, SLOT('handle_selection_robot_event_team(int)'))
 
     @pyqtSlot(int)
-    def handle_selection_robot_event(self, index):
+    def handle_selection_robot_event_id(self, index):
         self.parent.deselect_all_robots()
-        self.parent.select_robot(index)
+        self.parent.select_robot(index, True if self.selectTeam.currentText() == 'Yellow' else False)
+
+    @pyqtSlot(int)
+    def handle_selection_robot_event_team(self, index):
+        self.parent.deselect_all_robots()
+        self.parent.select_robot(self.selectRobot.currentIndex(), True if index == 0 else False)
 
     @pyqtSlot(int)
     def tab_selected(self, index):
         if index == 0:
             self.parent.deselect_all_robots()
         elif index == 1:
-            self.parent.select_robot(self.selectRobot.currentIndex())
+            id_bot = self.selectRobot.currentIndex()
+            self.parent.select_robot(id_bot, True if self.selectTeam.currentText() == 'Yellow' else False)
 
     def hideEvent(self, event):
         self.parent.deselect_all_robots()
@@ -165,6 +180,9 @@ class StrategyCtrView(QWidget):
 
     def send_tactic(self):
         id_bot = int(self.selectRobot.currentText())
+        is_yellow = True if self.selectTeam == 'Yellow' else False
+        if not is_yellow:
+            id_bot += 6
         tactic = str(self.selectTactic.currentText())
         target = self.parent.model_dataout.target
         if not tactic == 'Aucune Tactique disponible':

@@ -231,8 +231,8 @@ class FieldView(QtGui.QWidget):
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             mob.deselect()
 
-    def select_robot(self, index):
-        for i, mob in enumerate(self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']):
+    def select_robot(self, index, is_yellow):
+        for i, mob in enumerate(self.graph_mobs['robots_yellow'] if is_yellow else self.graph_mobs['robots_blue']):
             if i == index:
                 mob.select()
             else:
@@ -299,7 +299,7 @@ class FieldView(QtGui.QWidget):
         if self.controller.get_tactic_controller_is_visible():
             distance, number, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
             if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen:
-                self.select_robot(number)
+                self.select_robot(number % 6, True if number <= 5 else False)
                 self.controller.force_tactic_controller_select_robot(number)
 
     def mouseDoubleClickEvent(self, event):
