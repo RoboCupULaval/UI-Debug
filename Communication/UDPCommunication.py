@@ -19,7 +19,41 @@ class UDPSending(object):
         self._sock.sendto(p_object, (self._ip, self._port))
 
 
+class UDPReceiving(QtCore.QThread):
+    def __init__(self, ip='localhost', port=20021):
+        super().__init__()
+        self._num = 0
+        self._ip = ip
+        self._port = port
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        self._data = []
+
+    def start(self):
+        self._sock.bind((self._ip, self._port))
+        super().start()
+
+    def run(self):
+        while True:
+            try:
+                data, addr = self._sock.recvfrom(65565)
+                if not len(self._data) or not data == self._data[-1]:
+                    data = self._num, data
+                    self._data.append(data)
+                    self._num += 1
+            except Exception as e:
+                print(type(e).__name__, str(e))
+
+    def get_last_data(self):
+        raw_data = None
+        try:
+            raw_data = self._data.pop(0)
+        finally:
+            return raw_data
+
+
 class UDPServer(QtCore.QThread):
+    # === ERROR FASTTOP ===
     def __init__(self, parent=None, port=20021):
         super().__init__(parent)
         self.prnt = parent

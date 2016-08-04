@@ -20,7 +20,7 @@ from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
 from View.StatusBarView import StatusBarView
 
-from Communication.UDPCommunication import UDPServer
+from Communication.UDPCommunication import UDPServer, UDPReceiving
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -37,7 +37,8 @@ class MainController(QWidget):
         self.draw_handler = DrawingObjectFactory(self)
 
         # Communication
-        self.network_data_in = UDPServer(self)
+        # self.network_data_in = UDPServer(self)
+        self.network_data_in = UDPReceiving()
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
