@@ -319,9 +319,10 @@ class FieldView(QtGui.QWidget):
 
     def mouseMoveEvent(self, event):
         """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
-        if not QtToolBox.field_ctrl.camera_is_locked():
-            self.setCursor(QtCore.Qt.ClosedHandCursor)
-        QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
+        if event.buttons() == QtCore.Qt.LeftButton:
+            if not QtToolBox.field_ctrl.camera_is_locked():
+                self.setCursor(QtCore.Qt.ClosedHandCursor)
+            QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
 
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
