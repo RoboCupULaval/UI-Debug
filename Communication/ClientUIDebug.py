@@ -9,7 +9,7 @@ class ClientUIDebug(object):
     def __init__(self, name, port_sender=20021, port_receiver=10021):
         self._name = str(name)
         self._udp_sender = UDPSending(port=port_sender)
-        self._udp_receiver = UDPReceiving(port=port_receiver)
+        self._udp_receiver = UDPReceiving(rcv_port=port_receiver)
 
     def start(self):
         self._udp_receiver.start()

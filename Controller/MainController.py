@@ -20,7 +20,7 @@ from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
 from View.StatusBarView import StatusBarView
 
-from Communication.UDPCommunication import UDPServer, UDPReceiving
+from Communication.UDPCommunication import UDPReceiving
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -38,7 +38,7 @@ class MainController(QWidget):
 
         # Communication
         # self.network_data_in = UDPServer(self)
-        self.network_data_in = UDPReceiving()
+        self.network_data_in = UDPReceiving(name='UDPServer', debug=False)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -91,6 +91,7 @@ class MainController(QWidget):
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
         self.model_datain.setup_udp_server(self.network_data_in)
+        self.model_dataout.setup_udp_server(self.network_data_in)
         self.model_frame.set_recorder(self.model_recorder)
 
     def init_menubar(self):

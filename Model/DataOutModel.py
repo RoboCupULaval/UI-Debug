@@ -1,7 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
 from PyQt4.QtCore import QTimer
-from Communication.UDPCommunication import UDPSending
 from Model.DataObject.SendingData.SendingStrategy import SendingStrategy
 from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
 from Model.DataObject.SendingData.SendingTactic import SendingTactic
@@ -12,12 +11,15 @@ __author__ = 'RoboCupULaval'
 class DataOutModel:
     def __init__(self, controller=None):
         self._controller = controller
-        self._udp_sender = UDPSending()
+        self._udp_sender = None
         self.target = 0, 0
 
         self.frame_timer = QTimer()
         self.frame_timer.timeout.connect(self.update_screen)
         self.frame_timer.start(20)
+
+    def setup_udp_server(self, server):
+        self._udp_sender = server
 
     def update_screen(self):
         self._controller.update_target_on_screen()
