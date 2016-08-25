@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
@@ -30,15 +31,35 @@ class ParamView(QtGui.QDialog):
 
     def init_page_network(self):
         layout_main = QtGui.QVBoxLayout(self._page_network)
+        layout_main.setAlignment(QtCore.Qt.AlignTop)
         self._page_network.setLayout(layout_main)
 
+        # PARAM UI Server
+        group_server = QtGui.QGroupBox('UI Server')
+        layout_main.addWidget(group_server)
         layout_form = QtGui.QFormLayout()
-        self.form_network_recv_port = QtGui.QLineEdit()
-        layout_form.addRow(QtGui.QLabel("UDP Port de réception :"), self.form_network_recv_port)
-        self.form_network_send_port = QtGui.QLineEdit()
-        layout_form.addRow(QtGui.QLabel("UDP Port d'envoi :"), self.form_network_send_port)
+        group_server.setLayout(layout_form)
 
-        layout_main.addLayout(layout_form)
+        # => Port rcv
+        self.form_network_recv_port = QtGui.QLineEdit()
+        layout_form.addRow(QtGui.QLabel("Port de réception :"), self.form_network_recv_port)
+        # => Port snd
+        self.form_network_send_port = QtGui.QLineEdit()
+        layout_form.addRow(QtGui.QLabel("Port d'envoi :"), self.form_network_send_port)
+
+        # PARAM VISION
+        group_vision = QtGui.QGroupBox('Vision')
+        layout_main.addWidget(group_vision)
+        layout_form = QtGui.QFormLayout()
+        group_vision.setLayout(layout_form)
+
+        # => IP
+        self.form_network_vision_ip = QtGui.QLineEdit()
+        self.form_network_vision_ip.setDisabled(True)
+        layout_form.addRow(QtGui.QLabel("IP :"), self.form_network_vision_ip)
+        # => Port
+        self.form_network_vision_port = QtGui.QLineEdit()
+        layout_form.addRow(QtGui.QLabel("Port :"), self.form_network_vision_port)
 
     def init_page_dimension(self):
         layout_main = QtGui.QVBoxLayout(self._page_dimension)
@@ -127,6 +148,8 @@ class ParamView(QtGui.QDialog):
         # NETWORK
         self.form_network_recv_port.setText(str(self._ctrl.network_data_in.get_default_rcv_port()))
         self.form_network_snd_port.setText(str(self._ctrl.network_data_in.get_default_snd_port()))
+        self.form_network_vision_ip.setText(str(self._ctrl.network_vision.get_default_ip()))
+        self.form_network_vision_port.setText(str(self._ctrl.network_vision.get_default_port()))
 
         self._apply_param()
 
@@ -146,6 +169,8 @@ class ParamView(QtGui.QDialog):
 
         self.form_network_recv_port.setText(str(self._ctrl.network_data_in.get_rcv_port()))
         self.form_network_send_port.setText(str(self._ctrl.network_data_in.get_snd_port()))
+        self.form_network_vision_ip.setText(str(self._ctrl.network_vision.get_ip()))
+        self.form_network_vision_port.setText(str(self._ctrl.network_vision.get_port()))
 
     def hide(self):
         self.restore_values()
@@ -227,6 +252,19 @@ class ParamView(QtGui.QDialog):
                 self._ctrl.network_data_in.set_snd_port(int(self.form_network_send_port.text()))
         except Exception as e:
             self.form_network_send_port.setStyleSheet(style_bad)
+            is_wrong = True
+
+        try:
+            self.form_network_vision_ip.setStyleSheet(style_good)
+            self.form_network_recv_port.setStyleSheet(style_good)
+            if not self._ctrl.network_vision.get_ip() == str(self.form_network_vision_ip.text()) \
+                or not self._ctrl.network_vision.get_port() == int(self.form_network_vision_port.text()):
+                self._ctrl.network_vision.set_new_connexion(str(self.form_network_vision_ip.text()),
+                                                            int(self.form_network_vision_port.text()))
+        except Exception as e:
+            print(type(e).__name__, e)
+            self.form_network_vision_ip.setStyleSheet(style_bad)
+            self.form_network_vision_port.setStyleSheet(style_bad)
             is_wrong = True
 
         if is_wrong:
