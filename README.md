@@ -75,6 +75,9 @@ data = {'level': int,       # 0:NOSET | 1:DEBUG | 2:INFO | 3:WARN | 4:ERR | 5:C
 
 """ ... """
 
+# Type 1000 - Envoie à l'UI d'un HandShake pour savoir si l'UI est connecté
+data = {}                   # Dictionnaire vide
+
 # Type 1001 - Envoie à l'UI la liste des stratégies, tactiques et actions disponibles.
 data = {'strategy': list(str),      # Liste de toutes les stratégies
         'tactic': list(str),        # Liste de toutes les tactiques
@@ -178,6 +181,9 @@ data = {'tree': list(tuple(tuple(int, int), tuple(int, int)), ...)
         }
         
 """ ... """
+
+# Type 5000 - Envoie la réponse du HandShake au client
+data = {}                           # Dictionnaire vide
 
 # Type 5001 - Basculer l'IA en mode contrôle humain/machine (toggle-human-control)
 data = {'is_human_control': bool    # Donne le contrôle de l'IA à la humain ou à la machine

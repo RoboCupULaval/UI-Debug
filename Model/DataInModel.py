@@ -14,6 +14,7 @@ from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
 from Model.DataObject.DataFactory import DataFactory
 from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
 from Model.DataObject.LoggingData.BaseDataLog import BaseDataLog
+from Model.DataObject.AccessorData.HandShakeAcc import HandShakeAcc
 
 __author__ = 'RoboCupULaval'
 
@@ -26,6 +27,7 @@ class DataInModel(object):
         self._data_logging = list()
         self._data_config = list()
         self._data_draw = dict()
+        self._distrib_sepcific_packet = dict()
         self._data_STA = None
 
         # Système interne
@@ -43,6 +45,7 @@ class DataInModel(object):
         self._pause = False
 
         # Initialisations
+        self._init_distributor()
         self._initialization()
 
     def _initialization(self):
@@ -52,6 +55,14 @@ class DataInModel(object):
         self._data_draw['robots_blue'] = [list() for _ in range(6)]
         self._data_recovery.run = self._get_data_in
         self._data_recovery.start()
+
+    def _init_distributor(self):
+        """ Initialise la distribution des paquets en fonction du type de paquet """
+        self._distrib_sepcific_packet[VeryLargeDataAcc.__name__] = self._distrib_VeryLargeData
+        self._distrib_sepcific_packet[BaseDataDraw.__name__] = self._distrib_BaseDataDraw
+        self._distrib_sepcific_packet[StratGeneralAcc.__name__] = self._distrib_StratGeneral
+        self._distrib_sepcific_packet[BaseDataLog.__name__] = self._distrib_BaseDataLog
+        self._distrib_sepcific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
 
     def setup_udp_server(self, udp_server):
         """ Installer le serveur UDP """
@@ -81,21 +92,40 @@ class DataInModel(object):
             data_in = pickle.loads(package)
             if data_in is not None:
                 data = self._datain_factory.get_data_object(data_in)
-                if isinstance(data, BaseDataLog):
-                    self._store_data_logging(data)
-                elif isinstance(data, BaseDataAccessor):
-                    if type(data).__name__ == StratGeneralAcc.__name__:
-                        if self._data_STA is not None:
-                            for key in data.data.keys():
-                                self._data_STA.data[key] = data.data[key]
-                        else:
-                            self._data_STA = data
-                    elif data.__class__.__name__ == VeryLargeDataAcc.__name__:
-                        data.store()
-                        self._extract_and_distribute_data(data.rebuild())
-                elif isinstance(data, BaseDataDraw):
-                    self._data_draw['notset'].append(data)
-                    self.show_draw(self._data_draw['notset'][-1])
+                try:
+                    if isinstance(data, BaseDataDraw):
+                        self._distrib_sepcific_packet[BaseDataDraw.__name__](data)
+                    else:
+                        self._distrib_sepcific_packet[type(data).__name__](data)
+                except KeyError as e:
+                    print(type(e).__name__, e)
+
+    # === DISTRIBUTOR ===
+
+    def _distrib_VeryLargeData(self, data):
+        """ Traite le paquet VeryLargeData """
+        data.store()
+        self._extract_and_distribute_data(data.rebuild())
+
+    def _distrib_BaseDataDraw(self, data):
+        """ Traite le paquet de type générique DataDraw """
+        self._data_draw['notset'].append(data)
+        self.show_draw(self._data_draw['notset'][-1])
+
+    def _distrib_StratGeneral(self, data):
+        if self._data_STA is not None:
+            for key in data.data.keys():
+                self._data_STA.data[key] = data.data[key]
+        else:
+            self._data_STA = data
+
+    def _distrib_BaseDataLog(self, data):
+        self._store_data_logging(data)
+
+    def _distrib_HandShake(self, data):
+        self._controller.send_handshake()
+
+    # === ===
 
     def _store_data_logging(self, data):
         """ Stock les données de logging """

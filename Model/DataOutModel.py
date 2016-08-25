@@ -4,6 +4,7 @@ from PyQt4.QtCore import QTimer
 from Model.DataObject.SendingData.SendingStrategy import SendingStrategy
 from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
 from Model.DataObject.SendingData.SendingTactic import SendingTactic
+from Model.DataObject.SendingData.SendingHandShake import SendingHandShake
 
 __author__ = 'RoboCupULaval'
 
@@ -39,4 +40,8 @@ class DataOutModel:
 
     def send_toggle_human_control(self, result):
         pkg = SendingToggleHumanCtrl().set_data(is_human_control=result)
+        self._udp_sender.send_message(pkg.get_binary())
+
+    def send_handshake(self):
+        pkg = SendingHandShake()
         self._udp_sender.send_message(pkg.get_binary())

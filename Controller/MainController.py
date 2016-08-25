@@ -320,3 +320,6 @@ class MainController(QWidget):
         """ Récupère la fréquence de rafraîchissement de l'écran """
         return self.view_screen.get_fps()
 
+    def send_handshake(self):
+        self.model_dataout.send_handshake()
+
