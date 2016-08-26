@@ -3,7 +3,6 @@
 import logging
 import pickle
 import socket
-from time import sleep
 from threading import Thread, Event
 
 __author__ = 'RoboCupULaval'
@@ -20,8 +19,9 @@ class UDPServer(Thread):
         self._snd_port = snd_port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._event_input = Event()
+        self._event_connexion = Event()
+        self._event_restart = Event()
         self._is_running = False
-        self._socket_is_up = False
 
         self._data = []
         self._msg_logging = []
@@ -40,7 +40,7 @@ class UDPServer(Thread):
     def init_logger(self):
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(thread)d - %(levelname)s - %(message)s')
         ch.setFormatter(formatter)
         self._logger.addHandler(ch)
 
@@ -96,35 +96,39 @@ class UDPServer(Thread):
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind((self._ip, self._rcv_port))
         self._sock.settimeout(1)
-        super().start()
+        self._event_restart.set()
+        if not self.isAlive():
+            super().start()
 
     def stop(self):
         self._logger.debug('STOP')
         self._is_running = False
 
     def run(self):
-        self._logger.debug('UP: {}, {}'.format(self._ip, self._rcv_port))
-        self._socket_is_up = True
-        while self._is_running:
-            try:
-                self._logger.debug("WAITING FOR: new package")
-                data, addr = self._sock.recvfrom(65565)
-                if not len(self._data) or not data == self._data[-1]:
-                    data = self._num, data
-                    self._data.append(data)
-                    self._logger.debug("RECV {}: len {} from {}, {}".format(self._num, len(data[1]), addr[0], addr[1]))
-                    self._num += 1
-                    self._event_input.set()
-            except socket.timeout:
-                self._logger.debug("TIMEOUT: recvfrom")
-        self._socket_is_up = False
-        self._sock.close()
-        self._logger.debug('DOWN: {}, {}'.format(self._ip, self._rcv_port))
+        while True:
+            self._event_restart.wait()
+            self._event_restart.clear()
+            self._logger.debug('UP: {}, {}'.format(self._ip, self._rcv_port))
+            self._event_connexion.clear()
+            while self._is_running:
+                try:
+                    self._logger.debug("WAITING FOR: new package")
+                    data, addr = self._sock.recvfrom(65565)
+                    if not len(self._data) or not data == self._data[-1]:
+                        data = self._num, data
+                        self._data.append(data)
+                        self._logger.debug("RECV {}: len {} from {}, {}".format(self._num, len(data[1]), addr[0], addr[1]))
+                        self._num += 1
+                        self._event_input.set()
+                except socket.timeout:
+                    self._logger.debug("TIMEOUT: recvfrom")
+            self._sock.close()
+            self._logger.debug('DOWN: {}, {}'.format(self._ip, self._rcv_port))
+            self._event_connexion.set()
 
     def wait_connexion(self):
         self._logger.debug('WAITING FOR: Shutdown connexion: {}, {}'.format(self._ip, self._rcv_port))
-        while self._socket_is_up:
-            sleep(0.25)
+        self._event_connexion.wait()
 
     def get_last_data(self):
         if len(self._data) == 0:
