@@ -83,6 +83,15 @@ data = {'strategy': list(str),      # Liste de toutes les stratégies
         'tactic': list(str),        # Liste de toutes les tactiques
         'action': list(str)}        # Liste de toutes les actions
 
+# Type 1002 - Envoie à l'UI le statut d'un robot
+data = {'id': int,                  # Identification du robot (0-5)
+        'team': str,                # Identification de l'équipe ('Yellow' | 'Blue')
+        # === Options supplémentaires ===
+        'tactic': str,              # Correspond à la tactique active sur le robot
+        'action': str,              # Correspond à l'action active sur le robot
+        'target': tuple(int, int),  # Correspond à la cible active du robot
+        }
+
 # Type 2000 - Envoie à l'UI d'un fragment binaire identifié pour le reconstruire par la suite.
 data = {'id': str,                  # Identification du binaire à reconstruire
         'piece_number': int,        # Numéro de morceau courant
