@@ -41,7 +41,7 @@ class UDPServer(Thread):
     def init_logger(self):
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(thread)d - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(threadName)s - %(levelname)s - %(message)s')
         ch.setFormatter(formatter)
         self._logger.addHandler(ch)
 
@@ -80,7 +80,7 @@ class UDPServer(Thread):
         self._logger.debug('NEW CONNEXION: port {}'.format(port))
         try:
             self.stop()
-            self.wait_connexion()
+            self.wait_for_new_connexion()
             self.set_connexion(port)
             self.start()
         except Exception as e:
@@ -127,11 +127,11 @@ class UDPServer(Thread):
             self._logger.debug('DOWN: {}, {}'.format(self._ip, self._rcv_port))
             self._event_connexion.set()
 
-    def wait_connexion(self):
+    def wait_for_new_connexion(self):
         self._logger.debug('WAITING FOR: Shutdown connexion: {}, {}'.format(self._ip, self._rcv_port))
         self._event_connexion.wait()
 
-    def get_last_data(self):
+    def waiting_for_last_data(self):
         if len(self._data) == 0:
             self._logger.debug('WAITING FOR: Data in')
             self._event_input.wait()

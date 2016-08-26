@@ -44,6 +44,7 @@ class DataInModel(Thread):
         self._event_robot_state = Event()
         self._event_log = Event()
         self._event_draw = Event()
+        self._event_pause = Event()
 
         # Réseau
         self._udp_receiver = None
@@ -80,7 +81,7 @@ class DataInModel(Thread):
         """ Initialisation du logger """
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(thread)d - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(threadName)s - %(levelname)s - %(message)s')
         ch.setFormatter(formatter)
         self._logger.addHandler(ch)
         self._logger.debug('INIT: Logger')
@@ -89,6 +90,7 @@ class DataInModel(Thread):
         """ Installer le serveur UDP """
         self._udp_receiver = udp_server
         self._udp_receiver.start()
+        self._event_pause.set()
         self._logger.debug('SETUP: UDP Server')
 
     def start(self):
@@ -98,33 +100,37 @@ class DataInModel(Thread):
 
     def run(self):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
-        self._logger.debug('Thread ON')
+        self._logger.debug('Thread RUNNING')
         while True:
-            if not self._pause:
-                package = None
-                try:
-                    package = self._udp_receiver.get_last_data()
-                    self._extract_and_distribute_data(package)
-                except AttributeError:
-                    pass
-                finally:
-                    self._last_packet = package[0] if package is not None else None
-        self._logger.debug('Thread OFF')
+            self.waiting_for_pause_event()
+            package = None
+            try:
+                self._logger.debug('RUN: get Last data from udp server')
+                package = self._udp_receiver.waiting_for_last_data()
+                self._extract_and_distribute_data(package)
+            except AttributeError as e:
+                self._logger.warn(type(e).__name__ + str(e))
+            finally:
+                self._last_packet = package[0] if package is not None else None
+        self._logger.debug('Thread RUN STOPPING')
 
     # === DISTRIBUTOR ===
 
     def _distrib_VeryLargeData(self, data):
         """ Traite le paquet spécifique VeryLargeData """
+        self._logger.debug('DISTRIB: VeryLargeData')
         data.store()
         self._extract_and_distribute_data(data.rebuild())
 
     def _distrib_BaseDataDraw(self, data):
         """ Traite le paquet de type générique DataDraw """
+        self._logger.debug('DISTRIB: BaseDataDraw')
         self._data_draw['notset'].append(data)
         self.show_draw(self._data_draw['notset'][-1])
 
     def _distrib_StratGeneral(self, data):
         """ Traite le paquet spécifique StratGeneral """
+        self._logger.debug('DISTRIB: StratGeneral')
         if self._data_STA is not None:
             for key in data.data.keys():
                 self._data_STA.data[key] = data.data[key]
@@ -133,19 +139,23 @@ class DataInModel(Thread):
 
     def _distrib_BaseDataLog(self, data):
         """ Traite le paquet de type générique BaseDataLog """
+        self._logger.debug('DISTRIB: BaseDataLog')
         self._store_data_logging(data)
 
     def _distrib_HandShake(self, data):
         """ Traite le paquet spécifique HandShake """
+        self._logger.debug('DISTRIB: HandShake')
         self._controller.send_handshake()
 
     def _distrib_RobotState(self, data):
         """ Traite le paquet spécifique RobotState """
+        self._logger.debug('DISTRIB: RobotState')
         self._robot_state.append(data)
 
     # === PRIVATE METHODS ===
 
     def _extract_and_distribute_data(self, package):
+        self._logger.debug('INTERNAL: Extract and distribute')
         if package is not None:
             if isinstance(package, (tuple, list)):
                 package = package[1]
@@ -160,17 +170,22 @@ class DataInModel(Thread):
                     else:
                         self._distrib_sepcific_packet[type(data).__name__](data)
                 except KeyError as e:
-                    print(type(e).__name__, e)
+                    self._logger.warn(type(e).__name__, e)
 
     def _store_data_logging(self, data):
         """ Stock les données de logging """
+        self._logger.debug('INTERNAL: Store logging')
         self._data_logging.append(data)
         self._controller.update_logging()
 
     # === PUBLIC METHODS ===
 
+    def waiting_for_pause_event(self):
+        self._logger.debug('WAITING FOR: Pause event')
+        self._event_pause.wait()
+
     def add_logging(self, name, message, level=2):
-        self._logger.debug('TRIG: Add new log')
+        self._logger.debug('TRIGGER: Add new log')
         data_in = {'name': name,
                    'type': 2,
                    'version': '1.0',
@@ -182,38 +197,38 @@ class DataInModel(Thread):
     def get_last_log(self, index=0):
         """ Récupère les derniers logging"""
         if len(self._data_logging):
-            self._logger.debug('TRIG: GET LOG')
+            self._logger.debug('TRIGGER: GET LOG')
             return self._data_logging[index:]
         else:
-            self._logger.warn('TRIG: GET LOG - No new log')
+            self._logger.warn('TRIGGER: GET LOG - No new log')
             return None
 
     def show_draw(self, draw):
         """ Afficher le dessin sur la fenêtre du terrain """
         if isinstance(draw, BaseDataDraw):
-            self._logger.debug('TRIG: SHOW DRAW')
+            self._logger.debug('TRIGGER: SHOW DRAW')
             self._controller.add_draw_on_screen(draw)
         else:
-            self._logger.warn('TRIG: SHOW DRAW not available object')
+            self._logger.warn('TRIGGER: SHOW DRAW not available object')
 
     def write_logging_file(self, path, text):
         """ Écrit le logging dans un fichier texte sur le path déterminé """
-        self._logger.debug('TRIG: write logging file')
+        self._logger.debug('TRIGGER: write logging file')
         with open(path, 'w') as f:
             text = '##### LOGGING FROM UI #####\n' + text
             f.write(text)
 
     def pause(self):
         """ Met le modèle en pause """
-        self._logger.debug('TRIG: PAUSE')
-        self._pause = True
+        self._logger.debug('TRIGGER: PAUSE')
+        self._event_pause.clear()
 
     def play(self):
         """ Met le modèle en lecture """
-        self._logger.debug('TRIG: PLAY')
-        self._pause = False
+        self._logger.debug('TRIGGER: PLAY')
+        self._event_pause.set()
 
     def is_pause(self):
         """ Requete pour savoir si le modèle est en pause """
         self._logger.debug('GET: is pause ?')
-        return self._pause
+        return self._event_pause.isSet()

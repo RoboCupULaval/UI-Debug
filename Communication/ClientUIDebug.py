@@ -25,4 +25,4 @@ class ClientUIDebug(object):
 
     # Requête de dernière commande
     def get_last_command(self):
-        return self._udp.get_last_data()
+        return self._udp.waiting_for_last_data()
