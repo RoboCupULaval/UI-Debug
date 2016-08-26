@@ -206,6 +206,16 @@ data = {'id': int,                  # ID du robot
         'target': tuple(int, int)   # Position de la cible du robot
        }
 
+# Type 5005 - Envoie les dimensions du terrain
+data = {'width': int,               # Longueur du terrain
+        'height': int,              # Largeur du terrain
+        'center_radius': int,       # Rayon du cercle central
+        'defense_radius': int,      # Rayon des cercles en défense
+        'defense_stretch': int,     # Longueur de la ligne de séparation en défense
+        'goal_width': int,          # Longueur de la cage du but
+        'goal_height': int,         # Largeur de la cage du but
+        }
+
 """ ... """
 ```
 

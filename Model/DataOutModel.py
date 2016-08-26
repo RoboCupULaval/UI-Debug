@@ -5,6 +5,7 @@ from Model.DataObject.SendingData.SendingStrategy import SendingStrategy
 from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
 from Model.DataObject.SendingData.SendingTactic import SendingTactic
 from Model.DataObject.SendingData.SendingHandShake import SendingHandShake
+from Model.DataObject.SendingData.SendingGeometry import SendingGeometry
 
 __author__ = 'RoboCupULaval'
 
@@ -45,3 +46,14 @@ class DataOutModel:
     def send_handshake(self):
         pkg = SendingHandShake()
         self._udp_sender.send_message(pkg.get_binary())
+
+    def send_geometry(self, field_control):
+        pkg = SendingGeometry().set_data(width=field_control.width,
+                                         height=field_control.height,
+                                         center_radius=field_control.center_radius,
+                                         defense_radius=field_control.defense_radius,
+                                         defense_stretch=field_control.defense_stretch,
+                                         goal_width=field_control.goal_width,
+                                         goal_height=field_control.goal_height)
+        if self._udp_sender is not None:
+            self._udp_sender.send_message(pkg.get_binary())

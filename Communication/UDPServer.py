@@ -4,12 +4,12 @@ import logging
 import pickle
 import socket
 from time import sleep
-from PyQt4 import QtCore
+from threading import Thread
 
 __author__ = 'RoboCupULaval'
 
 
-class UDPServer(QtCore.QThread):
+class UDPServer(Thread):
     def __init__(self, name='UDP', ip="127.0.0.1", rcv_port=20021, snd_port=10021, debug=False):
         super().__init__()
         self._num = 0

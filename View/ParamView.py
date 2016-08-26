@@ -104,6 +104,10 @@ class ParamView(QtGui.QDialog):
 
         self.restore_values()
 
+        but_send_geometry = QtGui.QPushButton('Envoyer la Géométrie du terrain')
+        but_send_geometry.clicked.connect(self._ctrl.send_geometry)
+        layout_field.addRow(but_send_geometry)
+
     def init_bottom_page(self):
         # Bas de fenêtre
         layout_bottom = QtGui.QHBoxLayout()

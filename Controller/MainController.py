@@ -321,5 +321,10 @@ class MainController(QWidget):
         return self.view_screen.get_fps()
 
     def send_handshake(self):
+        """ Envoie un HandShake au client """
         self.model_dataout.send_handshake()
+
+    def send_geometry(self):
+        """ Envoie la géométrie du terrain """
+        self.model_dataout.send_geometry(QtToolBox.field_ctrl)
 
