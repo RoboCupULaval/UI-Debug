@@ -95,6 +95,8 @@ class DataInModel(object):
                 try:
                     if isinstance(data, BaseDataDraw):
                         self._distrib_sepcific_packet[BaseDataDraw.__name__](data)
+                    elif isinstance(data, BaseDataLog):
+                        self._distrib_sepcific_packet[BaseDataLog.__name__](data)
                     else:
                         self._distrib_sepcific_packet[type(data).__name__](data)
                 except KeyError as e:
@@ -103,7 +105,7 @@ class DataInModel(object):
     # === DISTRIBUTOR ===
 
     def _distrib_VeryLargeData(self, data):
-        """ Traite le paquet VeryLargeData """
+        """ Traite le paquet spécifique VeryLargeData """
         data.store()
         self._extract_and_distribute_data(data.rebuild())
 
@@ -113,6 +115,7 @@ class DataInModel(object):
         self.show_draw(self._data_draw['notset'][-1])
 
     def _distrib_StratGeneral(self, data):
+        """ Traite le paquet spécifique StratGeneral """
         if self._data_STA is not None:
             for key in data.data.keys():
                 self._data_STA.data[key] = data.data[key]
@@ -120,9 +123,11 @@ class DataInModel(object):
             self._data_STA = data
 
     def _distrib_BaseDataLog(self, data):
+        """ Traite le paquet de type générique BaseDataLog """
         self._store_data_logging(data)
 
     def _distrib_HandShake(self, data):
+        """ Traite le paquet spécifique HandShake """
         self._controller.send_handshake()
 
     # === ===
