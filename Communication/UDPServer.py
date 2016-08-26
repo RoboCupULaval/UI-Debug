@@ -13,6 +13,7 @@ class UDPServer(Thread):
         super().__init__()
         self._num = 0
         self._ip = ip
+        self.daemon = True
         self._default_rcv_port = 20021
         self._default_snd_port = 10021
         self._rcv_port = rcv_port
