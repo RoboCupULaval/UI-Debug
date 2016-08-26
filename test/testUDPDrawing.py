@@ -3,11 +3,11 @@
 from random import randint
 import pickle
 from time import time, sleep
-from Communication.UDPCommunication import UDPReceiving
+from Communication.UDPServer import UDPServer
 
 __author__ = 'RoboCupULaval'
 
-ex = UDPReceiving(rcv_port=10021, snd_port=20021, debug=True)
+ex = UDPServer(rcv_port=10021, snd_port=20021, debug=True)
 
 def create_basic_pkg():
     pkg = {'name': 'tester',
@@ -208,12 +208,12 @@ def test_text_draw(ex):
 
 if __name__ == '__main__':
 
-    ex = UDPReceiving(name='UDPClient', rcv_port=10020, snd_port=20020, debug=True)
+    ex = UDPServer(name='UDPClient', rcv_port=10021, snd_port=20021, debug=True)
     ex.start()
-    stress_test(ex)
-    # test_influence_map()
+    # stress_test(ex)
+    test_influence_map(ex)
     # test_tree()
     # test_text_draw()
     # test_big_data()
-    sleep(30)
+    ex.join()
 
