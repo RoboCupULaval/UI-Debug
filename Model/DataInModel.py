@@ -73,7 +73,6 @@ class DataInModel(object):
         """ Récupère les données du serveur UDP pour les stocker dans le modèles """
         while True:
             if not self._pause:
-                QMutexLocker(self._mutex).relock()
                 package = None
                 try:
                     package = self._udp_receiver.get_last_data()
@@ -82,8 +81,6 @@ class DataInModel(object):
                     pass
                 finally:
                     self._last_packet = package[0] if package is not None else None
-                    QMutexLocker(self._mutex).unlock()
-            sleep(0.01)
 
     def _extract_and_distribute_data(self, package):
         if package is not None:

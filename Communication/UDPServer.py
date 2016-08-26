@@ -4,7 +4,7 @@ import logging
 import pickle
 import socket
 from time import sleep
-from threading import Thread
+from threading import Thread, Event
 
 __author__ = 'RoboCupULaval'
 
@@ -19,16 +19,19 @@ class UDPServer(Thread):
         self._rcv_port = rcv_port
         self._snd_port = snd_port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._event_input = Event()
         self._is_running = False
         self._socket_is_up = False
 
         self._data = []
         self._msg_logging = []
         self._logger = logging.getLogger(name)
+
         if debug:
             self._logger.setLevel(logging.DEBUG)
         else:
             self._logger.setLevel(logging.INFO)
+
         self.init_logger()
 
     def toggle_debug(self):
@@ -111,6 +114,7 @@ class UDPServer(Thread):
                     self._data.append(data)
                     self._logger.debug("RECV {}: len {} from {}, {}".format(self._num, len(data[1]), addr[0], addr[1]))
                     self._num += 1
+                    self._event_input.set()
             except socket.timeout:
                 self._logger.debug("TIMEOUT: recvfrom")
         self._socket_is_up = False
@@ -123,9 +127,13 @@ class UDPServer(Thread):
             sleep(0.25)
 
     def get_last_data(self):
+        if len(self._data) == 0:
+            self._logger.debug('WAITING FOR: Data in')
+            self._event_input.wait()
         raw_data = None
         try:
             raw_data = self._data.pop(0)
             self._logger.debug("GET: data {}".format(len(raw_data)))
         finally:
+            self._event_input.clear()
             return raw_data
