@@ -3,11 +3,11 @@
 from random import randint
 import pickle
 from time import time, sleep
-from Communication.UDPCommunication import UDPSending
+from Communication.UDPServer import UDPServer
 
 __author__ = 'RoboCupULaval'
 
-ex = UDPSending(port=20021)
+ex = UDPServer(rcv_port=10021, snd_port=20021, debug=True)
 
 def create_basic_pkg():
     pkg = {'name': 'tester',
@@ -19,7 +19,7 @@ def create_basic_pkg():
     return pkg
 
 
-def test_multiple_lines():
+def test_multiple_lines(ex):
     pkg = create_basic_pkg()
     pkg['type'] = 3002
     pkg['data']['points'] = list()
@@ -36,7 +36,7 @@ def test_multiple_lines():
     ex.send_message(pkg)
 
 
-def test_line():
+def test_line(ex):
     """ Line """
     pkg = create_basic_pkg()
     pkg['type'] = 3001
@@ -49,11 +49,11 @@ def test_line():
     ex.send_message(pkg)
 
 
-def test_influence_map():
+def test_influence_map(ex):
     """ InfluenceMapTest"""
     pkg = create_basic_pkg()
     pkg['type'] = 3007
-    pkg['data']['field_data'] = [[randint(0, 100) for x in range(120)] for y in range(180)]
+    pkg['data']['field_data'] = [[x+y for x in range(120)] for y in range(180)]
     pkg['data']['hottest_color'] = 255, 0, 0
     pkg['data']['coldest_color'] = 0, 255, 0
     pkg['data']['has_grid'] = False
@@ -61,11 +61,11 @@ def test_influence_map():
     pkg['data']['grid_color'] = 255, 255, 255
     pkg['data']['grid_style'] = 'SolidLine'
     pkg['data']['opacity'] = 10
-    pkg['data']['timeout'] = randint(2, 10)
+    pkg['data']['timeout'] = 0
     ex.send_message(pkg)
 
 
-def test_circle():
+def test_circle(ex):
     """ Circle """
     pkg = create_basic_pkg()
     pkg['type'] = 3003
@@ -78,7 +78,7 @@ def test_circle():
     ex.send_message(pkg)
 
 
-def test_rect():
+def test_rect(ex):
     """ Rectangle """
     pkg = create_basic_pkg()
     pkg['type'] = 3006
@@ -90,7 +90,7 @@ def test_rect():
     ex.send_message(pkg)
 
 
-def test_point():
+def test_point(ex):
     """ Point """
     pkg = create_basic_pkg()
     pkg['type'] = 3004
@@ -100,7 +100,7 @@ def test_point():
     ex.send_message(pkg)
 
 
-def test_multiple_points():
+def test_multiple_points(ex):
     """ Point """
     pkg = create_basic_pkg()
     pkg['type'] = 3005
@@ -111,7 +111,7 @@ def test_multiple_points():
     ex.send_message(pkg)
 
 
-def test_strat():
+def test_strat(ex):
     pkg = create_basic_pkg()
     pkg['type'] = 1001
     pkg['data']['strategy'] = ['Start1', 'Start2']
@@ -119,14 +119,14 @@ def test_strat():
     ex.send_message(pkg)
 
 
-def test_logging(msg=''):
+def test_logging(ex, msg=''):
     pkg = create_basic_pkg()
     pkg['type'] = 2
     pkg['data']['level'] = 2
     pkg['data']['message'] = 'HelloWorld' + msg
     ex.send_message(pkg)
 
-def test_big_data():
+def test_big_data(ex):
     # TODO - Finir test
     pkg = create_basic_pkg()
     pkg['type'] = 3007
@@ -155,23 +155,23 @@ def test_big_data():
         sleep(0.001)
         ex.send_message(v_pkg)
 
-def stress_test():
+def stress_test(ex):
     """
         Test tous les paquest :
         /!\ Éviter de tester l'influenceMap en même temps que le reste /!\
     """
     for _ in range(5):
-        #test_influence_map()
-        test_circle()
-        test_multiple_lines()
-        test_line()
-        test_rect()
-        test_point()
-        test_multiple_points()
-        test_tree()
+        #test_influence_map(ex)
+        test_circle(ex)
+        test_multiple_lines(ex)
+        test_line(ex)
+        test_rect(ex)
+        test_point(ex)
+        test_multiple_points(ex)
+        test_tree(ex)
 
 
-def test_tree():
+def test_tree(ex):
     def build_tree(n):
         tree = []
         last_line = [tuple([tuple([randint(-4500, 0), randint(-3000, 0)]),
@@ -198,7 +198,7 @@ def test_tree():
     ex.send_message(pkg)
 
 
-def test_text_draw():
+def test_text_draw(ex):
     pkg = create_basic_pkg()
     pkg['type'] = 3008
     pkg['data']['position'] = 0, 0
@@ -207,8 +207,13 @@ def test_text_draw():
     ex.send_message(pkg)
 
 if __name__ == '__main__':
-    # stress_test()
+
+    ex = UDPServer(name='UDPClient', rcv_port=10021, snd_port=20021, debug=True)
+    ex.start()
+    # stress_test(ex)
+    test_influence_map(ex)
     # test_tree()
     # test_text_draw()
-    test_big_data()
+    # test_big_data()
+    ex.join()
 

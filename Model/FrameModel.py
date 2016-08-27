@@ -6,8 +6,6 @@ from datetime import timedelta
 
 from PyQt4.QtCore import QTimer
 
-from Communication.vision import Vision
-
 __author__ = 'RoboCupULaval'
 
 
@@ -19,7 +17,7 @@ class FrameModel:
     """
     def __init__(self, controller=None):
         self._controller = controller
-        self._vision = Vision()
+        self._vision = None
         self._recorder = None
 
         # Initialisation des variables de données
@@ -31,12 +29,14 @@ class FrameModel:
         self._last_frame_caught_time = datetime.min
         self._frame_catcher_update_rate = 60.0        # Fréquence d'update en Hz
         self._frame_catcher_timer = QTimer()
-        self._init_frame_catcher()
 
         # Contrôleur
         self._recorder_is_enable = False
 
-    def _init_frame_catcher(self):
+    def set_vision(self, server):
+        self._vision = server
+
+    def start(self):
         """ Initialise le timer pour récupérer """
         self._frame_catcher_timer.timeout.connect(self._catching_frame)
         self._frame_catcher_timer.start(self._frequency_to_milliseconds_int(self._frame_catcher_update_rate))

@@ -38,6 +38,34 @@ class FieldController(object):
         self.radius_center_default = 500
         self.radius_center = self.radius_center_default
 
+    @property
+    def width(self):
+        return self.size[0]
+
+    @property
+    def height(self):
+        return self.size[1]
+
+    @property
+    def center_radius(self):
+        return self.radius_center
+
+    @property
+    def defense_radius(self):
+        return self.goal_radius
+
+    @property
+    def defense_stretch(self):
+        return self.goal_line
+
+    @property
+    def goal_width(self):
+        return self.goal_size[0]
+
+    @property
+    def goal_height(self):
+        return self.goal_size[1]
+
     def convert_real_to_scene_pst(self, x, y, theta=0.0):
         """ Convertit les coordonnées réelles en coordonnées du terrain """
         rot_x = cos(theta)

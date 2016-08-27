@@ -19,8 +19,10 @@ from View.MainWindow import MainWindow
 from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
 from View.StatusBarView import StatusBarView
+from View.GameStateView import GameStateView
 
-from Communication.UDPCommunication import UDPServer, UDPReceiving
+from Communication.UDPServer import UDPServer
+from Communication.vision import Vision
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -38,7 +40,8 @@ class MainController(QWidget):
 
         # Communication
         # self.network_data_in = UDPServer(self)
-        self.network_data_in = UDPReceiving()
+        self.network_data_in = UDPServer(name='UDPServer', debug=False)
+        self.network_vision = Vision()
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -56,6 +59,7 @@ class MainController(QWidget):
         self.view_controller = StrategyCtrView(self)
         self.view_media = MediaControllerView(self)
         self.view_status = StatusBarView(self)
+        self.view_robot_state = GameStateView(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -81,6 +85,7 @@ class MainController(QWidget):
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
         top_layout.addWidget(self.view_media)
+        top_layout.addWidget(self.view_robot_state)
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)
@@ -91,6 +96,9 @@ class MainController(QWidget):
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
         self.model_datain.setup_udp_server(self.network_data_in)
+        self.model_dataout.setup_udp_server(self.network_data_in)
+        self.model_frame.set_vision(self.network_vision)
+        self.model_frame.start()
         self.model_frame.set_recorder(self.model_recorder)
 
     def init_menubar(self):
@@ -187,6 +195,10 @@ class MainController(QWidget):
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
+
+        robStateAction = QAction('État des robots', self, checkable=True)
+        robStateAction.triggered.connect(self.view_robot_state.show_hide)
+        toolMenu.addAction(robStateAction)
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
@@ -315,3 +327,16 @@ class MainController(QWidget):
         """ Récupère la fréquence de rafraîchissement de l'écran """
         return self.view_screen.get_fps()
 
+    def send_handshake(self):
+        """ Envoie un HandShake au client """
+        self.model_dataout.send_handshake()
+
+    def send_geometry(self):
+        """ Envoie la géométrie du terrain """
+        self.model_dataout.send_geometry(QtToolBox.field_ctrl)
+
+    def waiting_for_robot_state(self):
+        return self.model_datain.waiting_for_robot_state_event()
+
+    def waiting_for_game_state(self):
+        return self.model_datain.waiting_for_game_state_event()

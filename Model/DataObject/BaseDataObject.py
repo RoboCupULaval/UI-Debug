@@ -175,7 +175,7 @@ class BaseDataObject:
             assert isinstance(point, tuple)
             assert len(point) == 2
             for value in point:
-                assert isinstance(value, int)
+                assert isinstance(value, (float, int))
             return True
         except AssertionError:
             return False

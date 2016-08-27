@@ -75,10 +75,27 @@ data = {'level': int,       # 0:NOSET | 1:DEBUG | 2:INFO | 3:WARN | 4:ERR | 5:C
 
 """ ... """
 
+# Type 1000 - Envoie à l'UI d'un HandShake pour savoir si l'UI est connecté
+data = {}                   # Dictionnaire vide
+
 # Type 1001 - Envoie à l'UI la liste des stratégies, tactiques et actions disponibles.
 data = {'strategy': list(str),      # Liste de toutes les stratégies
         'tactic': list(str),        # Liste de toutes les tactiques
         'action': list(str)}        # Liste de toutes les actions
+
+# Type 1002 - Envoie à l'UI le statut d'un robot
+data = {'id': int,                  # Identification du robot (0-5)
+        'team': str,                # Identification de l'équipe ('Yellow' | 'Blue')
+        # === Options supplémentaires ===
+        'tactic': str,              # Correspond à la tactique active sur le robot
+        'action': str,              # Correspond à l'action active sur le robot
+        'target': tuple(int, int),  # Correspond à la cible active du robot
+        }
+
+# Type 1003 - Envoie à l'UI le statut du jeu
+data = {'state': str,               # Correspond à la Stratégie courrante
+        'team': str,                # Identification de l'équipe ('Yellow' | 'Blue')
+        }
 
 # Type 2000 - Envoie à l'UI d'un fragment binaire identifié pour le reconstruire par la suite.
 data = {'id': str,                  # Identification du binaire à reconstruire
@@ -179,6 +196,9 @@ data = {'tree': list(tuple(tuple(int, int), tuple(int, int)), ...)
         
 """ ... """
 
+# Type 5000 - Envoie la réponse du HandShake au client
+data = {}                           # Dictionnaire vide
+
 # Type 5001 - Basculer l'IA en mode contrôle humain/machine (toggle-human-control)
 data = {'is_human_control': bool    # Donne le contrôle de l'IA à la humain ou à la machine
        }
@@ -199,6 +219,16 @@ data = {'tactic': str,              # Nom de la tactique
 data = {'id': int,                  # ID du robot
         'target': tuple(int, int)   # Position de la cible du robot
        }
+
+# Type 5005 - Envoie les dimensions du terrain
+data = {'width': int,               # Longueur du terrain
+        'height': int,              # Largeur du terrain
+        'center_radius': int,       # Rayon du cercle central
+        'defense_radius': int,      # Rayon des cercles en défense
+        'defense_stretch': int,     # Longueur de la ligne de séparation en défense
+        'goal_width': int,          # Longueur de la cage du but
+        'goal_height': int,         # Largeur de la cage du but
+        }
 
 """ ... """
 ```
