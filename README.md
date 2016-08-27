@@ -92,6 +92,11 @@ data = {'id': int,                  # Identification du robot (0-5)
         'target': tuple(int, int),  # Correspond à la cible active du robot
         }
 
+# Type 1003 - Envoie à l'UI le statut du jeu
+data = {'state': str,               # Correspond à la Stratégie courrante
+        'team': str,                # Identification de l'équipe ('Yellow' | 'Blue')
+        }
+
 # Type 2000 - Envoie à l'UI d'un fragment binaire identifié pour le reconstruire par la suite.
 data = {'id': str,                  # Identification du binaire à reconstruire
         'piece_number': int,        # Numéro de morceau courant

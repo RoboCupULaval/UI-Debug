@@ -8,6 +8,7 @@ from threading import Thread, Event
 
 from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
 from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
+from Model.DataObject.AccessorData.GameStateAcc import GameStateAcc
 from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
 from Model.DataObject.DataFactory import DataFactory
 from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
@@ -30,6 +31,7 @@ class DataInModel(Thread):
         # Stockage de données
         self._data_logging = list()
         self._robot_state = list()
+        self._game_state = list()
         self._data_config = list()
         self._data_draw = dict()
         self._distrib_sepcific_packet = dict()
@@ -42,6 +44,7 @@ class DataInModel(Thread):
 
         # Événement
         self._event_robot_state = Event()
+        self._event_game_state = Event()
         self._event_log = Event()
         self._event_draw = Event()
         self._event_pause = Event()
@@ -75,6 +78,7 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[BaseDataLog.__name__] = self._distrib_BaseDataLog
         self._distrib_sepcific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
         self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
+        self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
         self._logger.debug('INIT: Distributor')
 
     def _init_logger(self):
@@ -116,6 +120,13 @@ class DataInModel(Thread):
 
     # === DISTRIBUTOR ===
 
+    def _distrib_GameState(self, data):
+        """ Tratie le paquet spécifique GameState"""
+        self._logger.debug('DISTRIB: GameState')
+        self._game_state.append(data)
+        self._event_game_state.set()
+
+
     def _distrib_VeryLargeData(self, data):
         """ Traite le paquet spécifique VeryLargeData """
         self._logger.debug('DISTRIB: VeryLargeData')
@@ -151,6 +162,7 @@ class DataInModel(Thread):
         """ Traite le paquet spécifique RobotState """
         self._logger.debug('DISTRIB: RobotState')
         self._robot_state.append(data)
+        self._event_robot_state.set()
 
     # === PRIVATE METHODS ===
 
@@ -183,6 +195,18 @@ class DataInModel(Thread):
     def waiting_for_pause_event(self):
         self._logger.debug('WAITING FOR: Pause event')
         self._event_pause.wait()
+
+    def waiting_for_robot_state_event(self):
+        self._logger.debug('WAITING FOR: Robot State')
+        self._event_robot_state.wait()
+        self._event_robot_state.clear()
+        return self._robot_state[-1]
+
+    def waiting_for_game_state_event(self):
+        self._logger.debug('WAITING FOR: Game State')
+        self._event_game_state.wait()
+        self._event_game_state.clear()
+        return self._game_state[-1]
 
     def add_logging(self, name, message, level=2):
         self._logger.debug('TRIGGER: Add new log')

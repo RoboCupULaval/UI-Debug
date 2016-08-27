@@ -47,7 +47,7 @@ class UDPServer(Thread):
 
     def send_message(self, p_object):
         if not type(b'') == type(p_object):
-            self._logger.warn('SEND: object not serialized')
+            self._logger.debug('SEND: object not serialized')
             p_object = pickle.dumps(p_object)
         self._logger.debug('SEND: {} bytes'.format(len(p_object)))
         try:

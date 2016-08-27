@@ -19,6 +19,7 @@ from View.MainWindow import MainWindow
 from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
 from View.StatusBarView import StatusBarView
+from View.GameStateView import GameStateView
 
 from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
@@ -58,6 +59,7 @@ class MainController(QWidget):
         self.view_controller = StrategyCtrView(self)
         self.view_media = MediaControllerView(self)
         self.view_status = StatusBarView(self)
+        self.view_robot_state = GameStateView(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -83,6 +85,7 @@ class MainController(QWidget):
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
         top_layout.addWidget(self.view_media)
+        top_layout.addWidget(self.view_robot_state)
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)
@@ -192,6 +195,10 @@ class MainController(QWidget):
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
+
+        robStateAction = QAction('État des robots', self, checkable=True)
+        robStateAction.triggered.connect(self.view_robot_state.show_hide)
+        toolMenu.addAction(robStateAction)
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
@@ -328,3 +335,8 @@ class MainController(QWidget):
         """ Envoie la géométrie du terrain """
         self.model_dataout.send_geometry(QtToolBox.field_ctrl)
 
+    def waiting_for_robot_state(self):
+        return self.model_datain.waiting_for_robot_state_event()
+
+    def waiting_for_game_state(self):
+        return self.model_datain.waiting_for_game_state_event()
