@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from random import randint
+from random import randint, choice
 import pickle
 from time import time, sleep
 from Communication.UDPServer import UDPServer
@@ -18,6 +18,8 @@ def create_basic_pkg():
            }
     return pkg
 
+
+# ======= TEST PARTICULIER =======
 
 def test_multiple_lines(ex):
     pkg = create_basic_pkg()
@@ -155,21 +157,6 @@ def test_big_data(ex):
         sleep(0.001)
         ex.send_message(v_pkg)
 
-def stress_test(ex):
-    """
-        Test tous les paquest :
-        /!\ Éviter de tester l'influenceMap en même temps que le reste /!\
-    """
-    for _ in range(5):
-        #test_influence_map(ex)
-        test_circle(ex)
-        test_multiple_lines(ex)
-        test_line(ex)
-        test_rect(ex)
-        test_point(ex)
-        test_multiple_points(ex)
-        test_tree(ex)
-
 
 def test_tree(ex):
     def build_tree(n):
@@ -206,14 +193,61 @@ def test_text_draw(ex):
     pkg['data']['text'] = 'HelloWorld !'
     ex.send_message(pkg)
 
+def test_GameState(ex, offset=''):
+    pkg = create_basic_pkg()
+    pkg['type'] = 1003
+    if choice([True, False]):
+        pkg['data']['yellow'] = 'StrategyYellow' + offset
+    else:
+        pkg['data']['blue'] = 'StrategyBlue' + offset
+    ex.send_message(pkg)
+
+def test_RobotState(ex, offset=''):
+    pkg = create_basic_pkg()
+    pkg['type'] = 1002
+    pkg['data'][choice(['yellow', 'blue'])] = {choice(list(range(6))): {choice(['tactic', 'action']): 'YOLO' + str(offset)}}
+    pkg['data'][choice(['yellow', 'blue'])] = {choice(list(range(6))): {'target': tuple([randint(-500, 500), randint(-500, 500)])}}
+    ex.send_message(pkg)
+
+
+
+# =================================
+# ========== STRESS TEST ==========
+# =================================
+
+def stress_test_Statement(ex):
+    for i in range(1500):
+        sleep(randint(5, 10) / 1000)
+        if choice([True, False, False, False, False, False]):
+            test_GameState(ex, offset=str(i))
+        else:
+            test_RobotState(ex, offset=str(i))
+
+def stress_test(ex):
+    """
+        Test tous les paquest :
+        /!\ Éviter de tester l'influenceMap en même temps que le reste /!\
+    """
+    for _ in range(5):
+        test_influence_map(ex)
+        test_circle(ex)
+        test_multiple_lines(ex)
+        test_line(ex)
+        test_rect(ex)
+        test_point(ex)
+        test_multiple_points(ex)
+        test_tree(ex)
+
 if __name__ == '__main__':
 
     ex = UDPServer(name='UDPClient', rcv_port=10021, snd_port=20021, debug=True)
     ex.start()
     # stress_test(ex)
-    test_influence_map(ex)
+    # test_influence_map(ex)
     # test_tree()
     # test_text_draw()
     # test_big_data()
+    # test_RobotState(ex)
+    # stress_test_Statement(ex)
     ex.join()
 

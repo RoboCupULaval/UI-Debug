@@ -100,6 +100,7 @@ class MainController(QWidget):
         self.model_frame.set_vision(self.network_vision)
         self.model_frame.start()
         self.model_frame.set_recorder(self.model_recorder)
+        self.model_datain.set_recorder(self.model_recorder)
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -188,17 +189,19 @@ class MainController(QWidget):
         StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
         toolMenu.addAction(StrategyControllerAction)
 
+        toolMenu.addSeparator()
+
         mediaAction = QAction('Contrôleur Média', self, checkable=True)
         mediaAction.triggered.connect(self.view_media.toggle_visibility)
         toolMenu.addAction(mediaAction)
 
-        loggerAction = QAction('Loggeur', self,  checkable=True)
-        loggerAction.triggered.connect(self.view_logger.show_hide)
-        toolMenu.addAction(loggerAction)
-
         robStateAction = QAction('État des robots', self, checkable=True)
         robStateAction.triggered.connect(self.view_robot_state.show_hide)
         toolMenu.addAction(robStateAction)
+
+        loggerAction = QAction('Loggeur', self,  checkable=True)
+        loggerAction.triggered.connect(self.view_logger.show_hide)
+        toolMenu.addAction(loggerAction)
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
@@ -320,8 +323,10 @@ class MainController(QWidget):
         """ Active/Désactive le Recorder """
         if p_bool:
             self.model_frame.enable_recorder()
+            self.model_datain.enable_recorder()
         else:
             self.model_frame.disable_recorder()
+            self.model_datain.disable_recorder()
 
     def get_fps(self):
         """ Récupère la fréquence de rafraîchissement de l'écran """
@@ -340,3 +345,29 @@ class MainController(QWidget):
 
     def waiting_for_game_state(self):
         return self.model_datain.waiting_for_game_state_event()
+
+    # === RECORDER METHODS ===
+    def recorder_is_playing(self):
+        return self.model_recorder.is_playing()
+
+    def recorder_get_cursor_percentage(self):
+        return self.model_recorder.get_cursor_percentage()
+
+    def recorder_trigger_pause(self):
+        self.model_recorder.pause()
+
+    def recorder_trigger_play(self):
+        self.model_recorder.play()
+
+    def recorder_trigger_back(self):
+        self.model_recorder.back()
+
+    def recorder_trigger_rewind(self):
+        self.model_recorder.rewind()
+
+    def recorder_trigger_forward(self):
+        self.model_recorder.forward()
+
+    def recorder_skip_to(self, value):
+        self.model_recorder.skip_to(value)
+

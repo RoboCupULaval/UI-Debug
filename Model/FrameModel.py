@@ -127,7 +127,7 @@ class FrameModel:
     def enable_recorder(self):
         """ Activer l'enregistreur sur le modèle de frame """
         if self._recorder is not None:
-            self._recorder.init(self._data_queue_received)
+            self._recorder.init(frames=self._data_queue_received)
             self._recorder_is_enable = True
 
     def disable_recorder(self):

@@ -17,43 +17,38 @@ class RobotStateAcc(BaseDataAccessor):
             "data: {} n'est pas un dictionnaire.".format(type(self.data))
         keys = self.data.keys()
 
-        assert 'id' in keys, \
-            "data['id'] n'existe pas."
-        assert isinstance(self.data['id'], int), \
-            "data['id']: {} n'a pas le format attendu (int)".format(type(self.data['id']))
-        assert 0 <= self.data['id'] <= 5, \
-            "data['id']: {} n'est pas compris entre 0 et 5".format(self.data['id'])
-
-        assert 'team' in keys, \
-            "data['team'] n'existe pas."
-        assert self.data['team'].lower() in {'blue', 'yellow'}, \
-            "data['team'] {} n'a pas la valeur attendue (blue | yellow)".format(self.data['team'])
+        for key in keys:
+            assert isinstance(key, str), \
+                "data[{}]: {} la clé n'a pas le format attendu (str)".format(key, type(key))
+            assert key in {'yellow', 'blue'}, \
+                "data[{}] n'est pas une clé validee (yellow | blue)".format(key)
+            assert isinstance(self.data[key], dict), \
+                "data[{}]: {} n'a pas le format attendu (dict)".format(key, type(self.data[key]))
 
     @catch_format_error
     def _check_optional_data(self):
-        keys = self.data.keys()
-        if 'tactic' in keys and self.data['tactic'] is not None:
-            assert isinstance(self.data['tactic'], str), \
-                "data['tactic']: {} n'a pas le format attendu (str)".format(type(self.data['tactic']))
-        else:
-            self.data['tactic'] = None
-
-        if 'action' in keys and self.data['action'] is not None:
-            assert isinstance(self.data['action'], str), \
-                "data['action']: {} n'a pas le format attendu (str)".format(type(self.data['action']))
-        else:
-            self.data['action'] = None
-
-        if 'target' in keys and self.data['target'] is not None:
-            assert self._point_is_valid (self.data['target']), \
-                "data['target']: {} n'a pas le format attendu (tuple(int, int))".format(self.data['target'])
-        else:
-            self.data['target'] = None
+        for team in self.data.keys():
+            for id in self.data[team].keys():
+                assert isinstance(id, int), \
+                    "data[{}][{}]: {} n'a pas le format attendu (int)".format(team, id, type(id))
+                assert 0 <= id <= 5, \
+                    "data[{}][{}]: {} doit être compris entre 0 et 5".format(team, id, id)
+                for state in self.data[team][id]:
+                    assert isinstance(state, str), \
+                        "data[{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state)
+                    assert state in {'target', 'action', 'tactic'}, \
+                        "data[{}][{}]: {} devrait avoir la valeur suivante ('target' | 'action' | 'tactic')".format(team, id, state)
+                    if state == 'target':
+                        assert self._point_is_valid(self.data[team][id][state]), \
+                            "data[{}][{}][{}]: {} n'est pas un point valide".format(team, id, state, self.data[team][id][state])
+                    else:
+                        assert isinstance(self.data[team][id][state], str), \
+                            "data[{}][{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state, type(self.data[team][id][state]))
 
     @staticmethod
     def get_default_data_dict():
-        return dict(zip(['id', 'team', 'tactic', 'action', 'target'],
-                        [0, 'Yellow', None, None, None]))
+        return dict(zip(['yellow', 'blue'],
+                        [dict(), dict()]))
 
     @staticmethod
     def get_type():

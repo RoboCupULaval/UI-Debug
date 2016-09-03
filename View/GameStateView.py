@@ -131,35 +131,43 @@ class GameStateView(QWidget):
         while True:
             game_state = self._ctrl.waiting_for_game_state()
             self._logger.debug('RUN: Received game state')
-            if game_state.data['team'].lower() == 'blue':
-                col = 2
-            else:
-                col = 6
-            line = 1
-            if not self._layout.itemAtPosition(line, col).widget().text() == str(game_state.data['state']):
-                self._layout.itemAtPosition(line, col).widget().setText(str(game_state.data['state']))
+            if game_state is not None:
+                if not self._layout.itemAtPosition(1, 6).widget().text() == str(game_state['yellow']):
+                    self._layout.itemAtPosition(1, 6).widget().setText(str(game_state['yellow']))
+                if not self._layout.itemAtPosition(1, 2).widget().text() == str(game_state['blue']):
+                    self._layout.itemAtPosition(1, 2).widget().setText(str(game_state['blue']))
 
     def update_robot_state(self):
         self._logger.debug('RUN: Thread RobotState')
         while True:
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')
-            if robot_state.data['team'].lower() == 'blue':
-                col = 2
-            else:
-                col = 6
-            line = 3 + robot_state.data['id']
 
-            for i, header in enumerate(['tactic', 'action', 'target']):
-                if robot_state.data[header] is not None:
-                    self._logger.debug('RUN: id={} {}={}'.format(robot_state.data['id'], header, robot_state.data[header]))
-                    object = self._layout.itemAtPosition(line, col + i)
-                    if object is not None:
-                        widget = object.widget()
-                        if not widget.text() == str(robot_state.data[header]):
-                            widget.setText(str(robot_state.data[header]))
+            if robot_state is not None:
+                for team in robot_state.keys():
+                    if team == 'blue':
+                        t_col = 2
                     else:
-                        self._logger.warn('RUN: None type detected at {}, {}'.format(line, col+i))
+                        t_col = 6
+                    for id in robot_state[team].keys():
+                        line = 3 + id
+                        for state in robot_state[team][id].keys():
+                            if state == 'action':
+                                col = t_col + 1
+                            elif state == 'target':
+                                col = t_col + 2
+                            else:
+                                col = t_col
+
+                            object = self._layout.itemAtPosition(line, col)
+                            if object is not None:
+                                if not object.widget().text() == str(robot_state[team][id][state]):
+                                    self._logger.debug(
+                                        'RUN: {}.{}.{} = {} at {}, {}'.format(team, id, state, robot_state[team][id][state],
+                                                                              line, col))
+                                    object.widget().setText(str(robot_state[team][id][state]))
+                            else:
+                                self._logger.warn('RUN: NoneType detected at {}, {}'.format(line, col))
 
     def show_hide(self):
         self._logger.debug('TRIGGER: Show/Hide')

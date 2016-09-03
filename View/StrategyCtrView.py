@@ -30,6 +30,10 @@ class StrategyCtrView(QWidget):
         self.selectStrat = QComboBox()
         self.selectStrat.addItem('Aucune Stratégie disponible')
 
+        self.selectStratTeam = QComboBox()
+        self.selectStratTeam.addItem('Yellow')
+        self.selectStratTeam.addItem('Blue')
+
         self.page_strat_but_apply = QPushButton('Appliquer')
         self.page_strat_but_apply.clicked.connect(self.send_strat)
         self.page_strat_but_cancel = QPushButton("STOP")
@@ -42,6 +46,7 @@ class StrategyCtrView(QWidget):
         qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
         strat_combox = QVBoxLayout()
         strat_combox.addWidget(self.selectStrat)
+        strat_combox.addWidget(self.selectStratTeam)
         qgroup.setLayout(strat_combox)
 
         but_group = QHBoxLayout()
@@ -126,8 +131,8 @@ class StrategyCtrView(QWidget):
         super().hideEvent(event)
 
     def update_combobox(self):
-        if self.parent.model_datain._data_STA is not None:
-            data = self.parent.model_datain._data_STA.data
+        if self.parent.model_datain._data_STA_config is not None:
+            data = self.parent.model_datain._data_STA_config.data
 
             if data['tactic'] is not None:
                 tactics = self.get_tactic_list()
@@ -175,8 +180,9 @@ class StrategyCtrView(QWidget):
 
     def send_strat(self):
         strat = str(self.selectStrat.currentText())
+        team = str(self.selectStratTeam.currentText()).lower()
         if not strat == 'Aucune Stratégie disponible':
-            self.parent.model_dataout.send_strategy(strat)
+            self.parent.model_dataout.send_strategy(strat, team)
 
     def send_tactic(self):
         id_bot = int(self.selectRobot.currentText())
@@ -193,7 +199,8 @@ class StrategyCtrView(QWidget):
             self.parent.model_dataout.send_tactic(id_bot, 'tStop')
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strategy('pStop')
+        self.parent.model_dataout.send_strategy('pStop', 'yellow')
+        self.parent.model_dataout.send_strategy('pStop', 'blue')
 
     def toggle_show_hide(self):
         if self.isVisible():

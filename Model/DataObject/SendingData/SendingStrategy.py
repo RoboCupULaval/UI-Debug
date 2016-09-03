@@ -21,6 +21,13 @@ class SendingStrategy(BaseDataSending):
         assert isinstance(self.data['strategy'], str), \
             "data['strategy']: {} n'est pas le type attendu (str)".format(type(self.data['strategy']))
 
+        assert 'team' in keys, \
+            "data['team'] n'existe pas."
+        assert isinstance(self.data['team'], str), \
+            "data['team']: {} n'est pas le type attendu (str)".format(type(self.data['team']))
+        assert self.data['team'] in {'yellow', 'blue'}, \
+            "data['team']: {} devrait avoir l'une des valeurs suivantes ('yellow' | 'blue')".format(self.data['team'])
+
     @catch_format_error
     def _check_optional_data(self):
         pass
@@ -28,8 +35,8 @@ class SendingStrategy(BaseDataSending):
     @staticmethod
     def get_default_data_dict():
         """ Retourne une dictionnaire de données par défaut """
-        return dict(zip(['strategy'],
-                        ['StrategyHelloWorld']))
+        return dict(zip(['strategy', 'team'],
+                        ['StrategyHelloWorld', 'yellow']))
 
     @staticmethod
     def get_type():
