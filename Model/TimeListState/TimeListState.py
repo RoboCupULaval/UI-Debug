@@ -8,7 +8,7 @@ __author__ = 'jbecirovski'
 
 class TimeListState:
     """ BaseTimeList est un état qui est géré sous forme d'une liste indexé par un index et par du temps """
-    def __init__(self, name, default_model, debug=True):
+    def __init__(self, name, default_model, debug=False):
         assert isinstance(name, str), "{}.name: {} n'a pas le format attendu (str)".format(TimeListState.__name__, name)
         self._name = name
         self._logger = logging.getLogger(self._name)
