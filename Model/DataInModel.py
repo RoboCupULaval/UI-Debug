@@ -15,6 +15,8 @@ from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
 from Model.DataObject.LoggingData.BaseDataLog import BaseDataLog
 from Model.DataObject.AccessorData.HandShakeAcc import HandShakeAcc
 
+from .TimeListState.TimeListState import TimeListState
+
 __author__ = 'RoboCupULaval'
 
 
@@ -31,7 +33,7 @@ class DataInModel(Thread):
         # Stockage de données
         self._data_logging = list()
         self._robot_state = list()
-        self._game_state = list()
+        self._game_state = TimeListState('GameState', {'yellow': None, 'blue': None})
         self._data_config = list()
         self._data_draw = dict()
         self._distrib_sepcific_packet = dict()
@@ -123,7 +125,7 @@ class DataInModel(Thread):
     def _distrib_GameState(self, data):
         """ Tratie le paquet spécifique GameState"""
         self._logger.debug('DISTRIB: GameState')
-        self._game_state.append(data)
+        self._game_state.append(data.data)
         self._event_game_state.set()
 
 

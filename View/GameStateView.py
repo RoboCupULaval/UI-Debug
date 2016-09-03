@@ -131,13 +131,10 @@ class GameStateView(QWidget):
         while True:
             game_state = self._ctrl.waiting_for_game_state()
             self._logger.debug('RUN: Received game state')
-            if game_state.data['team'].lower() == 'blue':
-                col = 2
-            else:
-                col = 6
-            line = 1
-            if not self._layout.itemAtPosition(line, col).widget().text() == str(game_state.data['state']):
-                self._layout.itemAtPosition(line, col).widget().setText(str(game_state.data['state']))
+            if not self._layout.itemAtPosition(1, 6).widget().text() == str(game_state['yellow']):
+                self._layout.itemAtPosition(1, 6).widget().setText(str(game_state['yellow']))
+            if not self._layout.itemAtPosition(1, 2).widget().text() == str(game_state['blue']):
+                self._layout.itemAtPosition(1, 2).widget().setText(str(game_state['blue']))
 
     def update_robot_state(self):
         self._logger.debug('RUN: Thread RobotState')

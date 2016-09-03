@@ -15,28 +15,21 @@ class GameStateAcc(BaseDataAccessor):
     def _check_obligatory_data(self):
         assert isinstance(self.data, dict), \
             "data n'est pas un dictionnaire."
-        keys = self.data.keys()
-
-        assert 'state' in keys, \
-            "data['state'] n'existe pas."
-        assert isinstance(self.data['state'], str), \
-            "data['state']: {} n'a pas le format attendu".format(type(self.data['state']))
-
-        assert 'team' in keys, \
-            "data['team'] n'existe pas."
-        assert isinstance(self.data['team'], str), \
-            "data['team']: {} n'a pas le format attendu".format(type(self.data['team']))
-        assert self.data['team'].lower() in {'yellow', 'blue'}, \
-            "data['team']: {} n'a pas la valeur attendue (yellow | blue)".format(self.data['team'])
 
     @catch_format_error
     def _check_optional_data(self):
-        pass
+        keys = self.data.keys()
+        if 'yellow' in keys:
+            assert isinstance(self.data['yellow'], str), \
+                "data['yellow']: {} n'a pas le format attendu (str)".format(type(self.data['yellow']))
+        if 'blue' in keys:
+            assert isinstance(self.data['blue'], str), \
+                "data['blue']: {} n'a pas le format attendu (str)".format(type(self.data['blue']))
 
     @staticmethod
     def get_default_data_dict():
-        return dict(zip(['state', 'team'],
-                        ['None', 'yellow']))
+        return dict(zip(['yellow', 'blue'],
+                        ['None', 'None']))
 
     @staticmethod
     def get_type():
