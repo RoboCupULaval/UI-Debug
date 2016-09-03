@@ -7,6 +7,7 @@ from time import time
 from threading import Thread, Event
 
 from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
+from Model.DataObject.AccessorData.FieldGeometryAcc import FieldGeometryAcc
 from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
 from Model.DataObject.AccessorData.GameStateAcc import GameStateAcc
 from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
@@ -86,6 +87,7 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
         self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
         self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
+        self._distrib_sepcific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
         self._logger.debug('INIT: Distributor')
 
     def _init_logger(self):
@@ -127,8 +129,13 @@ class DataInModel(Thread):
 
     # === DISTRIBUTOR ===
 
+    def _distrib_FieldGeometry(self, data):
+        """ Traite le paque spécifique FieldGeometry """
+        self._logger.debug('DISTRIB: FieldGeometry')
+        self._controller.send_geometry()
+
     def _distrib_GameState(self, data):
-        """ Tratie le paquet spécifique GameState"""
+        """ Traite le paquet spécifique GameState """
         self._logger.debug('DISTRIB: GameState')
         self._game_state.append(data.data)
         self._event_game_state.set()
