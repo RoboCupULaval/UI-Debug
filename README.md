@@ -84,13 +84,16 @@ data = {'strategy': list(str),      # Liste de toutes les stratégies
         'action': list(str)}        # Liste de toutes les actions
 
 # Type 1002 - Envoie à l'UI le statut d'un robot
-data = {'id': int,                  # Identification du robot (0-5)
-        'team': str,                # Identification de l'équipe ('Yellow' | 'Blue')
-        # === Options supplémentaires ===
-        'tactic': str,              # Correspond à la tactique active sur le robot
-        'action': str,              # Correspond à l'action active sur le robot
-        'target': tuple(int, int),  # Correspond à la cible active du robot
+data = {str:   {                                    # Identification de l'équipe ('yellow' | 'blue')
+                 int:   {                           # Identification du robot (0-5)
+                         'tactic': str,             # Correspond à la tactique active sur le robot
+                         'action': str,             # Correspond à l'action active sur le robot
+                         'target': tuple(int, int), # Correspond à la cible active du robot
+                        }
+                }
         }
+==> exemple: {'yellow': {1: {'action': 'Kick', 'target': (0, 0)}, 5: {'tactic': 'GoToGoal'}},
+              'blue': {0: {'tactic': 'GoalKeeper', 'action': 'Stop'}}}
 
 # Type 1003 - Envoie à l'UI le statut du jeu
 data = {'blue': str,               # Correspond à la Stratégie courrante de l'équipe bleue
