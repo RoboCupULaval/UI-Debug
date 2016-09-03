@@ -131,8 +131,8 @@ class StrategyCtrView(QWidget):
         super().hideEvent(event)
 
     def update_combobox(self):
-        if self.parent.model_datain._data_STA is not None:
-            data = self.parent.model_datain._data_STA.data
+        if self.parent.model_datain._data_STA_config is not None:
+            data = self.parent.model_datain._data_STA_config.data
 
             if data['tactic'] is not None:
                 tactics = self.get_tactic_list()

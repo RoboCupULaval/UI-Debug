@@ -62,46 +62,49 @@ class MediaControllerView(QtGui.QWidget):
 
     def update_slider(self):
         while True:
-            if self.controller.model_recorder._ctrl_play:
-                self._media_slider.setValue(self.controller.model_recorder.get_cursor_percentage())
+            if self.controller.recorder_is_playing():
+                try:
+                    self._media_slider.setValue(self.controller.recorder_get_cursor_percentage())
+                except TypeError as e:
+                    pass
             sleep(0.1)
 
     def pause(self):
-        self.controller.model_recorder.pause()
-        value = self.controller.model_recorder.get_cursor_percentage()
+        self.controller.recorder_trigger_pause()
+        value = self.controller.recorder_get_cursor_percentage()
         if value is not None:
             self._media_slider.setValue(value)
         self._media_slider.setDisabled(False)
 
     def play(self):
-        self.controller.model_recorder.play()
+        self.controller.recorder_trigger_play()
         self._media_slider.setDisabled(True)
 
     def back(self):
-        self.controller.model_recorder.back()
-        value = self.controller.model_recorder.get_cursor_percentage()
+        self.controller.recorder_trigger_back()
+        value = self.controller.recorder_get_cursor_percentage()
         if value is not None:
             self._media_slider.setValue(value)
 
     def rewind(self):
-        self.controller.model_recorder.rewind()
-        value = self.controller.model_recorder.get_cursor_percentage()
+        self.controller.recorder_trigger_rewind()
+        value = self.controller.recorder_get_cursor_percentage()
         if value is not None:
             self._media_slider.setValue(value)
 
     def forward(self):
-        self.controller.model_recorder.forward()
-        value = self.controller.model_recorder.get_cursor_percentage()
+        self.controller.recorder_trigger_forward()
+        value = self.controller.recorder_get_cursor_percentage()
         if value is not None:
             self._media_slider.setValue(value)
 
     @QtCore.pyqtSlot()
     def sliderReleased(self):
-        self.controller.model_recorder.skip_to(self._media_slider.value())
+        self.controller.recorder_skip_to(self._media_slider.value())
 
     @QtCore.pyqtSlot()
     def sliderMoved(self):
-        self.controller.model_recorder.skip_to(self._media_slider.value())
+        self.controller.recorder_skip_to(self._media_slider.value())
 
     def toggle_visibility(self):
         if self.isVisible():

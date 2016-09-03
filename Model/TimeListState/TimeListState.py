@@ -1,6 +1,6 @@
 # Under GNU GPLv3 License, see LICENSE.txt
 
-import logging
+import logging, copy
 from datetime import datetime
 
 __author__ = 'jbecirovski'
@@ -11,13 +11,14 @@ class TimeListState:
     def __init__(self, name, default_model, debug=False):
         assert isinstance(name, str), "{}.name: {} n'a pas le format attendu (str)".format(TimeListState.__name__, name)
         self._name = name
-        self._logger = logging.getLogger(self._name)
+        self._logger = logging.getLogger(TimeListState.__name__ + '.' + self._name)
         if debug:
             self._logger.setLevel(logging.DEBUG)
         else:
             self._logger.setLevel(logging.INFO)
         self._state = [Node(default_model)]
         self._init_logger()
+        self._logger.debug('INIT: default_state: {}'.format(self._state[-1]))
 
     def _init_logger(self):
         """ Initialisation du logger """
@@ -31,34 +32,59 @@ class TimeListState:
     def __getitem__(self, index):
         """ Récupère l'état à l'instant T ou l'index """
         if isinstance(index, int):
+            self._logger.debug('GET: item with index={}'.format(index))
             return self._state[index].state
         elif isinstance(index, datetime):
-            return self._get_nearest(index).state
+            self._logger.debug('GET: item with time={}'.format(index))
+            node = self._get_nearest(index)
+            if node is not None:
+                return node.state
         else:
             raise IndexError()
 
     def __len__(self):
         """ Retourne le nombre d'éléments de la liste """
-        return len(self._state)
+        length = len(self._state)
+        self._logger.debug('GET: Length {}'.format(length))
+        return length
 
     def _get_nearest(self, time):
         # TODO - Augmenter la rapidité de l'algorithme
         # \====> Peut être améliorée en ayant une approche par le milieu puisque les données sont ordonnées
+        # \====> Peut être améliorée en gardant la dernière recherche (recherche locale)
 
         """ Récupère l'état le plus près du temps donné. L'algorithme parcours la liste élément par élément de la fin
             vers le début et s'arrête lorsqu'un noeud est temporellement plus près que le noeud suivant. """
-        self._logger.debug('GET: Nearest with time = {}'.format(time))
-        nearest = self._state[-1]
-        for node in self._state[1::-1]:
-            if abs(nearest.time - time) > abs(node.time - time):
+        self._logger.debug('GET: searching nearest node with time = {}'.format(time))
+        nearest = self._state[0]
+        for node in self._state[1:]:
+            if node.time < time:
                 nearest = node
             else:
-                self._logger.debug('GET: Nearest is index={}'.format(nearest.index))
+                self._logger.debug('GET: Nearest node is index={} | time={}'.format(nearest.index, nearest.time))
                 return nearest
 
     def append(self, state):
         """ Ajoute un paquet de données """
+        self._logger.debug('SET: append => {}'.format(state))
         self._state.append(Node(state, parent=self._state[-1]))
+
+    def copy(self):
+        """ Récupère une copie intégrale du TimeListState pour éviter la corruption de la liste originale """
+        self._logger.debug('GET: copy')
+        new_state = []
+        first_node = Node(self._state[0].state)
+        first_node._index = self._state[0].index
+        first_node._time = copy.deepcopy(self._state[0].time)
+        new_state.append(first_node)
+        for i, node in enumerate(self._state[1:], start=1):
+            new_node = Node(node.state, parent=new_state[i - 1])
+            new_node._index = node.index
+            new_node._time = copy.deepcopy(node.time)
+            new_state.append(new_node)
+        new_time_list_state = TimeListState(self._name, self._state[0])
+        new_time_list_state._state = new_state
+        return new_time_list_state
 
 
 class Node:
@@ -107,3 +133,6 @@ class Node:
     @property
     def time(self):
         return self._time
+
+    def __repr__(self):
+        return str(self._state)

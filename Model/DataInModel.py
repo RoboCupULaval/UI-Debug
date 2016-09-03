@@ -2,7 +2,7 @@
 
 import pickle
 import logging
-from time import time
+from time import time, sleep
 
 from threading import Thread, Event
 
@@ -30,20 +30,22 @@ class DataInModel(Thread):
         else:
             self._logger.setLevel(logging.INFO)
         self._controller = controller
+        self._recorder = None
+        self._recorder_is_enable = False
 
         # Stockage de données
         self._data_logging = list()
         self._robot_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
                                                                  [dict(zip(list(range(6)),
                                                                            [dict(zip(['tactic', 'action', 'target'],
-                                                                                    [None, None, None])) for _ in range(6)]
+                                                                                    ['None', 'None', 'None'])) for _ in range(6)]
                                                                            )) for _ in range(2)])))
 
-        self._game_state = TimeListState('GameState', {'yellow': None, 'blue': None})
+        self._game_state = TimeListState('GameState', {'yellow': 'None', 'blue': 'None'})
         self._data_config = list()
         self._data_draw = dict()
         self._distrib_sepcific_packet = dict()
-        self._data_STA = None
+        self._data_STA_config = None
 
         # Système interne
         self._datain_factory = DataFactory()
@@ -156,11 +158,11 @@ class DataInModel(Thread):
     def _distrib_StratGeneral(self, data):
         """ Traite le paquet spécifique StratGeneral """
         self._logger.debug('DISTRIB: StratGeneral')
-        if self._data_STA is not None:
+        if self._data_STA_config is not None:
             for key in data.data.keys():
-                self._data_STA.data[key] = data.data[key]
+                self._data_STA_config.data[key] = data.data[key]
         else:
-            self._data_STA = data
+            self._data_STA_config = data
 
     def _distrib_BaseDataLog(self, data):
         """ Traite le paquet de type générique BaseDataLog """
@@ -206,21 +208,42 @@ class DataInModel(Thread):
 
     # === PUBLIC METHODS ===
 
+    def set_recorder(self, recorder):
+        self._recorder = recorder
+
+    def get_game_state_copy(self):
+        return self._game_state.copy()
+
+    def get_robot_state_copy(self):
+        return self._robot_state.copy()
+
     def waiting_for_pause_event(self):
         self._logger.debug('WAITING FOR: Pause event')
         self._event_pause.wait()
 
     def waiting_for_robot_state_event(self):
         self._logger.debug('WAITING FOR: Robot State')
-        self._event_robot_state.wait()
-        self._event_robot_state.clear()
-        return self._robot_state[-1]
+        if self._recorder_is_enable:
+            sleep(1 / 30)
+            self._logger.debug('CATCH: Recorded Robot State')
+            return self._recorder.get_robot_state()
+        else:
+            self._logger.debug('CATCH: Robot State')
+            self._event_robot_state.wait()
+            self._event_robot_state.clear()
+            return self._robot_state[-1]
 
     def waiting_for_game_state_event(self):
         self._logger.debug('WAITING FOR: Game State')
-        self._event_game_state.wait()
-        self._event_game_state.clear()
-        return self._game_state[-1]
+        if self._recorder_is_enable:
+            sleep(1 / 30)
+            self._logger.debug('CATCH: Recorded GameState')
+            return self._recorder.get_game_state()
+        else:
+            self._logger.debug('CATCH: GameState')
+            self._event_game_state.wait()
+            self._event_game_state.clear()
+            return self._game_state[-1]
 
     def add_logging(self, name, message, level=2):
         self._logger.debug('TRIGGER: Add new log')
@@ -270,3 +293,21 @@ class DataInModel(Thread):
         """ Requete pour savoir si le modèle est en pause """
         self._logger.debug('GET: is pause ?')
         return self._event_pause.isSet()
+
+    # ====== RECORDER TOGGLE ======
+    def enable_recorder(self):
+        """ Activer l'enregistreur sur le modèle de frame """
+        self._logger.debug('SET: Enable recorder')
+        if self._recorder is not None:
+            self._recorder.init(game_state=self.get_game_state_copy(), robot_state=self.get_robot_state_copy())
+            self._recorder_is_enable = True
+            self._event_game_state.set()
+            self._event_robot_state.set()
+
+    def disable_recorder(self):
+        """ Désactiver l'enregistreur sur le modèle de frame """
+        self._logger.debug('SET: Disable recorder')
+        if self._recorder is not None:
+            self._recorder_is_enable = False
+            self._event_game_state.set()
+            self._event_robot_state.set()
