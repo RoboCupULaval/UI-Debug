@@ -32,7 +32,12 @@ class DataInModel(Thread):
 
         # Stockage de données
         self._data_logging = list()
-        self._robot_state = list()
+        self._robot_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
+                                                                 [dict(zip(list(range(6)),
+                                                                           [dict(zip(['tactic', 'action', 'target'],
+                                                                                    [None, None, None])) for _ in range(6)]
+                                                                           )) for _ in range(2)])))
+
         self._game_state = TimeListState('GameState', {'yellow': None, 'blue': None})
         self._data_config = list()
         self._data_draw = dict()
@@ -163,7 +168,7 @@ class DataInModel(Thread):
     def _distrib_RobotState(self, data):
         """ Traite le paquet spécifique RobotState """
         self._logger.debug('DISTRIB: RobotState')
-        self._robot_state.append(data)
+        self._robot_state.append(data.data.copy())
         self._event_robot_state.set()
 
     # === PRIVATE METHODS ===
