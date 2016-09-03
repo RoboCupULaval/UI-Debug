@@ -210,7 +210,8 @@ data = {'is_human_control': bool    # Donne le contrôle de l'IA à la humain ou
        }
 
 # Type 5002 - Envoie la Stratégie à adopter pour l'IA (set-strategy)
-data = {'strategy': str             # Nom de la stratégie
+data = {'strategy': str,            # Nom de la stratégie
+        'team': str                 # Couleur de l'équipe: 'yellow' | 'blue'
        }
 
 # Type 5003 - Envoie la tactique à adopter pour un robot (set-robot-tactic)
