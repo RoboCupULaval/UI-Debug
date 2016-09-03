@@ -93,8 +93,8 @@ data = {'id': int,                  # Identification du robot (0-5)
         }
 
 # Type 1003 - Envoie à l'UI le statut du jeu
-data = {'state': str,               # Correspond à la Stratégie courrante
-        'team': str,                # Identification de l'équipe ('Yellow' | 'Blue')
+data = {'blue': str,               # Correspond à la Stratégie courrante de l'équipe bleue
+        'yellow': str,             # Correspond à la Stratégie courrante de l'équipe jaune
         }
 
 # Type 2000 - Envoie à l'UI d'un fragment binaire identifié pour le reconstruire par la suite.
