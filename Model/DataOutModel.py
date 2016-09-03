@@ -35,8 +35,8 @@ class DataOutModel:
                                        goal=goal)
         self._udp_sender.send_message(pkg.get_binary())
 
-    def send_strategy(self, strat):
-        pkg = SendingStrategy().set_data(strategy=strat)
+    def send_strategy(self, strat, team):
+        pkg = SendingStrategy().set_data(strategy=strat, team=team)
         self._udp_sender.send_message(pkg.get_binary())
 
     def send_toggle_human_control(self, result):

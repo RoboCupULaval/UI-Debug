@@ -8,7 +8,7 @@ __author__ = 'jbecirovski'
 
 class TimeListState:
     """ BaseTimeList est un état qui est géré sous forme d'une liste indexé par un index et par du temps """
-    def __init__(self, name, default_model, debug=False):
+    def __init__(self, name, default_model, debug=True):
         assert isinstance(name, str), "{}.name: {} n'a pas le format attendu (str)".format(TimeListState.__name__, name)
         self._name = name
         self._logger = logging.getLogger(self._name)
@@ -42,10 +42,14 @@ class TimeListState:
         return len(self._state)
 
     def _get_nearest(self, time):
-        """ Récupère l'état le plus près du temps donné """
+        # TODO - Augmenter la rapidité de l'algorithme
+        # \====> Peut être améliorée en ayant une approche par le milieu puisque les données sont ordonnées
+
+        """ Récupère l'état le plus près du temps donné. L'algorithme parcours la liste élément par élément de la fin
+            vers le début et s'arrête lorsqu'un noeud est temporellement plus près que le noeud suivant. """
         self._logger.debug('GET: Nearest with time = {}'.format(time))
-        nearest = self._state[0]
-        for node in self._state[1:]:
+        nearest = self._state[-1]
+        for node in self._state[1::-1]:
             if abs(nearest.time - time) > abs(node.time - time):
                 nearest = node
             else:
@@ -58,7 +62,10 @@ class TimeListState:
 
 
 class Node:
-    """ Node est un noeud avec un index, temps de création et un lien avec le noeud qui le précède et le suit"""
+    """
+        Node est un noeud avec un index, temps de création et un lien avec le noeud qui le précède et le suit.
+        /!\ Les Nodes sont en mode read-only
+    """
     _length = 0
 
     def __init__(self, state, parent=None):
@@ -90,6 +97,7 @@ class Node:
     @next.setter
     def next(self, node):
         assert isinstance(node, Node)
+        assert self._next is None
         self._next = node
 
     @property
