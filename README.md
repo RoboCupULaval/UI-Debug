@@ -274,3 +274,81 @@ Le projet respecte les mêmes standards de code décrit dans le dépôt RoboCupU
 ## Responsable
 
 _(30 mai 2016)_ Julien B. jusqu'au _31 août 2016_
+
+# HOW TO:
+## Paquet de Communication
+Créer un nouveau paquet de communication se fait en suivant les étapes suivantes :
+
+* Définition du paquet
+* Création du paquet
+* Traitement du paquet
+
+### Définition du paquet :
+La définition du paquet se fait dans le fichier **REAMDE.md** dans la section Protocole de communication.
+Il faut déterminer les paramètres suivants :
+
+* Déterminer dans quelle famille se situe le paquet _(Logger | Accesseur | Dessin | Répondeur)_
+* Déterminer le numéro de type en fonction de la famille en sachant qu'un numéro est unique _(exemple : Pour la famille Logger je dois trouver un chiffre entre 0 et 999 qui ne soit pas pris)_
+* Définir et décrire les paramètres des données transmises sous le forme : _data = { ... }_
+
+Soyez bien explicite dans la description de votre paquet pour éviter de générer des erreurs lorsque vous recevrez un paquet.
+
+Dans la pratique, votre paquet est un dictionnaire à plusieurs niveaux avec une première couche qui va décrire le type de paquet et sa provenance, puis un second niveau qui contient les données. Votre paquet va prendre le chemin suivant :
+
+[ Serveur UDP ] => [ DataInModel -> DataInModel._datain_factory -> DataInModel._distrib_specific_packet ]
+
+* _datain_factory _[DataFactory]_ : On doit créer un objet qui va vérifier les données de la seconde couche de données du paquet
+* _distrib_specific_packet _[dict]_ : On va créer une méthode qui va s'occuper d'effectuer une action spécifique en fonction du paquet
+
+### Création du paquet
+
+Pour qu'un paquet soit accepté, il faut créer un nouvel objet en prenant le chemin suivant :
+
+* **_Model.DataObject.famille_de_votre_paquet.nom_du_paquet_**
+
+Plusieurs paquets sont déjà créés donc prenez le temps de bien comprendre son fonctionnement.
+Chaque objet DataIn hérite d'un objet de famille _(BaseDataLog | BaseDataAccessor | BaseDataDraw | BaseDataSending)_
+
+Dans ces objects, il y a 4 méthodes importantes :
+
+* **check_obligatory_data()** :
+On doit tester par des **assert** toutes les données qui sont **OBLIGATOIRES** sans lesquelles le paquet ne sera pas conforme et sera rejeté.
+
+* **check_optional_data()** :
+On doit tester par des **assert** toutes les données **OPTIONNELLES** et combler par des valeurs défauts les paramètres qui ne sont pas remplis.
+
+* **get_default_data_dict()** :
+Doit retourner un paquet de données par défaut. Cette méthode est utilisée par le _DataOutModel_ lorsque l'on va vouloir envoyer un paquet.
+
+* **get_type()** :
+Doit retourner le numéro de type _(int)_ du paquet. Cette méthode est utilisée par la _DataFactory_ afin d'indexer l'objet avec le paquet correspondant.
+
+/ ! \   Explicitez le message d'erreur provoqué par chaque **assert** afin que l'utilisateur ait le plus d'informations possibles   / ! \
+
+### Traitement du paquet
+
+Une fois que le paquet est vérifié, la _DataFactory_ va retourner un _DataIn_ au _DataInModel_ qui va s'occuper d'excuter une méthode en fonction du paquet.
+Cette méthode est stocké dans un dictionnaire et est indexé par le nom du _DataIn_
+
+Pour traiter le _DataIn_, vous devez faire les étapes suivantes :
+
+* **Définir la méthode de traitement du paquet** :
+Vous devez créer une méthode de la forme qui suit en sachant que l'argument _data_ de la méthode correspond à l'objet _DataIn_
+```python
+def _distrib_NOM_DE_DATAIN(self, data):
+        """ Traite le paquet spécifique NOM_DE_DATAIN """
+        ...
+```
+
+* **Indexer le _DataIn_ avec la méthode adéquate** :
+Pour indexer, allez dans la méthode _DataInModel._init_distributor. C'est à cet endroit que vous allez ajouter la ligne qui suit.
+```python
+self._distrib_specific_packet[NOM_DE_DATAIN.__name__] = self._distrib_NOM_DE_DATAIN
+```
+
+**BRAVO ! Vous venez de créer un tout nouveau paquet ! CONGRATZ..**
+
+## Créer un nouveau dessin
+TODO
+## Créer un nouveau widget View
+TODO**
