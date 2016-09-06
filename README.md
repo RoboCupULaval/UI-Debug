@@ -274,3 +274,155 @@ Le projet respecte les mêmes standards de code décrit dans le dépôt RoboCupU
 ## Responsable
 
 _(30 mai 2016)_ Julien B. jusqu'au _31 août 2016_
+
+# HOW TO:
+## Paquet de Communication
+Créer un nouveau paquet de communication se fait en suivant les étapes suivantes :
+
+* Définition du paquet
+* Création du paquet
+* Traitement du paquet
+
+### Définition du paquet :
+La définition du paquet se fait dans le fichier **REAMDE.md** dans la section Protocole de communication.
+Il faut déterminer les paramètres suivants :
+
+* Déterminer dans quelle famille se situe le paquet _(Logger | Accesseur | Dessin | Répondeur)_
+* Déterminer le numéro de type en fonction de la famille en sachant qu'un numéro est unique _(exemple : Pour la famille Logger je dois trouver un chiffre entre 0 et 999 qui ne soit pas pris)_
+* Définir et décrire les paramètres des données transmises sous le forme : _data = { ... }_
+
+Soyez bien explicite dans la description de votre paquet pour éviter de générer des erreurs lorsque vous recevrez un paquet.
+
+Dans la pratique, votre paquet est un dictionnaire à plusieurs niveaux avec une première couche qui va décrire le type de paquet et sa provenance, puis un second niveau qui contient les données. Votre paquet va prendre le chemin suivant :
+
+[ Serveur UDP ] => [ DataInModel -> DataInModel._datain_factory -> DataInModel._distrib_specific_packet ]
+
+* _datain_factory _[DataFactory]_ : On doit créer un objet qui va vérifier les données de la seconde couche de données du paquet
+* _distrib_specific_packet _[dict]_ : On va créer une méthode qui va s'occuper d'effectuer une action spécifique en fonction du paquet
+
+### Création du paquet
+
+Pour qu'un paquet soit accepté, il faut créer un nouvel objet en prenant le chemin suivant :
+
+* **_Model.DataObject.famille_de_votre_paquet.nom_du_paquet_**
+
+Plusieurs paquets sont déjà créés donc prenez le temps de bien comprendre son fonctionnement.
+Chaque objet DataIn hérite d'un objet de famille _(BaseDataLog | BaseDataAccessor | BaseDataDraw | BaseDataSending)_
+
+Dans ces objects, il y a 4 méthodes importantes :
+
+* **check_obligatory_data()** :
+On doit tester par des **assert** toutes les données qui sont **OBLIGATOIRES** sans lesquelles le paquet ne sera pas conforme et sera rejeté.
+
+* **check_optional_data()** :
+On doit tester par des **assert** toutes les données **OPTIONNELLES** et combler par des valeurs défauts les paramètres qui ne sont pas remplis.
+
+* **get_default_data_dict()** :
+Doit retourner un paquet de données par défaut. Cette méthode est utilisée par le _DataOutModel_ lorsque l'on va vouloir envoyer un paquet.
+
+* **get_type()** :
+Doit retourner le numéro de type _(int)_ du paquet. Cette méthode est utilisée par la _DataFactory_ afin d'indexer l'objet avec le paquet correspondant.
+
+/ ! \   Explicitez le message d'erreur provoqué par chaque **assert** afin que l'utilisateur ait le plus d'informations possibles   / ! \
+
+### Traitement du paquet
+
+Une fois que le paquet est vérifié, la _DataFactory_ va retourner un _DataIn_ au _DataInModel_ qui va s'occuper d'excuter une méthode en fonction du paquet.
+Cette méthode est stocké dans un dictionnaire et est indexé par le nom du _DataIn_
+
+Pour traiter le _DataIn_, vous devez faire les étapes suivantes :
+
+* **Définir la méthode de traitement du paquet** :
+Vous devez créer une méthode de la forme qui suit en sachant que l'argument _data_ de la méthode correspond à l'objet _DataIn_
+```python
+def _distrib_NOM_DE_DATAIN(self, data):
+        """ Traite le paquet spécifique NOM_DE_DATAIN """
+        ...
+```
+
+* **Indexer le _DataIn_ avec la méthode adéquate** :
+Pour indexer, allez dans la méthode _DataInModel._init_distributor. C'est à cet endroit que vous allez ajouter la ligne qui suit.
+```python
+self._distrib_specific_packet[NOM_DE_DATAIN.__name__] = self._distrib_NOM_DE_DATAIN
+```
+
+**BRAVO ! Vous venez de créer un tout nouveau paquet ! CONGRATZ..**
+
+## Créer un nouveau dessin
+Voici les étapes à suivre pour créer un nouveau dessin :
+
+* Déterminer les caractéristiques du dessin
+* Créer un nouveau paquet de communication _(voir rubrique précédente)_
+* Créer l'objet dessin correspondant
+
+### Déterminer les caractéristiques du dessin
+Les dessins utilisent les méthodes de l'objet _QPainter_ qui sont disponibles par ce [lien](http://pyqt.sourceforge.net/Docs/PyQt4/qpainter.html).
+Le parcours de toutes ces méthodes va vous permettre de déterminer les paramètres dont vous avez besoin.
+
+```
+Exemple :
+Pour une ligne droite, il s'agit de la méthode QPainter.drawLine(). En observant la documentation, je peux déterminer qu'il me faut :
+  - Un point de départ
+  - Un point d'arrivée
+  - Une couleur de trait
+  - Un type de trait
+  - Une épaisseur de trait
+```
+
+Bien évidemment, vous pouvez augmenter ou réduire la compléxité de votre dessin à votre guise !
+
+### Créer un nouveau paquet de communication
+Rappelez vous qu'il existe une _famille Dessin_ dans les paquets de communication. Je vous invite donc à suivre les étapes de la [rubrique correspondante](#paquet-de-communication)
+
+### Créer l'objet dessin correspondant
+Il existe deux types de dessins. Ceux qui sont fixes _(exemple DrawLine)_ et ceux qui sont mobiles _(exemple robot)_ qui se trouve dans ```Controller > DrawingObject/MobileObject```.
+
+Pour le cas du dessin, créer un nouveau fichier dans le chemin suivant : ```Controller > DrawingObject > NOM_DU_DESSINDrawing.py```
+
+Prenons l'exemple du ```LineDrawing``` :
+```python
+class LineDrawing(BaseDrawingObject):
+    def __init__(self, data_in):
+        BaseDrawingObject.__init__(self, data_in)
+
+    def draw(self, painter):
+        if self.isVisible():
+            # == SET PEN == 
+            painter.setPen(QtToolBox.create_pen(color=self.data['color'],
+                                                style=self.data['style'],
+                                                width=self.data['width']))
+                                                
+            # == SET BRUSH == 
+            painter.setBrush(QtToolBox.create_brush(is_visible=False))
+            
+            # == SET DRAW == 
+            x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['start'])
+            x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['end'])
+            painter.drawLine(x1, y1, x2, y2)
+
+    @staticmethod
+    def get_datain_associated():
+        return DrawLineDataIn.__name__
+```
+
+Voici les étapes importantes lors de la création de l'objet :
+
+* ```LineDrawing``` hérite de ```BaseDrawingObject```
+
+* La méthode ```def draw(self, painter):``` est celle qui sera appelée par un signal à chaque rafraîchissement de la fenêtre. _(Pour des raisons d'optimisation, nous utilisons cette manière et non celle Orienté Objet que propose PyQt)_
+
+    * Dans cette méthode, il faut mettre la condition ```if self.isVisible():``` obligatoirement, sans laquelle nous ne pourrons pas contrôler la visibilité du dessin (filtre, timeout, etc.)
+
+    * Il faut toujours assigner le PEN et le BRUSH avant de dessiner. Dans le cas contraitre vous vous retrouverez avec le PEN et BRUSH du dessin précédent.
+    
+    * Lorsque vous utilisez des coordonnées pour dessiner, gardez toujours à l'esprit que les coordonnées sur le terrain ne sont pas les mêmes que sur l'écran. Utilisez l'objet QtToolBox.field_ctrl pour convertir ces derniers.
+
+* La méthode ```def get_datain_associated():``` retourne le nom du _DataIn_ associé à ce dessin.
+
+```
+REMARQUE:
+Vous pouvez vous aider de l'objet Controller.QtToolBox pour créer vos dessins.
+```
+
+## Créer un nouveau widget Model / View
+TODO
