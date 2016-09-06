@@ -349,6 +349,80 @@ self._distrib_specific_packet[NOM_DE_DATAIN.__name__] = self._distrib_NOM_DE_DAT
 **BRAVO ! Vous venez de créer un tout nouveau paquet ! CONGRATZ..**
 
 ## Créer un nouveau dessin
+Voici les étapes à suivre pour créer un nouveau dessin :
+
+* Déterminer les caractéristiques du dessin
+* Créer un nouveau paquet de communication _(voir rubrique précédente)_
+* Créer l'objet dessin correspondant
+
+### Déterminer les caractéristiques du dessin
+Les dessins utilisent les méthodes de l'objet _QPainter_ qui sont disponibles par ce [lien](http://pyqt.sourceforge.net/Docs/PyQt4/qpainter.html).
+Le parcours de toutes ces méthodes va vous permettre de déterminer les paramètres dont vous avez besoin.
+
+```
+Exemple :
+Pour une ligne droite, il s'agit de la méthode QPainter.drawLine(). En observant la documentation, je peux déterminer qu'il me faut :
+  - Un point de départ
+  - Un point d'arrivée
+  - Une couleur de trait
+  - Un type de trait
+  - Une épaisseur de trait
+```
+
+Bien évidemment, vous pouvez augmenter ou réduire la compléxité de votre dessin à votre guise !
+
+### Créer un nouveau paquet de communication
+Rappelez vous qu'il existe une _famille Dessin_ dans les paquets de communication. Je vous invite donc à suivre les étapes de la [rubrique correspondante](#paquet-de-communication)
+
+### Créer l'objet dessin correspondant
+Il existe deux types de dessins. Ceux qui sont fixes _(exemple DrawLine)_ et ceux qui sont mobiles _(exemple robot)_ qui se trouve dans ```Controller > DrawingObject/MobileObject```.
+
+Pour le cas du dessin, créer un nouveau fichier dans le chemin suivant : ```Controller > DrawingObject > NOM_DU_DESSINDrawing.py```
+
+Prenons l'exemple du ```LineDrawing``` :
+```python
+class LineDrawing(BaseDrawingObject):
+    def __init__(self, data_in):
+        BaseDrawingObject.__init__(self, data_in)
+
+    def draw(self, painter):
+        if self.isVisible():
+            # == SET PEN == 
+            painter.setPen(QtToolBox.create_pen(color=self.data['color'],
+                                                style=self.data['style'],
+                                                width=self.data['width']))
+                                                
+            # == SET BRUSH == 
+            painter.setBrush(QtToolBox.create_brush(is_visible=False))
+            
+            # == SET DRAW == 
+            x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['start'])
+            x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['end'])
+            painter.drawLine(x1, y1, x2, y2)
+
+    @staticmethod
+    def get_datain_associated():
+        return DrawLineDataIn.__name__
+```
+
+Voici les étapes importantes lors de la création de l'objet :
+
+* ```LineDrawing``` hérite de ```BaseDrawingObject```
+
+* La méthode ```def draw(self, painter):``` est celle qui sera appelée par un signal à chaque rafraîchissement de la fenêtre. _(Pour des raisons d'optimisation, nous utilisons cette manière et non celle Orienté Objet que propose PyQt)_
+
+    * Dans cette méthode, il faut mettre la condition ```if self.isVisible():``` obligatoirement, sans laquelle nous ne pourrons pas contrôler la visibilité du dessin (filtre, timeout, etc.)
+
+    * Il faut toujours assigner le PEN et le BRUSH avant de dessiner. Dans le cas contraitre vous vous retrouverez avec le PEN et BRUSH du dessin précédent.
+    
+    * Lorsque vous utilisez des coordonnées pour dessiner, gardez toujours à l'esprit que les coordonnées sur le terrain ne sont pas les mêmes que sur l'écran. Utilisez l'objet QtToolBox.field_ctrl pour convertir ces derniers.
+
+* La méthode ```def get_datain_associated():``` retourne le nom du _DataIn_ associé à ce dessin.
+
+```
+REMARQUE:
+Vous pouvez vous aider de l'objet Controller.QtToolBox pour créer vos dessins.
+```
+
+## Créer un nouveau widget Model / View
 TODO
-## Créer un nouveau widget View
-TODO**
