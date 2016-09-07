@@ -425,4 +425,115 @@ Vous pouvez vous aider de l'objet Controller.QtToolBox pour créer vos dessins.
 ```
 
 ## Créer un nouveau widget Model / View
-TODO
+### Architecture MVC
+
+Nous appliquons le modèle MVC (modèle-vue-contrôleur) à l'UI-debug.
+
+<p><a href="https://commons.wikimedia.org/wiki/File:ModeleMVC.png#/media/File:ModeleMVC.png"><img src="https://upload.wikimedia.org/wikipedia/commons/6/63/ModeleMVC.png" alt="ModeleMVC.png" height="480" width="578"></a><br>Par <a href="//commons.wikimedia.org/w/index.php?title=User:Deltacen&amp;action=edit&amp;redlink=1" class="new" title="User:Deltacen (page does not exist)">Deltacen</a> — <span class="int-own-work" lang="fr">Travail personnel</span>, <a href="http://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=23724069">https://commons.wikimedia.org/w/index.php?curid=23724069</a></p>
+
+* **M pour Modèle (Model) :**
+    Le modèle représente le cœur (algorithmique) de l'application : traitements des données, interactions avec la base de données, etc. Il décrit les données manipulées par l'application. Il regroupe la gestion de ces données et est responsable de leur intégrité. La base de données sera l'un de ses composants. Le modèle comporte des méthodes standards pour mettre à jour ces données (insertion, suppression, changement de valeur). Il offre aussi des méthodes pour récupérer ces données. Les résultats renvoyés par le modèle ne s'occupent pas de la présentation. Le modèle ne contient aucun lien direct vers le contrôleur ou la vue. Sa communication avec la vue s'effectue au travers du patron Observateur.
+    
+    Le modèle peut autoriser plusieurs vues partielles des données. Si par exemple le programme manipule une base de données pour les emplois du temps, le modèle peut avoir des méthodes pour avoir tous les cours d'une salle, tous les cours d'une personne ou tous les cours d'un groupe de TD.
+
+* **V pour Vue (View) :**
+    Ce avec quoi l'utilisateur interagit se nomme précisément la vue. Sa première tâche est de présenter les résultats renvoyés par le modèle. Sa seconde tâche est de recevoir toute action de l'utilisateur (hover, clic de souris, sélection d'un bouton radio, cochage d'une case, entrée de texte, de mouvements, de voix, etc.). Ces différents événements sont envoyés au contrôleur. La vue n'effectue pas de traitement, elle se contente d'afficher les résultats des traitements effectués par le modèle et d'interagir avec l'utilisateur.
+    
+    Plusieurs vues peuvent afficher des informations partielles ou non d'un même modèle. Par exemple si une application de conversion de base a un entier comme unique donnée, ce même entier peut être affiché de multiples façons (en texte dans différentes bases, bit par bit avec des boutons à cocher, avec des curseurs). La vue peut aussi offrir à l'utilisateur la possibilité de changer de vue. Ceci permet une certaine récursivité du modèle.
+
+* **C pour Contrôleur (Controller) :**
+    Le contrôleur prend en charge la gestion des événements de synchronisation pour mettre à jour la vue ou le modèle et les synchroniser. Il reçoit tous les événements de la vue et enclenche les actions à effectuer. Si une action nécessite un changement des données, le contrôleur demande la modification des données au modèle afin que les données affichées se mettent à jour. D'après le patron de conception observateur/observable, la vue est un « observateur » du modèle qui est lui « observable ». Certains événements de l'utilisateur ne concernent pas les données mais la vue. Dans ce cas, le contrôleur demande à la vue de se modifier. Le contrôleur n'effectue aucun traitement, ne modifie aucune donnée. Il analyse la requête du client et se contente d'appeler le modèle adéquat et de renvoyer la vue correspondant à la demande.
+    
+    Par exemple, dans le cas d'une base de données gérant les emplois du temps des professeurs d'une école, une action de l'utilisateur peut être l'entrée (saisie) d'un nouveau cours. Le contrôleur ajoute ce cours au modèle et demande sa prise en compte par la vue. Une action de l'utilisateur peut aussi être de sélectionner une nouvelle personne pour visualiser tous ses cours. Ceci ne modifie pas la base des cours mais nécessite simplement que la vue s'adapte et offre à l'utilisateur une vision des cours de cette personne.
+    
+    Quand un même objet contrôleur reçoit les événements de tous les composants, il lui faut déterminer l'origine de chaque événement. Ce tri des événements peut s'avérer fastidieux et peut conduire à un code peu élégant (un énorme switch). C'est pourquoi le contrôleur est souvent scindé en plusieurs parties dont chacune reçoit les événements d'une partie des composants.
+
+``` source: https://fr.wikipedia.org/wiki/Modèle-vue-contrôleur```
+
+### Ajouter un widget
+Dans notre architecture, nous allons considéré comme **widget** un modèle ou une vue, puisqu'il n'y a qu'un seul contrôleur.
+
+* **Widget: Modèle**
+    Actuellement, chaque Modèle tourne sur son propre **_thread_** pour pouvoir mettre à jour régulière ses données.
+    
+    Donc il faut simplement créer une classe qui hérite de ```threading.Thread```. Pour des raisons de performance, nous n'utilisons pas la classe **_QThread_** qui est fourni avec PyQt4 puisqu'elle fonctionne très mal à haute fréquence d'utilisation.
+    
+    ________
+    **_Exemple:_**
+    ModelFrame récupère les données provenants du système de vision ou simulateur (grSim) via un serveur UDP. Il met à jour les données à chaque fois qu'il récupère un nouveau paquet de frame.
+
+* **Widget: Vue**
+    Les Vues est un ```QtGui.QWidget``` que vous pouvez représenter comme bon vous semble.
+    Voici une classe standard de Vue:
+    
+    ```python
+    from PyQt4 import QtGui
+    
+    class View(QtGui.QWidget):
+        def __init__(self, controller=None):
+            super().__init__()
+            self.controller = controller
+            self.main_layout = QtGui.QVBoxLayout(self)
+            self.label_welcome = QtGui.QLable('HelloWorld!')
+            ...
+            
+            # === INIT ===
+            self.init_ui()
+            ...
+        
+        def init_ui(self):
+            self.setLayout(self.main_layout)
+            self.main_layout.addWidget(self.label_welcome)
+            ...
+    ```
+    Les Widgets fonctionnent avec un système de calques _(Layout)_ que vous devez utiliser pour rendre votre interface agréable pour l'utilisateur (cf: [QLayout](http://web.univ-pau.fr/~puiseux/enseignement/python/tutoQt-zero/tuto-PyQt-zero.7.html)).
+    ```python
+    # Exemple Utilisation Calque:
+    self.main_layout = QtGui.QVBoxLayout(self)
+    ...
+    self.setLayout(self.main_layout)
+    ...
+    ```
+    Dans ces calques vous pourrez intégrer des fenêtres / boutons / afficheurs / champs / conteneurs / etc. en fonction de vos besoins (cf: [Base QtGui](http://web.univ-pau.fr/~puiseux/enseignement/python/tutoQt-zero/tuto-PyQt-zero.8.html)).
+    ```python
+    # Exemple Utilisation Label:
+    self.label_welcome = QtGui.QLable('HelloWorld!')
+    ...
+    self.main_layout.addWidget(self.label_welcome)
+    ...
+    ```
+
+### Intéragir entre widget
+
+La règle est très simple: Toutes les intéractions entre widgets doivent passer par le Contrôleur.
+Une _Vue_ qui veut obtenir certaines informations dans un _Modèle_ doit faire comme suit :
+```
+class Controller:
+    def __init__(self):
+        self.model = Model(controller=self)
+        self.view = View(controller=self)
+    ...
+    def model_get_ball_position(self):
+        return self.model.get_ball_position()
+    ...
+    
+class View:
+    def __init__(self, controller=None):
+        self.controller = controller
+    ...
+     def view_get_ball_position(self):
+        return self.controler.model_get_ball_position()
+    ...
+
+class Model:
+    def __init__(self, controller=None):
+        self.controller = controller
+    ...
+    def get_ball_position(self):
+        return ball_pst
+    ...
+    
+```
+
+C'est le contrôleur qui est responsable des widgets (Création / Destruction / Interaction).
+Ce qui signifie que pour chaque nouveau widget, vous devez l'instancier dans le contrôleur.
