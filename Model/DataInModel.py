@@ -43,7 +43,7 @@ class DataInModel(Thread):
 
         self._game_state = TimeListState('GameState', {'yellow': 'None', 'blue': 'None'})
         self._data_config = list()
-        self._data_draw = dict()
+        self._data_draw = TimeListState('DataDraw', dict())
         self._distrib_sepcific_packet = dict()
         self._data_STA_config = None
 
