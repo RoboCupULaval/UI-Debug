@@ -7,6 +7,7 @@ from PyQt4 import QtGui
 
 from Controller.QtToolBox import QtToolBox
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
+from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
 
 __author__ = 'RoboCupULaval'
 
@@ -27,6 +28,7 @@ class FieldView(QtGui.QWidget):
         self.draw_filterable = dict()
         self.list_filter = ['None']
         self.graph_map = None
+        self.multiple_points_map = None
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
         # Option
@@ -91,6 +93,8 @@ class FieldView(QtGui.QWidget):
         ref_time = time()
         if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
             self.graph_map = None
+        if self.multiple_points_map is not None and self.multiple_points_map.time_is_up(ref_time):
+            self.multiple_points_map = None
 
         for key, list_effects in self.draw_filterable.items():
             temp_list_draw = []
@@ -103,6 +107,11 @@ class FieldView(QtGui.QWidget):
         """ Dessine une InfuenceMap unique """
         if self.graph_map is not None and 'None' in self.list_filter:
             self.graph_map.draw(painter)
+
+    def draw_multiple_points(self, painter):
+        """ Dessine une série de points unique """
+        if self.multiple_points_map is not None and 'None' in self.list_filter:
+            self.multiple_points_map.draw(painter)
 
     def draw_field_lines(self, painter):
         """ Dessine les lignes du terrains """
@@ -264,6 +273,8 @@ class FieldView(QtGui.QWidget):
         draw.show()
         if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
+        elif isinstance(draw, MultiplePointsDrawing):
+            self.multiple_points_map = draw
         else:
             if draw.filter in self.draw_filterable.keys():
                 self.draw_filterable[draw.filter].append(draw)
@@ -347,6 +358,7 @@ class FieldView(QtGui.QWidget):
         painter.setBackground(QtToolBox.create_brush())
         self.draw_field_ground(painter)
         self.draw_map(painter)
+        self.draw_multiple_points(painter)
         self.draw_effects(painter)
         self.draw_field_lines(painter)
         self.draw_mobs(painter)
