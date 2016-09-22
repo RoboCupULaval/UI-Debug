@@ -284,7 +284,9 @@ class MainController(QWidget):
 
     def get_list_of_filters(self):
         """ Récupère la liste des filtres d'affichage """
-        name_filter = set(self.view_screen.draw_filterable.keys())
+        name_filter = list(self.view_screen.draw_filterable.keys())
+        name_filter += list(self.view_screen.multiple_points_map.keys())
+        name_filter = set(name_filter)
         name_filter.add('None')
         return name_filter
 

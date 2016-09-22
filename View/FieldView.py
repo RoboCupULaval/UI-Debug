@@ -33,7 +33,7 @@ class FieldView(QtGui.QWidget):
         self.draw_filterable = dict()
         self.list_filter = ['None']
         self.graph_map = None
-        self.multiple_points_map = None
+        self.multiple_points_map = dict()
         self.setCursor(QtCore.Qt.OpenHandCursor)
 
         # Option
@@ -108,8 +108,9 @@ class FieldView(QtGui.QWidget):
         ref_time = time()
         if self.graph_map is not None and self.graph_map.time_is_up(ref_time):
             self.graph_map = None
-        if self.multiple_points_map is not None and self.multiple_points_map.time_is_up(ref_time):
-            self.multiple_points_map = None
+        for key, value in self.multiple_points_map.items():
+            if value.time_is_up(ref_time):
+                del self.multiple_points_map[key]
 
         for key, list_effects in self.draw_filterable.items():
             temp_list_draw = []
@@ -125,8 +126,10 @@ class FieldView(QtGui.QWidget):
 
     def draw_multiple_points(self, painter):
         """ Dessine une série de points unique """
-        if self.multiple_points_map is not None and 'None' in self.list_filter:
-            self.multiple_points_map.draw(painter)
+        for key, value in self.multiple_points_map.items():
+            self._logger.debug('Valeur de la cle envoyer: {}, type {}'.format(key, type(key)))
+            if str(key) in self.list_filter:
+                value.draw(painter)
 
     def draw_field_lines(self, painter):
         """ Dessine les lignes du terrains """
@@ -198,6 +201,7 @@ class FieldView(QtGui.QWidget):
         """ Efface tous les dessins enregistrés """
         self.graph_map = None
         self.draw_filterable = dict()
+        self.multiple_points_map = dict()
 
     def set_ball_pos(self, x, y):
         """ Modifie la position de la balle sur la fenêtre du terrain """
@@ -289,7 +293,7 @@ class FieldView(QtGui.QWidget):
         if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
         elif type(draw).__name__ == MultiplePointsDrawing.__name__:
-            self.multiple_points_map = draw
+            self.multiple_points_map[draw.filter] = draw
         else:
             if draw.filter in self.draw_filterable.keys():
                 self.draw_filterable[draw.filter].append(draw)
