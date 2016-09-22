@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import logging
 from time import time
 
 from PyQt4 import QtCore
@@ -18,8 +18,13 @@ class FieldView(QtGui.QWidget):
     """
     frame_rate = 30
 
-    def __init__(self, controller):
-        QtGui.QWidget.__init__(self, controller)
+    def __init__(self, controller, debug=False):
+        super().__init__(controller)
+        self._logger = logging.getLogger(FieldView.__name__)
+        if debug:
+            self._logger.setLevel(logging.DEBUG)
+        else:
+            self._logger.setLevel(logging.INFO)
         self.tool_bar = QtGui.QToolBar(self)
         self.controller = controller
         self.last_frame = 0
@@ -55,6 +60,7 @@ class FieldView(QtGui.QWidget):
         self.init_graph_mobs()
         self.init_view_event()
         self.init_tool_bar()
+        self._init_logger()
         self.show()
 
     def init_view_event(self):
@@ -82,6 +88,15 @@ class FieldView(QtGui.QWidget):
         self._action_delete_draws.setIcon(QtGui.QIcon('Img/map_delete.png'))
         self._action_delete_draws.triggered.connect(self.delete_all_draw)
         self.tool_bar.addAction(self._action_delete_draws)
+
+    def _init_logger(self):
+        """ Initialisation du logger """
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(threadName)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        self._logger.addHandler(ch)
+        self._logger.debug('INIT: Logger')
 
     def emit_painting_signal(self):
         """ Émet un signal pour bloquer les ressources et afficher les éléments """
@@ -273,7 +288,7 @@ class FieldView(QtGui.QWidget):
         draw.show()
         if isinstance(draw, InfluenceMapDrawing):
             self.graph_map = draw
-        elif isinstance(draw, MultiplePointsDrawing):
+        elif type(draw).__name__ == MultiplePointsDrawing.__name__:
             self.multiple_points_map = draw
         else:
             if draw.filter in self.draw_filterable.keys():

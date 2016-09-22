@@ -109,7 +109,7 @@ def test_multiple_points(ex):
     pkg['data']["points"] = [tuple([randint(-3000, 3000), randint(-3000, 3000)]) for _ in range(5)]
     pkg['data']['color'] = randint(0, 255), randint(0, 255), randint(0, 255)
     pkg['data']['width'] = randint(2, 5)
-    pkg['data']['timeout'] = randint(2, 10)
+    pkg['data']['timeout'] = 0 # randint(2, 10)
     ex.send_message(pkg)
 
 
@@ -248,6 +248,9 @@ if __name__ == '__main__':
     # test_text_draw()
     # test_big_data()
     # test_RobotState(ex)
+    test_multiple_points(ex)
+    sleep(5)
+    test_multiple_points(ex)
     # stress_test_Statement(ex)
     ex.join()
 
