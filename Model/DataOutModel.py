@@ -6,6 +6,7 @@ from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHum
 from Model.DataObject.SendingData.SendingTactic import SendingTactic
 from Model.DataObject.SendingData.SendingHandShake import SendingHandShake
 from Model.DataObject.SendingData.SendingGeometry import SendingGeometry
+from Model.DataObject.SendingData.SendingAIServer import SendingAIServer
 
 __author__ = 'RoboCupULaval'
 
@@ -55,5 +56,10 @@ class DataOutModel:
                                          defense_stretch=field_control.defense_stretch,
                                          goal_width=field_control.goal_width,
                                          goal_height=field_control.goal_height)
+        if self._udp_sender is not None:
+            self._udp_sender.send_message(pkg.get_binary())
+
+    def send_is_serial(self, is_serial):
+        pkg = SendingAIServer().set_data(is_serial=is_serial)
         if self._udp_sender is not None:
             self._udp_sender.send_message(pkg.get_binary())

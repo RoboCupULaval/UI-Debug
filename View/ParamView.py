@@ -55,11 +55,19 @@ class ParamView(QtGui.QDialog):
 
         # => IP
         self.form_network_vision_ip = QtGui.QLineEdit()
-        self.form_network_vision_ip.setDisabled(True)
         layout_form.addRow(QtGui.QLabel("IP :"), self.form_network_vision_ip)
         # => Port
         self.form_network_vision_port = QtGui.QLineEdit()
         layout_form.addRow(QtGui.QLabel("Port :"), self.form_network_vision_port)
+
+        # => UDP/Serial
+        self.form_network_vision_udp = QtGui.QRadioButton()
+        self.form_network_vision_udp.setChecked(True)
+        layout_form.addRow(QtGui.QLabel("UDP :"), self.form_network_vision_udp)
+
+        self.form_network_vision_serial = QtGui.QRadioButton()
+        layout_form.addRow(QtGui.QLabel("Serial :"), self.form_network_vision_serial)
+
 
     def init_page_dimension(self):
         layout_main = QtGui.QVBoxLayout(self._page_dimension)
@@ -265,6 +273,9 @@ class ParamView(QtGui.QDialog):
                 or not self._ctrl.network_vision.get_port() == int(self.form_network_vision_port.text()):
                 self._ctrl.network_vision.set_new_connexion(str(self.form_network_vision_ip.text()),
                                                             int(self.form_network_vision_port.text()))
+            if not self._ctrl.get_is_serial == self.form_network_vision_serial.isChecked():
+                self._ctrl.set_is_serial(self.form_network_vision_serial.isChecked())
+                self._ctrl.send_is_ai_server_serial()
         except Exception as e:
             print(type(e).__name__, e)
             self.form_network_vision_ip.setStyleSheet(style_bad)

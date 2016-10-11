@@ -42,6 +42,7 @@ class MainController(QWidget):
         # self.network_data_in = UDPServer(self)
         self.network_data_in = UDPServer(name='UDPServer', debug=False)
         self.network_vision = Vision()
+        self.ai_server_is_serial = False
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -334,9 +335,21 @@ class MainController(QWidget):
         """ Récupère la fréquence de rafraîchissement de l'écran """
         return self.view_screen.get_fps()
 
+    def get_is_serial(self):
+        """ Récupère si le serveur de strategyIA est en mode serial (True) ou udp (False)"""
+        return self.ai_server_is_serial
+
+    def set_is_serial(self, is_serial):
+        """ Détermine si le serveur de strategyIA est en mode serial (True) ou udp (False)"""
+        self.ai_server_is_serial = is_serial
+
     def send_handshake(self):
         """ Envoie un HandShake au client """
         self.model_dataout.send_handshake()
+
+    def send_is_ai_server_serial(self):
+        """ Envoie si le serveur utilisé par strategyIA est en serial (True) ou en udp (False)"""
+        self.model_dataout.send_is_serial(self.ai_server_is_serial)
 
     def send_geometry(self):
         """ Envoie la géométrie du terrain """
