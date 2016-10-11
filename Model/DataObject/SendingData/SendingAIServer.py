@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
-from .BaseDataSending import BaseDataSending
-from ..BaseDataObject import catch_format_error
+from Model.DataObject.SendingData.BaseDataSending import BaseDataSending
+from Model.DataObject.BaseDataObject import catch_format_error
 
 # Demande à l'UI si le serveur de la stratégie IA est en UDP ou en serial
 

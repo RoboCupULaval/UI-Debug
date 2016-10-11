@@ -63,7 +63,8 @@ class ParamView(QtGui.QDialog):
         # => UDP/Serial
         self.form_network_vision_udp = QtGui.QRadioButton()
         self.form_network_vision_udp.setChecked(True)
-        layout_form.addRow(QtGui.QLabel("UDP :"), self.form_network_vision_udp)
+        self.form_network_vision_udp_label = QtGui.QLabel("UDP :")
+        layout_form.addRow(self.form_network_vision_udp_label, self.form_network_vision_udp)
 
         self.form_network_vision_serial = QtGui.QRadioButton()
         layout_form.addRow(QtGui.QLabel("Serial :"), self.form_network_vision_serial)
@@ -159,9 +160,11 @@ class ParamView(QtGui.QDialog):
 
         # NETWORK
         self.form_network_recv_port.setText(str(self._ctrl.network_data_in.get_default_rcv_port()))
-        self.form_network_snd_port.setText(str(self._ctrl.network_data_in.get_default_snd_port()))
+        self.form_network_send_port.setText(str(self._ctrl.network_data_in.get_default_snd_port()))
         self.form_network_vision_ip.setText(str(self._ctrl.network_vision.get_default_ip()))
         self.form_network_vision_port.setText(str(self._ctrl.network_vision.get_default_port()))
+        self.form_network_vision_serial.setChecked(False)
+        self.form_network_vision_udp.setChecked(True)
 
         self._apply_param()
 
@@ -273,13 +276,23 @@ class ParamView(QtGui.QDialog):
                 or not self._ctrl.network_vision.get_port() == int(self.form_network_vision_port.text()):
                 self._ctrl.network_vision.set_new_connexion(str(self.form_network_vision_ip.text()),
                                                             int(self.form_network_vision_port.text()))
-            if not self._ctrl.get_is_serial == self.form_network_vision_serial.isChecked():
-                self._ctrl.set_is_serial(self.form_network_vision_serial.isChecked())
-                self._ctrl.send_is_ai_server_serial()
         except Exception as e:
             print(type(e).__name__, e)
             self.form_network_vision_ip.setStyleSheet(style_bad)
             self.form_network_vision_port.setStyleSheet(style_bad)
+            is_wrong = True
+
+        try:
+            self.form_network_vision_serial.setStyleSheet(style_good)
+            self.form_network_vision_udp_label.setStyleSheet(style_good)
+            if self._ctrl.get_is_serial != self.form_network_vision_serial.isChecked():
+                self._ctrl.set_is_serial(self.form_network_vision_serial.isChecked())
+                self._ctrl.send_is_ai_server_serial()
+        except Exception as e:
+            print("erreur de serial/udp!")
+            print(type(e).__name__, e)
+            self.form_network_vision_serial.setStyleSheet(style_bad)
+            self.form_network_vision_udp_label.setStyleSheet(style_bad)
             is_wrong = True
 
         if is_wrong:
