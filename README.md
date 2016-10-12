@@ -356,7 +356,7 @@ Voici les étapes à suivre pour créer un nouveau dessin :
 * Créer l'objet dessin correspondant
 
 ### Déterminer les caractéristiques du dessin
-Les dessins utilisent les méthodes de l'objet _QPainter_ qui sont disponibles par ce [lien](http://pyqt.sourceforge.net/Docs/PyQt4/qpainter.html).
+Les dessins utilisent les méthodes de l'objet _QPainter_ qui sont disponibles par ce [lien](http://pyqt.sourceforge.net/Docs/PyQt5/qpainter.html).
 Le parcours de toutes ces méthodes va vous permettre de déterminer les paramètres dont vous avez besoin.
 
 ```
@@ -456,7 +456,7 @@ Dans notre architecture, nous allons considéré comme **widget** un modèle ou 
 * **Widget: Modèle**
     Actuellement, chaque Modèle tourne sur son propre **_thread_** pour pouvoir mettre à jour régulière ses données.
     
-    Donc il faut simplement créer une classe qui hérite de ```threading.Thread```. Pour des raisons de performance, nous n'utilisons pas la classe **_QThread_** qui est fourni avec PyQt4 puisqu'elle fonctionne très mal à haute fréquence d'utilisation.
+    Donc il faut simplement créer une classe qui hérite de ```threading.Thread```. Pour des raisons de performance, nous n'utilisons pas la classe **_QThread_** qui est fourni avec PyQt5 puisqu'elle fonctionne très mal à haute fréquence d'utilisation.
     
     ________
     **_Exemple:_**
@@ -467,7 +467,7 @@ Dans notre architecture, nous allons considéré comme **widget** un modèle ou 
     Voici une classe standard de Vue:
     
     ```python
-    from PyQt4 import QtGui
+    from PyQt5 import QtGui
     
     class View(QtGui.QWidget):
         def __init__(self, controller=None):

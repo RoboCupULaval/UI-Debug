@@ -1,9 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
 from time import sleep
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4.QtCore import Qt, QThread
+from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QThread
 
 __author__ = 'RoboCupULaval'
 

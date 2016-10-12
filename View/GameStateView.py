@@ -2,10 +2,10 @@
 
 import logging
 from threading import Thread
-from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QLabel
-from PyQt4.QtCore import Qt
+from PyQt5.QtGui import QWidget
+from PyQt5.QtGui import QGridLayout
+from PyQt5.QtGui import QLabel
+from PyQt5.QtCore import Qt
 
 __author__ = 'RoboCupULaval'
 

@@ -2,8 +2,8 @@
 
 import sys, time
 from random import randint
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtCore
 
 __author__ = 'jbecirovski'
 

@@ -2,11 +2,11 @@
 import sys
 
 try:
-    from PyQt4.QtGui import QApplication
+    from PyQt5.QtGui import QApplication
     from Controller.MainController import MainController
 except ImportError:
-    sys.stderr.write("PyQt4 n'est pas bien installé sur votre ordinateur. Veuillez installer une des versions " +
-                     "disponibles sur https://sourceforge.net/projects/pyqt/files/PyQt4/\n")
+    sys.stderr.write("PyQt5 n'est pas bien installé sur votre ordinateur. Veuillez installer une des versions " +
+                     "disponibles sur https://sourceforge.net/projects/pyqt/files/PyQt5/\n")
 
 __author__ = 'RoboCupULaval'
 

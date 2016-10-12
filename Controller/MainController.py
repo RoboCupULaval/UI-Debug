@@ -2,9 +2,9 @@
 
 from signal import signal, SIGINT
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtCore import Qt
+from PyQt5.QtGui import *
+from PyQt5.QtCore import SIGNAL
+from PyQt5.QtCore import Qt
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel

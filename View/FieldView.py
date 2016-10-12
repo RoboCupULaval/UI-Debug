@@ -2,8 +2,8 @@
 import logging
 from time import time
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 
 from Controller.QtToolBox import QtToolBox
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
