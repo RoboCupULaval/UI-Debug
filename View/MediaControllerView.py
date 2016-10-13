@@ -25,6 +25,8 @@ class MediaControllerView(QWidget):
         self._media_slider.setPageStep(1)
         self._media_slider.setOrientation(Qt.Horizontal)
         self._media_slider.setMaximumWidth(500)
+        self._media_slider.sliderMoved.connect(self.handle_sliderMoved)
+        self._media_slider.sliderReleased.connect(self.handle_sliderReleased)
 
         layout.addLayout(button_layout)
         layout.addWidget(self._media_slider)
@@ -96,11 +98,11 @@ class MediaControllerView(QWidget):
             self._media_slider.setValue(value)
 
     @pyqtSlot()
-    def on_media_slider_sliderReleased(self):
+    def handle_sliderReleased(self):
         self.controller.recorder_skip_to(self._media_slider.value())
 
     @pyqtSlot()
-    def on_media_slider_sliderMoved(self):
+    def handle_sliderMoved(self):
         self.controller.recorder_skip_to(self._media_slider.value())
 
     def toggle_visibility(self):

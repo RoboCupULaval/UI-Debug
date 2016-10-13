@@ -70,12 +70,14 @@ class StrategyCtrView(QWidget):
         group_vbox.addWidget(QLabel('ID du robot :'))
         self.selectRobot = QComboBox()
         [self.selectRobot.addItem(str(x)) for x in range(6)]
+        self.selectRobot.currentIndexChanged.connect(self.handle_selection_robot_event_id)
         group_vbox.addWidget(self.selectRobot)
 
         group_vbox.addWidget(QLabel('Équipe :'))
         self.selectTeam = QComboBox()
         self.selectTeam.addItem('Yellow')
         self.selectTeam.addItem('Blue')
+        self.selectTeam.currentIndexChanged.connect(self.handle_selection_robot_event_team)
         group_vbox.addWidget(self.selectTeam)
 
         group_vbox.addWidget(QLabel('Tactique à appliquer :'))
@@ -102,18 +104,19 @@ class StrategyCtrView(QWidget):
         # + Onglets
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
+        self.page_controller.currentChanged.connect(self.tab_selected)
 
-    @pyqtSlot(int, name='on_selectRobot_currentIndexChanged')
+    @pyqtSlot(int)
     def handle_selection_robot_event_id(self, index):
         self.parent.deselect_all_robots()
         self.parent.select_robot(index, True if self.selectTeam.currentText() == 'Yellow' else False)
 
-    @pyqtSlot(int, name='on_selectTeam_currentIndexChanged')
+    @pyqtSlot(int)
     def handle_selection_robot_event_team(self, index):
         self.parent.deselect_all_robots()
         self.parent.select_robot(self.selectRobot.currentIndex(), True if index == 0 else False)
 
-    @pyqtSlot(int, name='on_page_controller_currentChanged')
+    @pyqtSlot(int)
     def tab_selected(self, index):
         if index == 0:
             self.parent.deselect_all_robots()
