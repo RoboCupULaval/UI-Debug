@@ -347,9 +347,20 @@ class MainController(QWidget):
         """ Envoie un HandShake au client """
         self.model_dataout.send_handshake()
 
-    def send_is_ai_server_serial(self):
+    def send_ports_rs(self):
+        ports_info = dict(zip(['recv_port',
+                               'send_port'],
+                              [self.network_data_in.get_rcv_port(),
+                               self.network_data_in.get_snd_port()]))
+        self.model_dataout.send_ports_rs(ports_info)
+
+    def send_server(self):
         """ Envoie si le serveur utilisé par strategyIA est en serial (True) ou en udp (False)"""
-        self.model_dataout.send_is_serial(self.ai_server_is_serial)
+        server_info = dict(zip(['is_serial', 'ip', 'port'],
+                               [self.ai_server_is_serial,
+                                self.network_vision.get_ip(),
+                                self.network_vision.get_port()]))
+        self.model_dataout.send_server(server_info)
 
     def send_geometry(self):
         """ Envoie la géométrie du terrain """

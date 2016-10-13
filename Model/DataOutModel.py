@@ -7,6 +7,7 @@ from Model.DataObject.SendingData.SendingTactic import SendingTactic
 from Model.DataObject.SendingData.SendingHandShake import SendingHandShake
 from Model.DataObject.SendingData.SendingGeometry import SendingGeometry
 from Model.DataObject.SendingData.SendingAIServer import SendingAIServer
+from Model.DataObject.SendingData.SendingDataPorts import SendingDataPorts
 
 __author__ = 'RoboCupULaval'
 
@@ -59,7 +60,15 @@ class DataOutModel:
         if self._udp_sender is not None:
             self._udp_sender.send_message(pkg.get_binary())
 
-    def send_is_serial(self, is_serial):
-        pkg = SendingAIServer().set_data(is_serial=is_serial)
+    def send_ports_rs(self, ports_info):
+        pkg = SendingDataPorts().set_data(recv_port=ports_info['recv_port'],
+                                          send_port=ports_info['send_port'])
+        if self._udp_sender is not None:
+            self._udp_sender.send_message(pkg.get_binary())
+
+    def send_server(self, server_info):
+        pkg = SendingAIServer().set_data(is_serial=server_info['is_serial'],
+                                         ip=server_info['ip'],
+                                         port=server_info['port'])
         if self._udp_sender is not None:
             self._udp_sender.send_message(pkg.get_binary())

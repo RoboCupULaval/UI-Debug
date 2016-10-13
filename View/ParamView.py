@@ -46,6 +46,10 @@ class ParamView(QtGui.QDialog):
         # => Port snd
         self.form_network_send_port = QtGui.QLineEdit()
         layout_form.addRow(QtGui.QLabel("Port d'envoi :"), self.form_network_send_port)
+        # => Bouton envoie des ports recv et send
+        but_send_ports_rs = QtGui.QPushButton('Envoyer les paramètres')
+        but_send_ports_rs.clicked.connect(self._ctrl.send_ports_rs)
+        layout_form.addRow(but_send_ports_rs)
 
         # PARAM VISION
         group_vision = QtGui.QGroupBox('Vision')
@@ -68,6 +72,10 @@ class ParamView(QtGui.QDialog):
 
         self.form_network_vision_serial = QtGui.QRadioButton()
         layout_form.addRow(QtGui.QLabel("Serial :"), self.form_network_vision_serial)
+
+        but_send_server = QtGui.QPushButton('Envoyer les paramètres du réseau')
+        but_send_server.clicked.connect(self._ctrl.send_server)
+        layout_form.addRow(but_send_server)
 
 
     def init_page_dimension(self):
@@ -277,7 +285,6 @@ class ParamView(QtGui.QDialog):
                 self._ctrl.network_vision.set_new_connexion(str(self.form_network_vision_ip.text()),
                                                             int(self.form_network_vision_port.text()))
         except Exception as e:
-            print(type(e).__name__, e)
             self.form_network_vision_ip.setStyleSheet(style_bad)
             self.form_network_vision_port.setStyleSheet(style_bad)
             is_wrong = True
@@ -287,10 +294,8 @@ class ParamView(QtGui.QDialog):
             self.form_network_vision_udp_label.setStyleSheet(style_good)
             if self._ctrl.get_is_serial != self.form_network_vision_serial.isChecked():
                 self._ctrl.set_is_serial(self.form_network_vision_serial.isChecked())
-                self._ctrl.send_is_ai_server_serial()
+
         except Exception as e:
-            print("erreur de serial/udp!")
-            print(type(e).__name__, e)
             self.form_network_vision_serial.setStyleSheet(style_bad)
             self.form_network_vision_udp_label.setStyleSheet(style_bad)
             is_wrong = True
