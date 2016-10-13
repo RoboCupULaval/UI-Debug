@@ -237,6 +237,21 @@ data = {'width': int,               # Longueur du terrain
         'goal_height': int,         # Largeur de la cage du but
         }
 
+# Type 5006 - Envoie la configuration du réseau de la vision
+data = {'is_serial': bool,          # La communication avec StrategyIA est en mode serial(True) ou UDP(False)
+        'ip': str,                  # L'adresse ip de la vision 
+        'port': int                 # Le port de la vision
+}
+
+# Type 5007 - Envoie la configuration des ports de communication
+data = {'recv_port': int            # Le port de réception
+        'send_port': int            # Le port d'envoie
+}
+
+# Type 5008 - Envoie la configuration du réseau UDP de StrategyIA
+data = {'ip': str                   # L'adresse IP
+        'port': int                 # Le numéro de port
+}
 """ ... """
 ```
 
