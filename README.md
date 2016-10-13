@@ -235,6 +235,7 @@ data = {'width': int,               # Longueur du terrain
         'defense_stretch': int,     # Longueur de la ligne de séparation en défense
         'goal_width': int,          # Longueur de la cage du but
         'goal_height': int,         # Largeur de la cage du but
+        'ratio_field_mobs': int     # ratio des robots par rapport au terrain
         }
 
 """ ... """
