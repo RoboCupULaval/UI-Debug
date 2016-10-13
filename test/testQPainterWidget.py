@@ -2,17 +2,18 @@
 
 import sys, time
 from random import randint
-from PyQt5 import QtGui
-from PyQt5 import QtCore
+from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
+from PyQt5.QtCore import pyqtSignal, QMutex, QTimer
 
 __author__ = 'jbecirovski'
 
 
-class TestPainter(QtGui.QWidget):
+class TestPainter(QWidget):
     frame_rate = 1000
 
     def __init__(self):
-        QtGui.QWidget.__init__(self)
+        QWidget.__init__(self)
 
         self.best_score = 0
         # View Screen Draws
@@ -20,9 +21,9 @@ class TestPainter(QtGui.QWidget):
         self.setGeometry(200, 200, 1011, 720)
 
         # View Screen Core
-        self._emit_signal = QtCore.pyqtSignal
-        self._mutex = QtCore.QMutex()
-        self._timer = QtCore.QTimer()
+        self._emit_signal = pyqtSignal()
+        self._mutex = QMutex()
+        self._timer = QTimer()
         self._timer.timeout.connect(self.appendItem)
         self._timer.start(1000 / TestPainter.frame_rate)
         self.show()
@@ -33,18 +34,18 @@ class TestPainter(QtGui.QWidget):
         self.refresh()
 
     def refresh(self):
-       #QtCore.QMutexLocker(self._mutex).relock()
+       #QMutexLocker(self._mutex).relock()
         self.update()
-        #QtCore.QMutexLocker(self._mutex).unlock()
+        #QMutexLocker(self._mutex).unlock()
 
     def paintEvent(self, event):
-        painter = QtGui.QPainter()
+        painter = QPainter()
         painter.begin(self)
         if self._list_draw is not None:
             t_ref = time.time()
             for draw in self._list_draw:
-                painter.setBrush(QtGui.QBrush(QtGui.QColor(255, 0, 0)))
-                painter.setPen(QtGui.QPen())
+                painter.setBrush(QBrush(QColor(255, 0, 0)))
+                painter.setPen(QPen())
                 painter.drawRect(draw[0], draw[1], 100, 100)
             t_final = (time.time() - t_ref) * 1000
             painter.drawText(100, 80, 'BEST SCORE: {}'.format(self.best_score))
@@ -59,7 +60,7 @@ class TestPainter(QtGui.QWidget):
 
 
 if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     f = TestPainter()
     f.show()
     sys.exit(app.exec_())
