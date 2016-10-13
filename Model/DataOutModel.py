@@ -57,7 +57,8 @@ class DataOutModel:
                                          defense_radius=field_control.defense_radius,
                                          defense_stretch=field_control.defense_stretch,
                                          goal_width=field_control.goal_width,
-                                         goal_height=field_control.goal_height)
+                                         goal_height=field_control.goal_height,
+                                         ratio_field_mobs=field_control.ratio_field_mobs)
         if self._udp_sender is not None:
             self._udp_sender.send_message(pkg.get_binary())
 
