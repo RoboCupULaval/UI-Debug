@@ -2,8 +2,9 @@
 import logging
 from time import time
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
+from PyQt5.QtCore import Qt, pyqtSignal, QMutex, QTimer, QEvent
+from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy
+from PyQt5.QtGui import QIcon, QPainter
 
 from Controller.QtToolBox import QtToolBox
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
@@ -12,7 +13,7 @@ from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
 __author__ = 'RoboCupULaval'
 
 
-class FieldView(QtGui.QWidget):
+class FieldView(QWidget):
     """
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
@@ -25,7 +26,7 @@ class FieldView(QtGui.QWidget):
             self._logger.setLevel(logging.DEBUG)
         else:
             self._logger.setLevel(logging.INFO)
-        self.tool_bar = QtGui.QToolBar(self)
+        self.tool_bar = QToolBar(self)
         self.controller = controller
         self.last_frame = 0
         self.graph_mobs = dict()
@@ -34,7 +35,7 @@ class FieldView(QtGui.QWidget):
         self.list_filter = ['None']
         self.graph_map = None
         self.multiple_points_map = dict()
-        self.setCursor(QtCore.Qt.OpenHandCursor)
+        self.setCursor(Qt.OpenHandCursor)
 
         # Option
         self.option_vanishing = True
@@ -47,9 +48,9 @@ class FieldView(QtGui.QWidget):
         self._cursor_position = 0, 0
 
         # Thread Core
-        self._emit_signal = QtCore.pyqtSignal
-        self._mutex = QtCore.QMutex()
-        self.timer_screen_update = QtCore.QTimer()
+        self._emit_signal = pyqtSignal
+        self._mutex = QMutex()
+        self.timer_screen_update = QTimer()
 
         # Frame
         self._real_frame_rate = 0
@@ -70,22 +71,22 @@ class FieldView(QtGui.QWidget):
 
     def init_window(self):
         """ Initialisation de la fenêtre du widget qui affiche le terrain"""
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setMouseTracking(True)
         self.installEventFilter(self)
 
     def init_tool_bar(self):
         """ Initialisation de la barre d'outils de la vue du terrain """
-        self.tool_bar.setOrientation(QtCore.Qt.Horizontal)
+        self.tool_bar.setOrientation(Qt.Horizontal)
 
-        self._action_lock_camera = QtGui.QAction(self)
+        self._action_lock_camera = QAction(self)
         self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
         self.toggle_lock_camera()
         self.tool_bar.addAction(self._action_lock_camera)
 
-        self._action_delete_draws = QtGui.QAction(self)
+        self._action_delete_draws = QAction(self)
         self._action_delete_draws.setToolTip('Effacer tous les dessins')
-        self._action_delete_draws.setIcon(QtGui.QIcon('Img/map_delete.png'))
+        self._action_delete_draws.setIcon(QIcon('Img/map_delete.png'))
         self._action_delete_draws.triggered.connect(self.delete_all_draw)
         self.tool_bar.addAction(self._action_delete_draws)
 
@@ -158,12 +159,12 @@ class FieldView(QtGui.QWidget):
         """ Déverrouille/Verrouille la position et le zoom de la caméra """
         QtToolBox.field_ctrl.toggle_lock_camera()
         if QtToolBox.field_ctrl.camera_is_locked():
-            self.setCursor(QtCore.Qt.ArrowCursor)
-            self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock.png'))
+            self.setCursor(Qt.ArrowCursor)
+            self._action_lock_camera.setIcon(QIcon('Img/lock.png'))
             self._action_lock_camera.setToolTip('Déverrouiller Caméra')
         else:
-            self.setCursor(QtCore.Qt.OpenHandCursor)
-            self._action_lock_camera.setIcon(QtGui.QIcon('Img/lock_open.png'))
+            self.setCursor(Qt.OpenHandCursor)
+            self._action_lock_camera.setIcon(QIcon('Img/lock_open.png'))
             self._action_lock_camera.setToolTip('Verrouiller Caméra')
 
     def toggle_frame_rate(self):
@@ -320,7 +321,7 @@ class FieldView(QtGui.QWidget):
 
     def eventFilter(self, source, event):
         """ Gère l'événement filtré """
-        if event.type() == QtCore.QEvent.MouseMove:
+        if event.type() == QEvent.MouseMove:
             self._cursor_position = event.pos().x(), event.pos().y()
         return super().eventFilter(source, event)
 
@@ -335,7 +336,7 @@ class FieldView(QtGui.QWidget):
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """
         if not QtToolBox.field_ctrl.camera_is_locked():
-            self.setCursor(QtCore.Qt.ClosedHandCursor)
+            self.setCursor(Qt.ClosedHandCursor)
         if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
             self.controller.model_dataout.target = (x, y)
@@ -344,14 +345,14 @@ class FieldView(QtGui.QWidget):
     def mouseReleaseEvent(self, event):
         """ Gère l'événement de relâchement de la touche de la souris """
         if not QtToolBox.field_ctrl.camera_is_locked():
-            self.setCursor(QtCore.Qt.OpenHandCursor)
+            self.setCursor(Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
         """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
-        if event.buttons() == QtCore.Qt.LeftButton:
+        if event.buttons() == Qt.LeftButton:
             if not QtToolBox.field_ctrl.camera_is_locked():
-                self.setCursor(QtCore.Qt.ClosedHandCursor)
+                self.setCursor(Qt.ClosedHandCursor)
             QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
 
     def wheelEvent(self, event):
@@ -372,7 +373,7 @@ class FieldView(QtGui.QWidget):
         """ Gère l'événement du signal pour dessiner les éléments du terrain """
         self.frame_rate_event()
         self.timeout_handler()
-        painter = QtGui.QPainter()
+        painter = QPainter()
         painter.begin(self)
         painter.setBackground(QtToolBox.create_brush())
         self.draw_field_ground(painter)

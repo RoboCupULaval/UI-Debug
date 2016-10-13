@@ -1,23 +1,24 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt5 import QtGui
-from PyQt5 import QtCore
+from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QTimer, Qt
 
 __author__ = 'RoboCupULaval'
 
 
-class StatusBarView(QtGui.QWidget):
+class StatusBarView(QWidget):
     def __init__(self, controller):
         super().__init__(controller)
 
         self._controller = controller
-        self._update_timer = QtCore.QTimer()
+        self._update_timer = QTimer()
         self._update_timer.timeout.connect(self.update_loop)
         self._update_timer.start(35)
 
         # Labels
-        self.label_coord_mouse = QtGui.QLabel('')
-        self.label_fps = QtGui.QLabel('')
+        self.label_coord_mouse = QLabel('')
+        self.label_fps = QLabel('')
 
         # Initialisations
         self.init_ui()
@@ -36,14 +37,14 @@ class StatusBarView(QtGui.QWidget):
         self.label_coord_mouse.setText("[X: {:>5} | Y: {:>5}]".format(str(x), str(y)))
 
     def init_ui(self):
-        layout = QtGui.QHBoxLayout()
+        layout = QHBoxLayout()
         layout.setContentsMargins(5, 5, 5, 5)
-        layout.setAlignment(QtCore.Qt.AlignLeft)
+        layout.setAlignment(Qt.AlignLeft)
         self.setLayout(layout)
         layout.addWidget(self.label_fps)
         layout.addWidget(self.label_coord_mouse)
 
-        font = QtGui.QFont()
+        font = QFont()
         font.setPixelSize(12)
         self.label_coord_mouse.setFont(font)
         self.label_fps.setFont(font)

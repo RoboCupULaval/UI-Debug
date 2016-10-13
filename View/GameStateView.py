@@ -2,9 +2,7 @@
 
 import logging
 from threading import Thread
-from PyQt5.QtGui import QWidget
-from PyQt5.QtGui import QGridLayout
-from PyQt5.QtGui import QLabel
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel
 from PyQt5.QtCore import Qt
 
 __author__ = 'RoboCupULaval'

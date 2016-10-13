@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QFont
 from PyQt5.QtCore import *
 
 __author__ = 'RoboCupULaval'

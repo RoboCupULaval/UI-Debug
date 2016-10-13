@@ -1,16 +1,16 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt5 import QtGui
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QLabel
 from PyQt5 import QtCore
 
 __author__ = 'RoboCupULaval'
 
 
-class FilterCtrlView(QtGui.QWidget):
+class FilterCtrlView(QWidget):
     def __init__(self, controller):
-        QtGui.QWidget.__init__(self)
+        QWidget.__init__(self)
         self._ctrl = controller
-        self._layout_v = QtGui.QVBoxLayout()
+        self._layout_v = QVBoxLayout()
         self._layout_v.setContentsMargins(0, 0, 0, 0)
 
         # Timer
@@ -34,7 +34,7 @@ class FilterCtrlView(QtGui.QWidget):
         """ Recharge toutes les checkbox avec les filtres présents """
         self.reset_layout()
         for name in self._ctrl.get_list_of_filters():
-            widget_check = QtGui.QCheckBox(name)
+            widget_check = QCheckBox(name)
             widget_check.setChecked(True)
             self._layout_v.addWidget(widget_check)
 
@@ -59,7 +59,7 @@ class FilterCtrlView(QtGui.QWidget):
 
     def add_filter(self, name):
         """ Ajoute une chackbox spécifiée par le nom """
-        widget_check = QtGui.QCheckBox(name, self)
+        widget_check = QCheckBox(name, self)
         widget_check.setChecked(True)
         self._layout_v.insertWidget(self._layout_v.count(), widget_check)
 
@@ -79,7 +79,7 @@ class FilterCtrlView(QtGui.QWidget):
         """ Efface les widgets contenu dans le layout """
         for i in range(self._layout_v.count()):
             self._layout_v.removeWidget(self._layout_v.itemAt(i))
-        self._layout_v.addWidget(QtGui.QLabel('Filtre dessin: '))
+        self._layout_v.addWidget(QLabel('Filtre dessin: '))
 
     def get_checked_box(self):
         """ Récupère la liste des filtres sélectionnés """

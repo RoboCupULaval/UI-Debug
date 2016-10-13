@@ -2,9 +2,10 @@
 
 from signal import signal, SIGINT
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import SIGNAL
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
+                            QAction, QMessageBox
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSignal, Qt
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
@@ -205,7 +206,7 @@ class MainController(QWidget):
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
-        self.connect(self, SIGNAL('triggered()'), self.closeEvent)
+        self.connect(self, pyqtSignal('triggered()'), self.closeEvent)
 
     def update_logging(self):
         self.view_logger.refresh()

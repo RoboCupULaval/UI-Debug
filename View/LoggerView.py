@@ -1,15 +1,9 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt5.QtGui import QWidget
-from PyQt5.QtGui import QTextEdit
-from PyQt5.QtGui import QHBoxLayout
-from PyQt5.QtGui import QVBoxLayout
-from PyQt5.QtGui import QPushButton
+from PyQt5.QtWidgets import QWidget, QTextEdit, QHBoxLayout, QVBoxLayout, \
+                            QPushButton, QGroupBox, QCheckBox, QMessageBox, \
+                            QFileDialog
 from PyQt5.QtGui import QIcon
-from PyQt5.QtGui import QGroupBox
-from PyQt5.QtGui import QCheckBox
-from PyQt5.QtGui import QMessageBox
-from PyQt5.QtGui import QFileDialog
 
 from PyQt5.QtCore import QTimer
 from PyQt5.QtCore import QMutex
