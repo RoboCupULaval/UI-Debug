@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox

@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap
 from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 from Controller.QtToolBox import QtToolBox
 

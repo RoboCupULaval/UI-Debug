@@ -1,12 +1,12 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtGui import QPixmap
-from PyQt4.QtGui import QPainter
-from PyQt4.QtGui import QImage
-from PyQt4.QtGui import QColor
-from PyQt4.QtGui import QTransform
-from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QRect
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPainter
+from PyQt5.QtGui import QImage
+from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QTransform
+from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QRect
 
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox

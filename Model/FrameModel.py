@@ -4,7 +4,7 @@ from collections import deque
 from datetime import datetime
 from datetime import timedelta
 
-from PyQt4.QtCore import QTimer
+from PyQt5.QtCore import QTimer
 
 __author__ = 'RoboCupULaval'
 
