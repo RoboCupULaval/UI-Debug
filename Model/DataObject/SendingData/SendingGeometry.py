@@ -44,6 +44,10 @@ class SendingGeometry(BaseDataSending):
             "data['goal_height'] n'existe pas."
         assert isinstance(self.data['goal_height'], (int, float)), \
             "data['goal_height']: {} n'a pas le format attendu (int, float)".format(type(self.data['goal_height']))
+        assert 'ratio_field_mobs' in keys, \
+            "data['ratio_field_mobs'] n'existe pas."
+        assert isinstance(self.data['ratio_field_mobs'], (int, float)), \
+            "data['ratio']: {} n'a pas le format attendu (int, float)".format(type(self.data['ratio_field_mobs']))
 
     @catch_format_error
     def _check_optional_data(self):
@@ -58,8 +62,9 @@ class SendingGeometry(BaseDataSending):
                          'defense_radius',
                          'defense_stretch',
                          'goal_width',
-                         'goal_height'],
-                        [0 for _ in range(7)]))
+                         'goal_height',
+                         'ratio_field_mobs'],
+                        [0 for _ in range(7)]+[1]))
 
     @staticmethod
     def get_type():

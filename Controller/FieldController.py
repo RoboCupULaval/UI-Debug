@@ -18,8 +18,6 @@ class FieldController(object):
 
         # Paramètre fenètre
         self.ratio_screen = 1 / 10
-        self.ratio_field_mobs_default = 1
-        self.ratio_field_mobs = self.ratio_field_mobs_default
         self.is_x_axe_flipped = False
         self.is_y_axe_flipped = True
 
@@ -37,6 +35,8 @@ class FieldController(object):
         self.goal_line = self.goal_line_default
         self.radius_center_default = 500
         self.radius_center = self.radius_center_default
+        self.ratio_field_mobs_default = 1
+        self._ratio_field_mobs = self.ratio_field_mobs_default
 
     @property
     def width(self):
@@ -65,6 +65,10 @@ class FieldController(object):
     @property
     def goal_height(self):
         return self.goal_size[1]
+
+    @property
+    def ratio_field_mobs(self):
+        return self._ratio_field_mobs
 
     def convert_real_to_scene_pst(self, x, y, theta=0.0):
         """ Convertit les coordonnées réelles en coordonnées du terrain """
