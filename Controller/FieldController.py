@@ -70,6 +70,10 @@ class FieldController(object):
     def ratio_field_mobs(self):
         return self._ratio_field_mobs
 
+    @ratio_field_mobs.setter
+    def ratio_field_mobs(self, new_ratio):
+        self._ratio_field_mobs = new_ratio
+
     def convert_real_to_scene_pst(self, x, y, theta=0.0):
         """ Convertit les coordonnées réelles en coordonnées du terrain """
         rot_x = cos(theta)
