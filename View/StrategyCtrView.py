@@ -1,13 +1,15 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
+                            QPushButton, QGroupBox, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
 
 __author__ = 'RoboCupULaval'
 
 
 class StrategyCtrView(QWidget):
+
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.parent = parent
@@ -101,25 +103,17 @@ class StrategyCtrView(QWidget):
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
 
-        # SIGNAL / SLOT
-        self.connect(self.page_controller, SIGNAL('currentChanged(int)'),
-                     self, SLOT('tab_selected(int)'))
-        self.connect(self.selectRobot, SIGNAL('currentIndexChanged(int)'),
-                     self, SLOT('handle_selection_robot_event_id(int)'))
-        self.connect(self.selectTeam, SIGNAL('currentIndexChanged(int)'),
-                     self, SLOT('handle_selection_robot_event_team(int)'))
-
-    @pyqtSlot(int)
+    @pyqtSlot(int, name='on_selectRobot_currentIndexChanged')
     def handle_selection_robot_event_id(self, index):
         self.parent.deselect_all_robots()
         self.parent.select_robot(index, True if self.selectTeam.currentText() == 'Yellow' else False)
 
-    @pyqtSlot(int)
+    @pyqtSlot(int, name='on_selectTeam_currentIndexChanged')
     def handle_selection_robot_event_team(self, index):
         self.parent.deselect_all_robots()
         self.parent.select_robot(self.selectRobot.currentIndex(), True if index == 0 else False)
 
-    @pyqtSlot(int)
+    @pyqtSlot(int, name='on_page_controller_currentChanged')
     def tab_selected(self, index):
         if index == 0:
             self.parent.deselect_all_robots()
