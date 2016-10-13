@@ -90,7 +90,6 @@ class MainController(QWidget):
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)
-        top_layout.setMargin(0)
 
         self.setLayout(top_layout)
 
