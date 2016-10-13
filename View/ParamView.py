@@ -71,11 +71,29 @@ class ParamView(QtGui.QDialog):
         layout_form.addRow(self.form_network_vision_udp_label, self.form_network_vision_udp)
 
         self.form_network_vision_serial = QtGui.QRadioButton()
+        self.form_network_vision_serial.toggled.connect(self.toggle_udp_config)
         layout_form.addRow(QtGui.QLabel("Serial :"), self.form_network_vision_serial)
 
         but_send_server = QtGui.QPushButton('Envoyer les paramètres du réseau')
         but_send_server.clicked.connect(self._ctrl.send_server)
         layout_form.addRow(but_send_server)
+
+        # PARAM UI Server
+        group_udp_serial = QtGui.QGroupBox('Configuration UDP/Serial')
+        layout_main.addWidget(group_udp_serial)
+        layout_form = QtGui.QFormLayout()
+        group_udp_serial.setLayout(layout_form)
+
+        # => IP Multicast UDP
+        self.form_udp_multicast_ip = QtGui.QLineEdit()
+        layout_form.addRow(QtGui.QLabel("IP Multicast:"), self.form_udp_multicast_ip)
+        # => Port Multicast UDP
+        self.form_udp_multicast_port = QtGui.QLineEdit()
+        layout_form.addRow(QtGui.QLabel("Port Multicast:"), self.form_udp_multicast_port)
+        # => Bouton envoie configuration UDP
+        but_send_udp_multicast = QtGui.QPushButton('Envoyer les paramètres de l\'UDP')
+        but_send_udp_multicast.clicked.connect(self._ctrl.send_udp_config)
+        layout_form.addRow(but_send_udp_multicast)
 
 
     def init_page_dimension(self):
@@ -173,6 +191,10 @@ class ParamView(QtGui.QDialog):
         self.form_network_vision_port.setText(str(self._ctrl.network_vision.get_default_port()))
         self.form_network_vision_serial.setChecked(False)
         self.form_network_vision_udp.setChecked(True)
+        self.form_udp_multicast_ip.setText(str(self._ctrl.udp_config.get_default_ip()))
+        self.form_udp_multicast_ip.setDisabled(False)
+        self.form_udp_multicast_port.setText(str(self._ctrl.udp_config.get_default_port()))
+        self.form_udp_multicast_port.setDisabled(False)
 
         self._apply_param()
 
@@ -194,6 +216,16 @@ class ParamView(QtGui.QDialog):
         self.form_network_send_port.setText(str(self._ctrl.network_data_in.get_snd_port()))
         self.form_network_vision_ip.setText(str(self._ctrl.network_vision.get_ip()))
         self.form_network_vision_port.setText(str(self._ctrl.network_vision.get_port()))
+        self.form_udp_multicast_ip.setText(str(self._ctrl.udp_config.ip))
+        self.form_udp_multicast_port.setText(str(self._ctrl.udp_config.port))
+
+    def toggle_udp_config(self):
+        if self.form_network_vision_serial.isChecked():
+            self.form_udp_multicast_ip.setDisabled(True)
+            self.form_udp_multicast_port.setDisabled(True)
+        else:
+            self.form_udp_multicast_ip.setDisabled(False)
+            self.form_udp_multicast_port.setDisabled(False)
 
     def hide(self):
         self.restore_values()
@@ -294,10 +326,27 @@ class ParamView(QtGui.QDialog):
             self.form_network_vision_udp_label.setStyleSheet(style_good)
             if self._ctrl.get_is_serial != self.form_network_vision_serial.isChecked():
                 self._ctrl.set_is_serial(self.form_network_vision_serial.isChecked())
-
+            self.toggle_udp_config()
         except Exception as e:
             self.form_network_vision_serial.setStyleSheet(style_bad)
             self.form_network_vision_udp_label.setStyleSheet(style_bad)
+            is_wrong = True
+
+        try:
+            self.form_udp_multicast_ip.setStyleSheet(style_good)
+            if self._ctrl.udp_config.ip != str(self.form_udp_multicast_ip.text()):
+                self._ctrl.udp_config.ip = self.form_udp_multicast_ip.text()
+            self.toggle_udp_config()
+        except Exception as e:
+            self.form_udp_multicast_ip.setStyleSheet(style_bad)
+            is_wrong = True
+
+        try:
+            self.form_udp_multicast_port.setStyleSheet(style_good)
+            if self._ctrl.udp_config.port != str(self.form_udp_multicast_port.text()):
+                self._ctrl.udp_config.port = self.form_udp_multicast_port.text()
+        except Exception as e:
+            self.form_udp_multicast_port.setStyleSheet(style_bad)
             is_wrong = True
 
         if is_wrong:

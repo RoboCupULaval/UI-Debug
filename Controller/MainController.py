@@ -23,6 +23,7 @@ from View.GameStateView import GameStateView
 
 from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
+from Communication.UDPConfig import UDPConfig
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -43,6 +44,7 @@ class MainController(QWidget):
         self.network_data_in = UDPServer(name='UDPServer', debug=False)
         self.network_vision = Vision()
         self.ai_server_is_serial = False
+        self.udp_config = UDPConfig()
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -361,6 +363,12 @@ class MainController(QWidget):
                                 self.network_vision.get_ip(),
                                 self.network_vision.get_port()]))
         self.model_dataout.send_server(server_info)
+
+    def send_udp_config(self):
+        udp_config_info = dict(zip(['ip', 'port'],
+                                   [self.udp_config.ip,
+                                    self.udp_config.port]))
+        self.model_dataout.send_udp_config(udp_config_info)
 
     def send_geometry(self):
         """ Envoie la géométrie du terrain """
