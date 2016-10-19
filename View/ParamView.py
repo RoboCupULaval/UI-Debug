@@ -2,7 +2,7 @@
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTabWidget, QWidget, \
                             QGroupBox, QFormLayout, QLineEdit, QLabel, \
-                            QPushButton, QHBoxLayout
+                            QPushButton, QHBoxLayout, QRadioButton
 from PyQt5 import QtCore
 from Controller.QtToolBox import QtToolBox
 
@@ -68,33 +68,33 @@ class ParamView(QDialog):
         layout_form.addRow(QLabel("Port :"), self.form_network_vision_port)
 
         # => UDP/Serial
-        self.form_network_vision_udp = QtGui.QRadioButton()
+        self.form_network_vision_udp = QRadioButton()
         self.form_network_vision_udp.setChecked(True)
-        self.form_network_vision_udp_label = QtGui.QLabel("UDP :")
+        self.form_network_vision_udp_label = QLabel("UDP :")
         layout_form.addRow(self.form_network_vision_udp_label, self.form_network_vision_udp)
 
-        self.form_network_vision_serial = QtGui.QRadioButton()
+        self.form_network_vision_serial = QRadioButton()
         self.form_network_vision_serial.toggled.connect(self.toggle_udp_config)
-        layout_form.addRow(QtGui.QLabel("Serial :"), self.form_network_vision_serial)
+        layout_form.addRow(QLabel("Serial :"), self.form_network_vision_serial)
 
-        but_send_server = QtGui.QPushButton('Envoyer les paramètres du réseau')
+        but_send_server = QPushButton('Envoyer les paramètres du réseau')
         but_send_server.clicked.connect(self._ctrl.send_server)
         layout_form.addRow(but_send_server)
 
         # PARAM UI Server
-        group_udp_serial = QtGui.QGroupBox('Configuration UDP/Serial')
+        group_udp_serial = QGroupBox('Configuration UDP/Serial')
         layout_main.addWidget(group_udp_serial)
-        layout_form = QtGui.QFormLayout()
+        layout_form = QFormLayout()
         group_udp_serial.setLayout(layout_form)
 
         # => IP Multicast UDP
-        self.form_udp_multicast_ip = QtGui.QLineEdit()
-        layout_form.addRow(QtGui.QLabel("IP Multicast:"), self.form_udp_multicast_ip)
+        self.form_udp_multicast_ip = QLineEdit()
+        layout_form.addRow(QLabel("IP Multicast:"), self.form_udp_multicast_ip)
         # => Port Multicast UDP
-        self.form_udp_multicast_port = QtGui.QLineEdit()
-        layout_form.addRow(QtGui.QLabel("Port Multicast:"), self.form_udp_multicast_port)
+        self.form_udp_multicast_port = QLineEdit()
+        layout_form.addRow(QLabel("Port Multicast:"), self.form_udp_multicast_port)
         # => Bouton envoie configuration UDP
-        but_send_udp_multicast = QtGui.QPushButton('Envoyer les paramètres de l\'UDP')
+        but_send_udp_multicast = QPushButton('Envoyer les paramètres de l\'UDP')
         but_send_udp_multicast.clicked.connect(self._ctrl.send_udp_config)
         layout_form.addRow(but_send_udp_multicast)
 
