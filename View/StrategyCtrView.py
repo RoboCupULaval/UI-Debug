@@ -1,12 +1,15 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
+                            QPushButton, QGroupBox, QHBoxLayout, QLabel
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
 
 __author__ = 'RoboCupULaval'
 
 
 class StrategyCtrView(QWidget):
+
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.parent = parent
@@ -67,12 +70,14 @@ class StrategyCtrView(QWidget):
         group_vbox.addWidget(QLabel('ID du robot :'))
         self.selectRobot = QComboBox()
         [self.selectRobot.addItem(str(x)) for x in range(6)]
+        self.selectRobot.currentIndexChanged.connect(self.handle_selection_robot_event_id)
         group_vbox.addWidget(self.selectRobot)
 
         group_vbox.addWidget(QLabel('Équipe :'))
         self.selectTeam = QComboBox()
         self.selectTeam.addItem('Yellow')
         self.selectTeam.addItem('Blue')
+        self.selectTeam.currentIndexChanged.connect(self.handle_selection_robot_event_team)
         group_vbox.addWidget(self.selectTeam)
 
         group_vbox.addWidget(QLabel('Tactique à appliquer :'))
@@ -99,14 +104,7 @@ class StrategyCtrView(QWidget):
         # + Onglets
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
-
-        # SIGNAL / SLOT
-        self.connect(self.page_controller, SIGNAL('currentChanged(int)'),
-                     self, SLOT('tab_selected(int)'))
-        self.connect(self.selectRobot, SIGNAL('currentIndexChanged(int)'),
-                     self, SLOT('handle_selection_robot_event_id(int)'))
-        self.connect(self.selectTeam, SIGNAL('currentIndexChanged(int)'),
-                     self, SLOT('handle_selection_robot_event_team(int)'))
+        self.page_controller.currentChanged.connect(self.tab_selected)
 
     @pyqtSlot(int)
     def handle_selection_robot_event_id(self, index):

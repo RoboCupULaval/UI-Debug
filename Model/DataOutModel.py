@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4.QtCore import QTimer
+from PyQt5.QtCore import QTimer
 from Model.DataObject.SendingData.SendingStrategy import SendingStrategy
 from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
 from Model.DataObject.SendingData.SendingTactic import SendingTactic

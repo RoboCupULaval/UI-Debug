@@ -1,10 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import sys
-from PyQt4.QtGui import QMainWindow
-from PyQt4.QtGui import QApplication
-from PyQt4.QtGui import QMenuBar
-from PyQt4.QtGui import QAction
-from PyQt4.QtGui import QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMenuBar, QAction, \
+                            QMessageBox
 
 __author__ = 'RoboCupULaval'
 

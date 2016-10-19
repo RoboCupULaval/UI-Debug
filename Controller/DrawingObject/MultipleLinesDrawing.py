@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui
 
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox

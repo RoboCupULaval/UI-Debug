@@ -2,9 +2,10 @@
 
 from signal import signal, SIGINT
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
+                            QAction, QMessageBox
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
@@ -92,7 +93,6 @@ class MainController(QWidget):
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)
-        top_layout.setMargin(0)
 
         self.setLayout(top_layout)
 
@@ -208,7 +208,6 @@ class MainController(QWidget):
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
-        self.connect(self, SIGNAL('triggered()'), self.closeEvent)
 
     def update_logging(self):
         self.view_logger.refresh()
@@ -219,6 +218,7 @@ class MainController(QWidget):
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')
 
+    @pyqtSlot(name='on_triggered')
     def closeEvent(self, event):
         self.close()
 
