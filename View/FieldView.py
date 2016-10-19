@@ -357,7 +357,7 @@ class FieldView(QWidget):
 
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
-        if event.delta() > 0:
+        if event.angleDelta().y() > 0:
             QtToolBox.field_ctrl.zoom()
         else:
             QtToolBox.field_ctrl.dezoom()
