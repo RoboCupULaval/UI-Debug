@@ -237,15 +237,15 @@ data = {'width': int,               # Longueur du terrain
         'goal_height': int,         # Largeur de la cage du but
         'ratio_field_mobs': float   # ratio des robots par rapport au terrain
         }
-        
-# Type 5006 - Envoie la description du serveur de Vision
-data = {'ip': str,               # L'adresse IP du serveur d'IA
-        'port': int,             # Le numéro de port du serveur d'IA
+
+# Type 5006 - Envoie la description du serveur de Vision/IA
+data = {'is_serial': bool,       # Si le serveur d'IA est en mode UDP ou serial
+        'ip': str,               # L'adresse IP du serveur de Vision
+        'port': int,             # Le numéro de port du serveur de Vision
         }
         
-# Type 5008 - Envoie la description du serveur de l'IA
-data = {'is_serial': bool,       # Si le serveur d'IA est en mode UDP ou serial
-        'ip': str,               # L'adresse IP du serveur d'IA
+# Type 5008 - Envoie la description du serveur UDP du serveur IA (il faut que is_serial dans 5006 soit à False)
+data = {'ip': str,               # L'adresse IP du serveur d'IA
         'port': int,             # Le numéro de port du serveur d'IA
         }
         
