@@ -238,21 +238,22 @@ data = {'width': int,               # Longueur du terrain
         'ratio_field_mobs': float   # ratio des robots par rapport au terrain
         }
 
-# Type 5006 - Envoie la configuration du réseau de la vision
-data = {'is_serial': bool,          # La communication avec StrategyIA est en mode serial(True) ou UDP(False)
-        'ip': str,                  # L'adresse ip de la vision 
-        'port': int                 # Le port de la vision
-}
+# Type 5006 - Envoie la description du serveur de Vision/IA
+data = {'is_serial': bool,       # Si le serveur d'IA est en mode UDP(False) ou serial(True)
+        'ip': str,               # L'adresse IP du serveur de Vision
+        'port': int,             # Le numéro de port du serveur de Vision
+        }
 
 # Type 5007 - Envoie la configuration des ports de communication
 data = {'recv_port': int            # Le port de réception
         'send_port': int            # Le port d'envoie
 }
 
-# Type 5008 - Envoie la configuration du réseau UDP de StrategyIA
-data = {'ip': str                   # L'adresse IP
-        'port': int                 # Le numéro de port
-}
+# Type 5008 - Envoie la description du serveur UDP du serveur IA (il faut que is_serial dans 5006 soit à False)
+data = {'ip': str,               # L'adresse IP du serveur d'IA
+        'port': int,             # Le numéro de port du serveur d'IA
+        }
+        
 """ ... """
 ```
 
