@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from math import cos, sin, atan2
+from .config import *
 
 __author__ = 'RoboCupULaval'
 
@@ -25,17 +26,17 @@ class FieldController(object):
         # TODO - Possible de récupérer ces informations dans les paquets des frames
         # TODO - Faire que ces paramètres soient paramétrables depuis le GUI
         self.marge = 250
-        self.size_default = [9000, 6000]
+        self.size_default = [config.field_width, config.field_height]
         self.size = self.size_default.copy()
-        self.goal_size_default = [200, 1000]
+        self.goal_size_default = [config.goal_width, config.goal_height]
         self.goal_size = self.goal_size_default.copy()
-        self.goal_radius_default = 1000
+        self.goal_radius_default = config.goalzone_radius
         self.goal_radius = self.goal_radius_default
-        self.goal_line_default = 500
+        self.goal_line_default = config.goalzone_height
         self.goal_line = self.goal_line_default
-        self.radius_center_default = 500
+        self.radius_center_default = config.center_radius
         self.radius_center = self.radius_center_default
-        self.ratio_field_mobs_default = 1
+        self.ratio_field_mobs_default = config.field_ratio
         self._ratio_field_mobs = self.ratio_field_mobs_default
 
     @property
