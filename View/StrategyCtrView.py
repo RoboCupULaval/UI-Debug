@@ -193,11 +193,11 @@ class StrategyCtrView(QWidget):
         args = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
         if not tactic == 'Aucune Tactique disponible':
-            self.parent.model_dataout.send_tactic(id_bot, tactic, target, args=args)
+            self.parent.model_dataout.send_tactic(id_bot, tactic=tactic, target=target, args=args)
 
     def send_tactic_stop(self):
         for id_bot in range(6):
-            self.parent.model_dataout.send_tactic(id_bot, 'tStop', [])
+            self.parent.model_dataout.send_tactic(id_bot, 'tStop', args=None)
 
     def send_strat_stop(self):
         self.parent.model_dataout.send_strategy('pStop', 'yellow')
