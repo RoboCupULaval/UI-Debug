@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
                             QPushButton, QGroupBox, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont
@@ -84,6 +84,8 @@ class StrategyCtrView(QWidget):
         self.selectTactic = QComboBox()
         self.selectTactic.addItem('Aucune Tactique disponible')
         group_vbox.addWidget(self.selectTactic)
+        self.argumentsLine = QLineEdit()
+        group_vbox.addWidget(self.argumentsLine)
 
         but_group_tact = QHBoxLayout()
         tact_apply_but = QPushButton('Appliquer')
@@ -188,13 +190,14 @@ class StrategyCtrView(QWidget):
         if not is_yellow:
             id_bot += 6
         tactic = str(self.selectTactic.currentText())
+        args = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
         if not tactic == 'Aucune Tactique disponible':
-            self.parent.model_dataout.send_tactic(id_bot, tactic, target)
+            self.parent.model_dataout.send_tactic(id_bot, tactic=tactic, target=target, args=args)
 
     def send_tactic_stop(self):
         for id_bot in range(6):
-            self.parent.model_dataout.send_tactic(id_bot, 'tStop')
+            self.parent.model_dataout.send_tactic(id_bot, 'tStop', args=None)
 
     def send_strat_stop(self):
         self.parent.model_dataout.send_strategy('pStop', 'yellow')

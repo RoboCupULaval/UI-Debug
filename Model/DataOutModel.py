@@ -29,13 +29,16 @@ class DataOutModel:
     def update_screen(self):
         self._controller.update_target_on_screen()
 
-    def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0)):
+    def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0), args=None):
         target = int(target[0]), int(target[1])
         goal = int(goal[0]), int(goal[1])
+        if args is None:
+            args = []
         pkg = SendingTactic().set_data(tactic=tactic,
                                        id=id_bot % 6,
                                        target=target,
-                                       goal=goal)
+                                       goal=goal,
+                                       args=args)
         self._udp_sender.send_message(pkg.get_binary())
 
     def send_strategy(self, strat, team):

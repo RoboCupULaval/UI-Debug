@@ -40,6 +40,12 @@ class SendingTactic(BaseDataSending):
         else:
             self._data['data']['goal'] = 0, 0
 
+        if 'args' in keys:
+            assert isinstance(self.data['args'], list), \
+                "data['args'] n'a pas le format attendu (list(str))"
+        else:
+            self._data['data']['args'] = []
+
     @staticmethod
     def get_default_data_dict():
         """ Retourne une dictionnaire de données par défaut """
