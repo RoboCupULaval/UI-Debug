@@ -61,7 +61,6 @@ class DataInModel(Thread):
 
         # Réseau
         self._udp_receiver = None
-        self._last_packet = None
 
         # Contrôleur
         self._pause = False
@@ -118,15 +117,12 @@ class DataInModel(Thread):
         self._logger.debug('Thread RUNNING')
         while True:
             self.waiting_for_pause_event()
-            package = None
             try:
                 self._logger.debug('RUN: get Last data from udp server')
                 package = self._udp_receiver.waiting_for_last_data()
                 self._extract_and_distribute_data(package)
             except AttributeError as e:
                 self._logger.warn(type(e).__name__ + str(e))
-            finally:
-                self._last_packet = package[0] if package is not None else None
         self._logger.debug('Thread RUN STOPPING')
 
     # === DISTRIBUTOR ===
