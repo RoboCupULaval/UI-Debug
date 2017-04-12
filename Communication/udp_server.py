@@ -6,27 +6,22 @@ from socketserver import ThreadingMixIn, UDPServer, BaseRequestHandler
 import threading
 import socket
 import struct
-from collections import deque
 
 
-def getUDPHandler(packet_list, packet_type):
+def getUDPHandler(receiver):
     class ThreadedUDPRequestHandler(BaseRequestHandler):
-
         def handle(self):
             data = self.request[0]
-            packet = packet_type()
-            packet.ParseFromString(data)
-            packet_list.append(packet)
+            receiver.set_current_frame(data)
 
     return ThreadedUDPRequestHandler
 
 
 class ThreadedUDPServer(ThreadingMixIn, UDPServer):
-
     allow_reuse_address = True
 
-    def __init__(self, host, port, packet_type, packet_list):
-        handler = getUDPHandler(packet_list, packet_type)
+    def __init__(self, host, port, receiver):
+        handler = getUDPHandler(receiver)
         super(ThreadedUDPServer, self).__init__(('', port), handler)
         self.socket.setsockopt(socket.IPPROTO_IP,
                                socket.IP_ADD_MEMBERSHIP,
@@ -39,20 +34,22 @@ class ThreadedUDPServer(ThreadingMixIn, UDPServer):
 
 
 class PBPacketReceiver(object):
-
     def __init__(self, host, port, packet_type):
-        self.packet_list = deque(maxlen=100)
-        self.server = ThreadedUDPServer(host, port,
-                                        packet_type,
-                                        self.packet_list)
+        self.current_packet = None
+        self.lock = threading.Lock()
+        self.packet_type = packet_type
+        self.server = ThreadedUDPServer(host, port, self)
 
-    def pop_frames(self):
-        new_list = list(self.packet_list)
-        self.packet_list.clear()
-        return new_list
+    def set_current_frame(self, data):
+        self.lock.acquire()
+        self.current_data = data
+        self.lock.release()
 
     def get_latest_frame(self):
-        try:
-            return self.packet_list[-1]
-        except IndexError:
+        if self.current_data is None:
             return None
+        packet = self.packet_type()
+        self.lock.acquire()
+        packet.ParseFromString(self.current_data)
+        self.lock.release()
+        return packet
