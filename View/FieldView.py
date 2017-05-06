@@ -38,7 +38,7 @@ class FieldView(QWidget):
         self.setCursor(Qt.OpenHandCursor)
 
         # Option
-        self.option_vanishing = True
+        self.option_vanishing = False
         self.option_show_number = False
         self.option_show_vector = False
         self.option_target_mode = False
@@ -81,7 +81,7 @@ class FieldView(QWidget):
 
         self._action_lock_camera = QAction(self)
         self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
-        self.toggle_lock_camera()
+        #self.toggle_lock_camera()
         self.tool_bar.addAction(self._action_lock_camera)
 
         self._action_delete_draws = QAction(self)
@@ -161,11 +161,11 @@ class FieldView(QWidget):
         if QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.ArrowCursor)
             self._action_lock_camera.setIcon(QIcon('Img/lock.png'))
-            self._action_lock_camera.setToolTip('Déverrouiller Caméra')
+            self._action_lock_camera.setToolTip('Déverrouiller caméra')
         else:
             self.setCursor(Qt.OpenHandCursor)
             self._action_lock_camera.setIcon(QIcon('Img/lock_open.png'))
-            self._action_lock_camera.setToolTip('Verrouiller Caméra')
+            self._action_lock_camera.setToolTip('Verrouiller caméra')
 
     def toggle_frame_rate(self):
         """ Afficher/Cacher la fréquence de rafraîchissement de l'écran """

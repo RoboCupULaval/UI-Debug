@@ -14,7 +14,7 @@ class StrategyCtrView(QWidget):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.init_ui()
-        self.hide()
+        #self.hide()
 
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_combobox)

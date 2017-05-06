@@ -30,7 +30,7 @@ class GameStateView(QWidget):
         self.init_logger()
         self.init_ui()
         self.init_loop()
-        self.hide()
+        #self.hide()
         self._logger.debug('CONSTRUCT: ... End')
 
     def _get_style_sheet(self, is_yellow=None, bold=False, color='black'):

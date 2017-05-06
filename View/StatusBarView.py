@@ -30,7 +30,7 @@ class StatusBarView(QWidget):
 
     def update_fps(self):
         fps = self._controller.get_fps()
-        self.label_fps.setText("[Frame rate: {} fps]".format(fps))
+        self.label_fps.setText("[UI refresh rate: {} fps]".format(fps))
 
     def update_coord_cursor(self):
         x, y = self._controller.get_cursor_position_from_screen()
