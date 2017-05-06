@@ -22,24 +22,26 @@ class FieldLineDrawing(BaseDrawingObject):
 
             # Rectangle de contour du terrain
             x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
-            width, height = QtToolBox.field_ctrl.get_size_to_screen()
-            painter.drawRect(x, y, width, height)
+            length, width = QtToolBox.field_ctrl.get_size_to_screen()
+            painter.drawRect(x, y, length, width)
 
             # Rectangle des buts
-            goal_width, goal_height = QtToolBox.field_ctrl.goal_size
+            goal_depth = QtToolBox.field_ctrl.goal_depth
+            goal_width = QtToolBox.field_ctrl.goal_width
+
+            goal_depth_resize = goal_depth * QtToolBox.field_ctrl.ratio_screen
             goal_width_resize = goal_width * QtToolBox.field_ctrl.ratio_screen
-            goal_height_resize = goal_height * QtToolBox.field_ctrl.ratio_screen
-            x_goal = x - goal_width_resize
-            y_goal = y + height / 2 - goal_height_resize / 2
-            painter.drawRect(x_goal, y_goal, goal_width_resize, goal_height_resize)
-            x_goal = x + width
-            y_goal = y + height / 2 - goal_height_resize / 2
-            painter.drawRect(x_goal, y_goal, goal_width_resize, goal_height_resize)
+            x_goal = x - goal_depth_resize
+            y_goal = y + width / 2 - goal_width_resize / 2
+            painter.drawRect(x_goal, y_goal, goal_depth_resize, goal_width_resize)
+            x_goal = x + length
+            y_goal = y + width / 2 - goal_width_resize / 2
+            painter.drawRect(x_goal, y_goal, goal_depth_resize, goal_width_resize)
 
             # Ligne de la surface de réparation
             rad_width = QtToolBox.field_ctrl.defense_radius * QtToolBox.field_ctrl.ratio_screen
             x_rad_goal = x
-            y_rad_goal = y + height / 2 - QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
+            y_rad_goal = y + width / 2 - QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
             # => TopLeft
             painter.drawArc(QtCore.QRect(x_rad_goal - rad_width,
                                          y_rad_goal - rad_width,
@@ -47,7 +49,7 @@ class FieldLineDrawing(BaseDrawingObject):
                                          rad_width * 2),
                             0, 90 * 16)
 
-            y_rad_goal = y + height / 2 + QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
+            y_rad_goal = y + width / 2 + QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
             # => BotLeft
             painter.drawArc(QtCore.QRect(x_rad_goal - rad_width,
                                          y_rad_goal - rad_width,
@@ -55,16 +57,16 @@ class FieldLineDrawing(BaseDrawingObject):
                                          rad_width * 2),
                             270 * 16, 90 * 16)
             # => TopRight
-            x_rad_goal = x + width
-            y_rad_goal = y + height / 2 - QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
+            x_rad_goal = x + length
+            y_rad_goal = y + width / 2 - QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
             painter.drawArc(QtCore.QRect(x_rad_goal - rad_width,
                                          y_rad_goal - rad_width,
                                          rad_width * 2,
                                          rad_width * 2),
                             90 * 16, 90 * 16)
             # => BotRight
-            x_rad_goal = x + width
-            y_rad_goal = y + height / 2 + QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
+            x_rad_goal = x + length
+            y_rad_goal = y + width / 2 + QtToolBox.field_ctrl.defense_stretch / 2 * QtToolBox.field_ctrl.ratio_screen
             painter.drawArc(QtCore.QRect(x_rad_goal - rad_width,
                                          y_rad_goal - rad_width,
                                          rad_width * 2,
@@ -75,20 +77,20 @@ class FieldLineDrawing(BaseDrawingObject):
             # Ligne de la surface de réparation (droite)
             goal_line_resized = QtToolBox.field_ctrl.defense_stretch * QtToolBox.field_ctrl.ratio_screen
             x1 = x + QtToolBox.field_ctrl.defense_radius * QtToolBox.field_ctrl.ratio_screen
-            y1 = y + height / 2 - goal_line_resized / 2
-            y2 = y + height / 2 + goal_line_resized / 2
+            y1 = y + width / 2 - goal_line_resized / 2
+            y2 = y + width / 2 + goal_line_resized / 2
             painter.drawLine(x1, y1, x1, y2)
-            x1 = x + width - QtToolBox.field_ctrl.defense_radius * QtToolBox.field_ctrl.ratio_screen
+            x1 = x + length - QtToolBox.field_ctrl.defense_radius * QtToolBox.field_ctrl.ratio_screen
             painter.drawLine(x1, y1, x1, y2)
 
             # Ligne de demi-terrain
-            x1, y1 = x + width / 2, y
-            x2, y2 = x + width / 2, y + height
+            x1, y1 = x + length / 2, y
+            x2, y2 = x + length / 2, y + width
             painter.drawLine(x1, y1, x2, y2)
 
             # Cercle central
             radius = QtToolBox.field_ctrl.center_circle_radius * QtToolBox.field_ctrl.ratio_screen
-            x, y = x + width / 2, y + height / 2
+            x, y = x + length / 2, y + width / 2
             painter.drawEllipse(x - radius, y - radius, radius * 2, radius * 2)
 
     @staticmethod

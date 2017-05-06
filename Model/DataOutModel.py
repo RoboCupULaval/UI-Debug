@@ -54,13 +54,13 @@ class DataOutModel:
         self._udp_sender.send_message(pkg.get_binary())
 
     def send_geometry(self, field_control):
-        pkg = SendingGeometry().set_data(width=field_control.width,
-                                         height=field_control.height,
-                                         center_radius=field_control.center_radius,
+        pkg = SendingGeometry().set_data(field_length=field_control.field_length,
+                                         field_width=field_control.field_width,
+                                         center_circle_radius=field_control.center_circle_radius,
                                          defense_radius=field_control.defense_radius,
                                          defense_stretch=field_control.defense_stretch,
                                          goal_width=field_control.goal_width,
-                                         goal_height=field_control.goal_height,
+                                         goal_depth=field_control.goal_depth,
                                          ratio_field_mobs=field_control.ratio_field_mobs)
         if self._udp_sender is not None:
             self._udp_sender.send_message(pkg.get_binary())
