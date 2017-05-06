@@ -247,6 +247,10 @@ class MainController(QWidget):
         """ Modifie la position et l'orientation d'un robot sur le terrain """
         self.view_screen.set_bot_pos(bot_id, pst[0], pst[1], theta)
 
+    def set_field_size(self, frame_field_size):
+        """ Modifie la dimension du terrain provenant des frames de vision"""
+        QtToolBox.field_ctrl.set_field_size(frame_field_size)
+
     def hide_mob(self, bot_id=None):
         """ Cache l'objet mobile si l'information n'est pas update """
         if self.view_screen.isVisible() and not self.view_screen.option_vanishing:

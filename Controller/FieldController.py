@@ -23,41 +23,49 @@ class FieldController(object):
         self.is_y_axe_flipped = True
 
         # Dimension du terrain
-        # TODO - Possible de récupérer ces informations dans les paquets des frames
         # TODO - Faire que ces paramètres soient paramétrables depuis le GUI
-        self.marge = 250
-        self.size_default = [config.field_width, config.field_height]
-        self.size = self.size_default.copy()
-        self.goal_size_default = [config.goal_width, config.goal_height]
-        self.goal_size = self.goal_size_default.copy()
-        self.goal_radius_default = config.goalzone_radius
-        self.goal_radius = self.goal_radius_default
-        self.goal_line_default = config.goalzone_height
-        self.goal_line = self.goal_line_default
-        self.radius_center_default = config.center_radius
-        self.radius_center = self.radius_center_default
-        self.ratio_field_mobs_default = config.field_ratio
-        self._ratio_field_mobs = self.ratio_field_mobs_default
+        self.marge = 250 # C'est quoi ca??
+        self._ratio_field_mobs = 1 # C'est quoi ca??
+        # TODO : Utiliser les dimensions en commentaires ci-dessous
+        # self.line_width = 10
+        self.field_length = 9000
+        self.field_width = 6000
+        # self.boundary_width = 300
+        # self.referee_width = 400
+        self.goal_width_ = 1000
+        self.goal_depth = 180
+        # self.goal_wall_width = 20
+        self.center_circle_radius = 1000
+        self.defense_radius_ = 1000
+        self.defense_stretch_ = 500
+        # self.free_kick_from_defense_dist = 700
+        # self.penalty_spot_from_field_line_dist = 450
+        # self.penalty_line_from_spot_dist = 350
+
+        self.field_size = [self.field_length, self.field_width]
+        self.goal_size = [self.goal_depth, self.goal_width_]
+
+
 
     @property
     def width(self):
-        return self.size[0]
+        return self.field_size[0]
 
     @property
     def height(self):
-        return self.size[1]
+        return self.field_size[1]
 
     @property
     def center_radius(self):
-        return self.radius_center
+        return self.center_circle_radius
 
     @property
     def defense_radius(self):
-        return self.goal_radius
+        return self.defense_radius_
 
     @property
     def defense_stretch(self):
-        return self.goal_line
+        return self.defense_stretch_
 
     @property
     def goal_width(self):
@@ -85,14 +93,14 @@ class FieldController(object):
         if self.is_y_axe_flipped:
             y *= -1
             rot_y *= -1
-        x = (x + self.size[0] / 2 + self.marge) * self.ratio_screen + self._camera_position[0]
-        y = (y + self.size[1] / 2 + self.marge) * self.ratio_screen + self._camera_position[1]
+        x = (x + self.field_size[0] / 2 + self.marge) * self.ratio_screen + self._camera_position[0]
+        y = (y + self.field_size[1] / 2 + self.marge) * self.ratio_screen + self._camera_position[1]
         return x, y, atan2(rot_y, rot_x)
 
     def convert_screen_to_real_pst(self, x, y):
         """ Convertir les coordonnées du terrain en coordonnées réelles """
-        x_2 = (x - self._camera_position[0]) / self.ratio_screen - self.size[0] / 2 - self.marge
-        y_2 = (y - self._camera_position[1]) / self.ratio_screen - self.size[1] / 2 - self.marge
+        x_2 = (x - self._camera_position[0]) / self.ratio_screen - self.field_size[0] / 2 - self.marge
+        y_2 = (y - self._camera_position[1]) / self.ratio_screen - self.field_size[1] / 2 - self.marge
         if self.is_x_axe_flipped:
             x_2 *= -1
         if self.is_y_axe_flipped:
@@ -115,7 +123,7 @@ class FieldController(object):
 
     def get_size_to_screen(self):
         """ Donne la taille du terrain sur l'écran """
-        return self.size[0] * self.ratio_screen, self.size[1] * self.ratio_screen
+        return self.field_size[0] * self.ratio_screen, self.field_size[1] * self.ratio_screen
 
     def drag_camera(self, x, y):
         """ Déplacement de la caméra """
@@ -169,3 +177,27 @@ class FieldController(object):
         """ Réinitialise la position et le zoom de la caméra par défaut """
         self._camera_position = (0, 0)
         self.ratio_screen = 1 / 10
+
+    def set_field_size(self, field):
+        """ Ajuste les dimensions du terrain """
+
+        # TODO : Utiliser les dimensions en commentaires ci-dessous
+        # self.line_width = field.line_width
+        self.field_length = field.field_length
+        self.field_width = field.field_width
+        # self.boundary_width = field.boundary_width
+        # self.referee_width = field.referee_width
+        self.goal_width_ = field.goal_width
+        self.goal_depth = field.goal_depth
+        #self.goal_wall_width = field.goal_wall_width
+        self.center_circle_radius = field.center_circle_radius
+        self.defense_radius_ = field.defense_radius
+        self.defense_stretch_ = field.defense_stretch
+        # self.free_kick_from_defense_dist = field.free_kick_from_defense_dist
+        # self.penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
+        # self.penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
+
+        self.field_size = [self.field_length, self.field_width]
+        self.goal_size = [self.goal_depth, self.goal_width_]
+
+

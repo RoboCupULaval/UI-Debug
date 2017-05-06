@@ -63,6 +63,10 @@ class FrameModel:
             if not self._frame_has_been_processed(frame):
                 self._last_frame_caught_time = datetime.now()
                 self._update_view_screen_mobs(datetime.now(), frame)
+                #print(frame.geometry)
+                if frame.geometry.field.line_width !=0:
+                    self._update_field_size(frame)
+
 
     def _get_last_frame(self):
         """ Récupère le dernier frame de la vision ou de l'enregistreur """
@@ -70,6 +74,21 @@ class FrameModel:
             return self._vision.get_latest_frame()
         else:
             return self._recorder.get_last_frame()
+
+    def _update_field_size(self, frame):
+        """ Mise à jour des données de dimensions du terrain"""
+        #field_length = frame.geometry.field.field_length
+        ##field_width = frame.geometry.field.field_width
+        #goal_width = frame.geometry.field.goal_width
+        #goal_depth = frame.geometry.field.goal_depth
+        #center_circle_radius = frame.geometry.field.center_circle_radius
+        #defense_radius = frame.geometry.field.defense_radius
+        #defense_stretch = frame.geometry.field.defense_stretch
+        #field_ratio = 1
+
+        #field = FieldSize(field_length, field_width, goal_width, goal_depth, defense_radius, defense_stretch,
+        #                  center_circle_radius, field_ratio)
+        self._controller.set_field_size(frame.geometry.field)                                                                  #ooooooo?
 
     def _update_view_screen_mobs(self, ftime, frame):
         """ Mise à jour des données de la vue des objets mobiles  """

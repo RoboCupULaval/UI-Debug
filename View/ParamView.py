@@ -202,16 +202,16 @@ class ParamView(QDialog):
         self._apply_param()
 
     def restore_values(self):
-        self.form_field_width.setText(str(QtToolBox.field_ctrl.size[0]))
-        self.form_field_height.setText(str(QtToolBox.field_ctrl.size[1]))
+        self.form_field_width.setText(str(QtToolBox.field_ctrl.field_size[0]))
+        self.form_field_height.setText(str(QtToolBox.field_ctrl.field_size[1]))
 
         self.form_goal_width.setText(str(QtToolBox.field_ctrl.goal_size[0]))
         self.form_goal_height.setText(str(QtToolBox.field_ctrl.goal_size[1]))
 
-        self.form_goal_radius.setText(str(QtToolBox.field_ctrl.goal_radius))
-        self.form_goal_line.setText(str(QtToolBox.field_ctrl.goal_line))
+        self.form_goal_radius.setText(str(QtToolBox.field_ctrl.defense_radius))
+        self.form_goal_line.setText(str(QtToolBox.field_ctrl.defense_stretch))
 
-        self.form_center_radius.setText(str(QtToolBox.field_ctrl.radius_center))
+        self.form_center_radius.setText(str(QtToolBox.field_ctrl.center_circle_radius))
 
         self.form_ratio_mobs.setText(str(QtToolBox.field_ctrl.ratio_field_mobs))
 
