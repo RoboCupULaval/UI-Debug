@@ -21,7 +21,7 @@ class DataOutModel:
 
         self.frame_timer = QTimer()
         self.frame_timer.timeout.connect(self.update_screen)
-        self.frame_timer.start(20)
+        self.frame_timer.start(30)  # C'est quoi ca? c'était à 20
 
     def setup_udp_server(self, server):
         self._udp_sender = server
@@ -35,7 +35,7 @@ class DataOutModel:
         if args is None:
             args = []
         pkg = SendingTactic().set_data(tactic=tactic,
-                                       id=id_bot % 6,
+                                       id=id_bot,
                                        target=target,
                                        goal=goal,
                                        args=args)

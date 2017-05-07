@@ -188,13 +188,13 @@ class FieldView(QWidget):
         self.graph_draw['field-lines'].show()
         self.graph_draw['frame-rate'] = self.controller.get_drawing_object('frame-rate')()
         self.graph_draw['frame-rate'].hide()
-        self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
-        self.graph_draw['robots_blue'] = [list() for _ in range(6)]
+        self.graph_draw['robots_yellow'] = [list() for _ in range(12)] # TODO : Cleaner
+        self.graph_draw['robots_blue'] = [list() for _ in range(12)] # TODO : Cleaner
 
         # Élément mobile graphique (Robots, balle et cible)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
-        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, is_yellow=True) for x in range(6)]
-        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, is_yellow=False) for x in range(6, 12)]
+        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, 'yellow') for x in range(12)]  # TODO : Cleaner
+        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, 'blue') for x in range(12)] # TODO : Cleaner
         self.graph_mobs['target'] = self.controller.get_drawing_object('target')()
         # TODO : show // init setters
 
@@ -210,15 +210,15 @@ class FieldView(QWidget):
             self.graph_mobs['ball'].setPos(x, y)
         self.graph_mobs['ball'].show()
 
-    def set_bot_pos(self, bot_id, x, y, theta):
+    def set_bot_pos(self, bot_id, team_color, x, y, theta):
         """ Modifie la position et l'orientation d'un robot sur la fenêtre du terrain """
-        if 0 <= bot_id < 6:
+        if team_color =='yellow':
             self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
             self.graph_mobs['robots_yellow'][bot_id].setRotation(theta)
-        elif 6 <= bot_id < 12:
-            self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
-            self.graph_mobs['robots_blue'][bot_id - 6].setRotation(theta)
-        self.show_bot(bot_id)
+        elif team_color == 'blue':
+            self.graph_mobs['robots_blue'][bot_id].setPos(x, y)
+            self.graph_mobs['robots_blue'][bot_id].setRotation(theta)
+        self.show_bot(bot_id, team_color)
 
     def set_target_pos(self, x, y):
         """ Modifie la position de la cible """
@@ -228,25 +228,25 @@ class FieldView(QWidget):
         """ Cache la balle dans la fenêtre de terrain """
         self.graph_mobs['ball'].hide()
 
-    def hide_bot(self, bot_id):
+    def hide_bot(self, bot_id, team_color):
         """ Cache un robot dans la fenêtre de terrain """
-        if 0 <= bot_id < 6:
+        if team_color =='yellow':
             self.graph_mobs['robots_yellow'][bot_id].hide()
             self.graph_mobs['robots_numbers'][bot_id].hide()
-        elif 6 <= bot_id < 12:
-            self.graph_mobs['robots_blue'][bot_id - 6].hide()
+        elif team_color == 'blue':
+            self.graph_mobs['robots_blue'][bot_id].hide()
             self.graph_mobs['robots_numbers'][bot_id].hide()
 
     def show_ball(self):
         """ Affiche la balle dans la fenêtre de terrain """
         self.graph_mobs['ball'].show()
 
-    def show_bot(self, bot_id):
+    def show_bot(self, bot_id, team_color):
         """ Affiche un robot dans la fenêtre du terrain """
-        if 0 <= bot_id < 6:
+        if team_color == 'yellow':
             self.graph_mobs['robots_yellow'][bot_id].show()
-        elif 6 <= bot_id < 12:
-            self.graph_mobs['robots_blue'][bot_id - 6].show()
+        elif team_color == 'blue':
+            self.graph_mobs['robots_blue'][bot_id].show()
 
     def show_number_option(self):
         """ Affiche les numéros des robots """
@@ -260,9 +260,9 @@ class FieldView(QWidget):
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             mob.deselect()
 
-    def select_robot(self, index, is_yellow):
-        for i, mob in enumerate(self.graph_mobs['robots_yellow'] if is_yellow else self.graph_mobs['robots_blue']):
-            if i == index:
+    def select_robot(self, bot_id, team_color):
+        for i, mob in enumerate(self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']):
+            if i == bot_id:
                 mob.select()
             else:
                 mob.deselect()
@@ -330,8 +330,8 @@ class FieldView(QWidget):
         if self.controller.get_tactic_controller_is_visible():
             distance, number, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
             if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen:
-                self.select_robot(number % 6, True if number <= 5 else False)
-                self.controller.force_tactic_controller_select_robot(number)
+                self.select_robot(number % 6, 'yellow' if number <= 5 else 'blue')     # TODO : CLEANER
+                self.controller.force_tactic_controller_select_robot(number % 6, 'yellow' if number <= 5 else 'blue')   # TODO : CLEANER
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """

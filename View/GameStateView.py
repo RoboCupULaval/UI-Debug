@@ -98,7 +98,7 @@ class GameStateView(QWidget):
             self._layout.addWidget(label, 2, i)
 
         # id robot
-        for i in range(6):
+        for i in range(6):  # TODO : Change Max robots
             for j in range(2):
                 label = QLabel(str(i))
                 label.setAlignment(Qt.AlignCenter)

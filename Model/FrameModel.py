@@ -77,18 +77,7 @@ class FrameModel:
 
     def _update_field_size(self, frame):
         """ Mise à jour des données de dimensions du terrain"""
-        #field_length = frame.geometry.field.field_length
-        ##field_width = frame.geometry.field.field_width
-        #goal_width = frame.geometry.field.goal_width
-        #goal_depth = frame.geometry.field.goal_depth
-        #center_circle_radius = frame.geometry.field.center_circle_radius
-        #defense_radius = frame.geometry.field.defense_radius
-        #defense_stretch = frame.geometry.field.defense_stretch
-        #field_ratio = 1
-
-        #field = FieldSize(field_length, field_width, goal_width, goal_depth, defense_radius, defense_stretch,
-        #                  center_circle_radius, field_ratio)
-        self._controller.set_field_size(frame.geometry.field)                                                                  #ooooooo?
+        self._controller.set_field_size(frame.geometry.field)
 
     def _update_view_screen_mobs(self, ftime, frame):
         """ Mise à jour des données de la vue des objets mobiles  """
@@ -101,7 +90,7 @@ class FrameModel:
         self._update_view_screen_team_blue()
 
     def _update_view_screen_ball(self):
-        """ Muse à jour des données de la vue de la balle """
+        """ Mise à jour des données de la vue de la balle """
         try:
             x = self._current_frame.detection.balls[0].x
             y = self._current_frame.detection.balls[0].y
@@ -110,36 +99,40 @@ class FrameModel:
             self._controller.hide_mob()
 
     def _update_view_screen_team_yellow(self):
-        """ Muse à jour des données de la vue des robots de l'équipe jaune """
+        """ Mise à jour des données de la vue des robots de l'équipe jaune """
+        team_color = 'yellow'
         try:
-            list_bot_id = {0, 1, 2, 3, 4, 5}
+            list_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
             for info_bot in self._current_frame.detection.robots_yellow:
+
                 list_bot_id.remove(info_bot.robot_id)
                 bot_id = info_bot.robot_id
                 x = info_bot.x
                 y = info_bot.y
                 theta = info_bot.orientation
-                self._controller.set_robot_pos_on_screen(bot_id, (x, y), theta)
+                self._controller.set_robot_pos_on_screen(bot_id, team_color, (x, y), theta)
 
             for bot_id in list_bot_id:
-                self._controller.hide_mob(bot_id)
+                self._controller.hide_mob(bot_id, team_color)
         except Exception as e:
             pass
 
-    def _update_view_screen_team_blue(self):
-        """ Muse à jour des données de la vue des robots de l'équipe bleue """
+    def _update_view_screen_team_blue(self):  # TODO : Merger avec fonction précédente
+        """ Mise à jour des données de la vue des robots de l'équipe bleue """
+        team_color = 'blue'
         try:
-            list_bot_id = {0, 1, 2, 3, 4, 5}
+            list_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
             for info_bot in self._current_frame.detection.robots_blue:
+
                 list_bot_id.remove(info_bot.robot_id)
                 bot_id = info_bot.robot_id
                 x = info_bot.x
                 y = info_bot.y
                 theta = info_bot.orientation
-                self._controller.set_robot_pos_on_screen(bot_id + 6, (x, y), theta)
+                self._controller.set_robot_pos_on_screen(bot_id, team_color, (x, y), theta)
 
             for bot_id in list_bot_id:
-                self._controller.hide_mob(bot_id + 6)
+                self._controller.hide_mob(bot_id, team_color)
         except Exception as e:
             pass
 
