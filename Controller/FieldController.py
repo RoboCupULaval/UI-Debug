@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from math import cos, sin, atan2
-from .config import *
+
 
 __author__ = 'RoboCupULaval'
 
