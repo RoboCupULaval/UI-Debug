@@ -97,16 +97,18 @@ class GameStateView(QWidget):
             label.setStyleSheet(self._get_style_sheet(bold=True))
             self._layout.addWidget(label, 2, i)
 
+        list_active_robots = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # TODO (pturgeon): Créer variable globale
+
         # id robot
-        for i in range(6):  # TODO : Change Max robots
+        for i in range(len(list_active_robots)):
             for j in range(2):
-                label = QLabel(str(i))
+                label = QLabel(str(list_active_robots[i]))
                 label.setAlignment(Qt.AlignCenter)
                 label.setStyleSheet(self._get_style_sheet(bold=True))
                 self._layout.addWidget(label, 3 + i, 1 + 4 * j)
 
         # None value everywhere else
-        for i in range(6):
+        for i in range(len(list_active_robots)):
             for j in [1, 2, 3, 5, 6, 7]:
                 label = QLabel('None')
                 label.setAlignment(Qt.AlignCenter)

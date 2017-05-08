@@ -75,8 +75,8 @@ class StrategyCtrView(QWidget):
 
         group_vbox.addWidget(QLabel('Équipe :'))
         self.selectTeam = QComboBox()
-        self.selectTeam.addItem('Yellow')
-        self.selectTeam.addItem('Blue')
+        self.selectTeam.addItem('yellow')
+        self.selectTeam.addItem('blue')
         self.selectTeam.currentIndexChanged.connect(self.handle_selection_robot_event_team)
         group_vbox.addWidget(self.selectTeam)
 
@@ -111,7 +111,7 @@ class StrategyCtrView(QWidget):
     @pyqtSlot(int)
     def handle_selection_robot_event_id(self, index):
         self.parent.deselect_all_robots()
-        self.parent.select_robot(index, 'yellow' if self.selectTeam.currentText() == 'Yellow' else 'blue') # TODO : À cleaner
+        self.parent.select_robot(index, self.selectTeam.currentText())
 
     @pyqtSlot(int)
     def handle_selection_robot_event_team(self, index):
@@ -124,7 +124,7 @@ class StrategyCtrView(QWidget):
             self.parent.deselect_all_robots()
         elif index == 1:
             id_bot = self.selectRobot.currentIndex()
-            team_color = 'yellow' if self.selectTeam.currentText() == 'Yellow' else 'blue' # TODO : À cleaner
+            team_color = self.selectTeam.currentText()
             self.parent.select_robot(id_bot, team_color)
 
     def hideEvent(self, event):
@@ -187,7 +187,6 @@ class StrategyCtrView(QWidget):
 
     def send_tactic(self):
         id_bot = int(self.selectRobot.currentText())
-        #team_color = 'yellow' if self.selectTeam == 'Yellow' else 'blue'  # TODO : à cleaner
         tactic = str(self.selectTactic.currentText())
         args = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
@@ -195,7 +194,7 @@ class StrategyCtrView(QWidget):
             self.parent.model_dataout.send_tactic(id_bot, tactic=tactic, target=target, args=args)
 
     def send_tactic_stop(self):
-        for id_bot in range(12):   # TODO : à cleaner
+        for id_bot in range(12):   # TODO (pturgeon): Changer pour constante globable (ou liste?)
             self.parent.model_dataout.send_tactic(id_bot, 'tStop', args=None)
 
     def send_strat_stop(self):

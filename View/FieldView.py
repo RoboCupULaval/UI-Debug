@@ -180,6 +180,7 @@ class FieldView(QWidget):
 
     def init_graph_mobs(self):
         """ Initialisation des objets graphiques """
+        max_robots_in_team = 12
 
         # Élément graphique pour les dessins
         self.graph_draw['field-ground'] = self.controller.get_drawing_object('field-ground')()
@@ -188,13 +189,13 @@ class FieldView(QWidget):
         self.graph_draw['field-lines'].show()
         self.graph_draw['frame-rate'] = self.controller.get_drawing_object('frame-rate')()
         self.graph_draw['frame-rate'].hide()
-        self.graph_draw['robots_yellow'] = [list() for _ in range(12)] # TODO : Cleaner
-        self.graph_draw['robots_blue'] = [list() for _ in range(12)] # TODO : Cleaner
+        self.graph_draw['robots_yellow'] = [list() for _ in range(max_robots_in_team)]
+        self.graph_draw['robots_blue'] = [list() for _ in range(max_robots_in_team)]
 
         # Élément mobile graphique (Robots, balle et cible)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
-        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, 'yellow') for x in range(12)]  # TODO : Cleaner
-        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, 'blue') for x in range(12)] # TODO : Cleaner
+        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, 'yellow') for x in range(max_robots_in_team)]
+        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, 'blue') for x in range(max_robots_in_team)]
         self.graph_mobs['target'] = self.controller.get_drawing_object('target')()
         # TODO : show // init setters
 
@@ -304,10 +305,18 @@ class FieldView(QWidget):
     def get_nearest_mob_from_position(self, x, y):
         """ Requête pour obtenir la distance, le numéro et le dessin du robot le plus près d'une position """
         nearest = []
-        for i, mob in enumerate(self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']):
+        for id, mob in enumerate(self.graph_mobs['robots_yellow']):
+            team_color = 'yellow'
             mob_x, mob_y, _ = mob.get_position_on_screen()
             distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
-            mob_ordered = distance, i, mob
+            mob_ordered = distance, id, team_color, mob
+            nearest.append(mob_ordered)
+
+        for id, mob in enumerate(self.graph_mobs['robots_blue']):
+            team_color = 'blue'
+            mob_x, mob_y, _ = mob.get_position_on_screen()
+            distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
+            mob_ordered = distance, id, team_color, mob
             nearest.append(mob_ordered)
         return min(nearest)
 
@@ -328,10 +337,10 @@ class FieldView(QWidget):
     def mousePressEvent(self, event):
         """ Gère l'événement du clic simple de la souris """
         if self.controller.get_tactic_controller_is_visible():
-            distance, number, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
+            distance, robot_id, team_color, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
             if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen:
-                self.select_robot(number % 6, 'yellow' if number <= 5 else 'blue')     # TODO : CLEANER
-                self.controller.force_tactic_controller_select_robot(number % 6, 'yellow' if number <= 5 else 'blue')   # TODO : CLEANER
+                self.select_robot(robot_id, team_color)
+                self.controller.force_tactic_controller_select_robot(robot_id, team_color)
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """

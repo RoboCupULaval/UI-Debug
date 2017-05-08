@@ -23,10 +23,9 @@ class FieldController(object):
         self.is_y_axe_flipped = True
 
         # Dimension du terrain
-        # TODO - Faire que ces paramètres soient paramétrables depuis le GUI
         self.marge = 250 # C'est quoi ca??
         self._ratio_field_mobs = 1 # C'est quoi ca??
-        # TODO : Utiliser les dimensions en commentaires ci-dessous
+        # TODO (pturgeon): Utiliser les dimensions en commentaires ci-dessous
         # self._line_width = 10
         self._field_length = 9000
         self._field_width = 6000
@@ -177,7 +176,7 @@ class FieldController(object):
 
     def set_field_size(self, field):
         """ Ajuste les dimensions du terrain """
-        # TODO : Utiliser les dimensions en commentaires ci-dessous
+        # TODO (pturgeon): Utiliser les dimensions en commentaires ci-dessous
         # self._line_width = field.line_width
         self._field_length = field.field_length
         self._field_width = field.field_width
