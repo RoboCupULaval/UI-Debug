@@ -14,7 +14,6 @@ class StrategyCtrView(QWidget):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.init_ui()
-        self.hide()
 
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_combobox)
@@ -22,6 +21,8 @@ class StrategyCtrView(QWidget):
 
     def init_ui(self):
         self.setFixedWidth(300)
+        self.setFixedHeight(300)
+
         # Création des pages d'onglet
         self.page_controller = QTabWidget(self)
         self.page_strategy = QWidget()

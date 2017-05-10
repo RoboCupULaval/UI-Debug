@@ -2,6 +2,8 @@
 
 from signal import signal, SIGINT
 
+from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtWidgets import QSpacerItem
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox
 from PyQt5.QtGui import QIcon
@@ -21,6 +23,8 @@ from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
 from View.StatusBarView import StatusBarView
 from View.GameStateView import GameStateView
+from View.GrsimCtrView import GrsimCtrView
+
 
 from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
@@ -64,6 +68,7 @@ class MainController(QWidget):
         self.view_media = MediaControllerView(self)
         self.view_status = StatusBarView(self)
         self.view_robot_state = GameStateView(self)
+        self.view_grsim_ctr = GrsimCtrView(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -80,10 +85,13 @@ class MainController(QWidget):
         # => Field | Filter | StratController (Horizontal)
         sub_layout = QHBoxLayout()
         sub_layout.setContentsMargins(0, 0, 0, 0)
+        subsub_layout = QVBoxLayout()
+        subsub_layout.setContentsMargins(0, 0, 0, 0)
         sub_layout.addWidget(self.view_screen)
         sub_layout.addWidget(self.view_filter)
-        sub_layout.addWidget(self.view_controller)
-
+        subsub_layout.addWidget(self.view_controller, alignment=Qt.AlignTop)
+        subsub_layout.addWidget(self.view_grsim_ctr, alignment=Qt.AlignTop)
+        sub_layout.addLayout(subsub_layout)
         # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
@@ -189,8 +197,14 @@ class MainController(QWidget):
         toolMenu.addAction(filterAction)
 
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
+        StrategyControllerAction.setChecked(True)
         StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
         toolMenu.addAction(StrategyControllerAction)
+
+        GrsimControllerAction = QAction('Contrôleur de Grsim', self,  checkable=True)
+        GrsimControllerAction.setChecked(True)
+        GrsimControllerAction.triggered.connect(self.view_grsim_ctr.toggle_show_hide)
+        toolMenu.addAction(GrsimControllerAction)
 
         toolMenu.addSeparator()
 
