@@ -123,6 +123,8 @@ class DataInModel(Thread):
                 self._extract_and_distribute_data(package)
             except AttributeError as e:
                 self._logger.warn(type(e).__name__ + str(e))
+            except TypeError:
+                pass
         self._logger.debug('Thread RUN STOPPING')
 
     # === DISTRIBUTOR ===
