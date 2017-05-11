@@ -21,7 +21,7 @@ def create_basic_pkg():
 
 # ======= TEST PARTICULIER =======
 
-def test_multiple_lines(ex):
+def test_multiple_lines():
     pkg = create_basic_pkg()
     pkg['type'] = 3002
     pkg['data']['points'] = list()
@@ -38,7 +38,7 @@ def test_multiple_lines(ex):
     ex.send_message(pkg)
 
 
-def test_line(ex):
+def test_line():
     """ Line """
     pkg = create_basic_pkg()
     pkg['type'] = 3001
@@ -51,7 +51,7 @@ def test_line(ex):
     ex.send_message(pkg)
 
 
-def test_influence_map(ex):
+def test_influence_map():
     """ InfluenceMapTest"""
     pkg = create_basic_pkg()
     pkg['type'] = 3007
@@ -67,7 +67,7 @@ def test_influence_map(ex):
     ex.send_message(pkg)
 
 
-def test_circle(ex):
+def test_circle():
     """ Circle """
     pkg = create_basic_pkg()
     pkg['type'] = 3003
@@ -80,7 +80,7 @@ def test_circle(ex):
     ex.send_message(pkg)
 
 
-def test_rect(ex):
+def test_rect():
     """ Rectangle """
     pkg = create_basic_pkg()
     pkg['type'] = 3006
@@ -92,7 +92,7 @@ def test_rect(ex):
     ex.send_message(pkg)
 
 
-def test_point(ex):
+def test_point():
     """ Point """
     pkg = create_basic_pkg()
     pkg['type'] = 3004
@@ -102,7 +102,7 @@ def test_point(ex):
     ex.send_message(pkg)
 
 
-def test_multiple_points(ex):
+def test_multiple_points():
     """ Point """
     pkg = create_basic_pkg()
     pkg['type'] = 3005
@@ -113,7 +113,7 @@ def test_multiple_points(ex):
     ex.send_message(pkg)
 
 
-def test_strat(ex):
+def test_strat():
     pkg = create_basic_pkg()
     pkg['type'] = 1001
     pkg['data']['strategy'] = ['Start1', 'Start2']
@@ -121,14 +121,14 @@ def test_strat(ex):
     ex.send_message(pkg)
 
 
-def test_logging(ex, msg=''):
+def test_logging(msg=''):
     pkg = create_basic_pkg()
     pkg['type'] = 2
     pkg['data']['level'] = 2
     pkg['data']['message'] = 'HelloWorld' + msg
     ex.send_message(pkg)
 
-def test_big_data(ex):
+def test_big_data():
     # TODO - Finir test
     pkg = create_basic_pkg()
     pkg['type'] = 3007
@@ -158,7 +158,7 @@ def test_big_data(ex):
         ex.send_message(v_pkg)
 
 
-def test_tree(ex):
+def test_tree():
     def build_tree(n):
         tree = []
         last_line = [tuple([tuple([randint(-4500, 0), randint(-3000, 0)]),
@@ -185,7 +185,7 @@ def test_tree(ex):
     ex.send_message(pkg)
 
 
-def test_text_draw(ex):
+def test_text_draw():
     pkg = create_basic_pkg()
     pkg['type'] = 3008
     pkg['data']['position'] = 0, 0
@@ -193,7 +193,7 @@ def test_text_draw(ex):
     pkg['data']['text'] = 'HelloWorld !'
     ex.send_message(pkg)
 
-def test_GameState(ex, offset=''):
+def test_GameState(offset=''):
     pkg = create_basic_pkg()
     pkg['type'] = 1003
     if choice([True, False]):
@@ -202,7 +202,7 @@ def test_GameState(ex, offset=''):
         pkg['data']['blue'] = 'StrategyBlue' + offset
     ex.send_message(pkg)
 
-def test_RobotState(ex, offset=''):
+def test_RobotState(offset=''):
     pkg = create_basic_pkg()
     pkg['type'] = 1002
     pkg['data'][choice(['yellow', 'blue'])] = {choice(list(range(6))): {choice(['tactic', 'action']): 'YOLO' + str(offset)}}
@@ -215,28 +215,28 @@ def test_RobotState(ex, offset=''):
 # ========== STRESS TEST ==========
 # =================================
 
-def stress_test_Statement(ex):
+def stress_test_Statement():
     for i in range(1500):
         sleep(randint(5, 10) / 1000)
         if choice([True, False, False, False, False, False]):
-            test_GameState(ex, offset=str(i))
+            test_GameState(offset=str(i))
         else:
-            test_RobotState(ex, offset=str(i))
+            test_RobotState(offset=str(i))
 
-def stress_test(ex):
+def stress_test():
     """
         Test tous les paquest :
         /!\ Éviter de tester l'influenceMap en même temps que le reste /!\
     """
     for _ in range(5):
-        test_influence_map(ex)
-        test_circle(ex)
-        test_multiple_lines(ex)
-        test_line(ex)
-        test_rect(ex)
-        test_point(ex)
-        test_multiple_points(ex)
-        test_tree(ex)
+        test_influence_map()
+        test_circle()
+        test_multiple_lines()
+        test_line()
+        test_rect()
+        test_point()
+        test_multiple_points()
+        test_tree()
 
 if __name__ == '__main__':
 
@@ -248,9 +248,9 @@ if __name__ == '__main__':
     # test_text_draw()
     # test_big_data()
     # test_RobotState(ex)
-    test_multiple_points(ex)
+    test_multiple_points()
     sleep(5)
-    test_multiple_points(ex)
+    test_multiple_points()
     # stress_test_Statement(ex)
     ex.join()
 
