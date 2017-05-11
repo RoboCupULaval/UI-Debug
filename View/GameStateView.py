@@ -98,7 +98,7 @@ class GameStateView(QWidget):
             self._layout.addWidget(label, 2, i)
 
         list_active_robots = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # TODO (pturgeon): Créer variable globale
-
+        #list.remove(2)
         # id robot
         for i in range(len(list_active_robots)):
             for j in range(2):
@@ -142,7 +142,7 @@ class GameStateView(QWidget):
         while True:
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')
-
+            print(robot_state)
             if robot_state is not None:
                 for team in robot_state.keys():
                     if team == 'blue':
