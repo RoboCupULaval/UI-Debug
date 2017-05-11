@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
                             QPushButton, QGroupBox, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
+from Communication import grSim_Packet_pb2 as grSim_Packet
+
 
 __author__ = 'RoboCupULaval'
 
@@ -45,7 +47,14 @@ class GrsimCtrView(QWidget):
         pass
 
     def send_command(self):
-        print("sdfasdfsdf")
+        a = grSim_Packet.grSim_Packet()
+        # replacement = a.replacement.ball.add()
+        a.replacement.ball.y = 0
+        a.replacement.ball.x = 0
+        a.replacement.ball.vx = 0
+        a.replacement.ball.vy = 0
+
+        self.parent.send_grsim_reset_command(a.SerializeToString())
 
 
     def toggle_show_hide(self):

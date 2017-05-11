@@ -6,7 +6,7 @@ __author__ = 'RoboCupULaval'
 
 
 class ClientUIDebug(object):
-    def __init__(self, name, port_sender=20021, port_receiver=10021):
+    def __init__(self, name, port_sender=2001, port_receiver=10021):
         self._name = str(name)
         self._udp = UDPServer(snd_port=port_sender, rcv_port=port_receiver)
 

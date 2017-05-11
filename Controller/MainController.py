@@ -394,6 +394,10 @@ class MainController(QWidget):
     def waiting_for_game_state(self):
         return self.model_datain.waiting_for_game_state_event()
 
+    # MGL 2017/05/10
+    def send_grsim_reset_command(self, command):
+        self.network_data_in.send_message(command)
+
     # === RECORDER METHODS ===
     def recorder_is_playing(self):
         return self.model_recorder.is_playing()
