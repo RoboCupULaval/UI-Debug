@@ -21,7 +21,7 @@ class DataOutModel:
 
         self.frame_timer = QTimer()
         self.frame_timer.timeout.connect(self.update_screen)
-        self.frame_timer.start(20)
+        self.frame_timer.start(30)  # C'est quoi ca? c'était à 20
 
     def setup_udp_server(self, server):
         self._udp_sender = server
@@ -35,7 +35,7 @@ class DataOutModel:
         if args is None:
             args = []
         pkg = SendingTactic().set_data(tactic=tactic,
-                                       id=id_bot % 6,
+                                       id=id_bot,
                                        target=target,
                                        goal=goal,
                                        args=args)
@@ -54,13 +54,13 @@ class DataOutModel:
         self._udp_sender.send_message(pkg.get_binary())
 
     def send_geometry(self, field_control):
-        pkg = SendingGeometry().set_data(width=field_control.width,
-                                         height=field_control.height,
-                                         center_radius=field_control.center_radius,
+        pkg = SendingGeometry().set_data(field_length=field_control.field_length,
+                                         field_width=field_control.field_width,
+                                         center_circle_radius=field_control.center_circle_radius,
                                          defense_radius=field_control.defense_radius,
                                          defense_stretch=field_control.defense_stretch,
                                          goal_width=field_control.goal_width,
-                                         goal_height=field_control.goal_height,
+                                         goal_depth=field_control.goal_depth,
                                          ratio_field_mobs=field_control.ratio_field_mobs)
         if self._udp_sender is not None:
             self._udp_sender.send_message(pkg.get_binary())

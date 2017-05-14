@@ -12,11 +12,11 @@ __author__ = 'RoboCupULaval'
 
 
 class RobotMob(BaseMobileObject):
-    def __init__(self, bot_id, x=0, y=0, theta=0, is_yellow=True):
+    def __init__(self, bot_id, team_color, x=0, y=0, theta=0):
         BaseMobileObject.__init__(self, x, y, theta)
-        self._id = 'b{}'.format(bot_id - 6) if bot_id > 5 else 'y{}'.format(bot_id)
-        self._is_yellow = is_yellow
-        self._display_number = False
+        self._bot_id = bot_id
+        self._team_color = team_color
+        self._display_number = True
         self._display_select = False
         self._display_vector = False
         self._radius = 180 / 2
@@ -37,7 +37,7 @@ class RobotMob(BaseMobileObject):
         # TODO Ajouter vecteur de direction
         if self.isVisible():
             x, y, theta = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y, self._theta)
-            if self._is_yellow:
+            if self._team_color == 'yellow':
                 painter.setBrush(QtToolBox.create_brush(color=(255, 255, 100)))
             else:
                 painter.setBrush(QtToolBox.create_brush(color=(100, 150, 255)))
@@ -56,7 +56,7 @@ class RobotMob(BaseMobileObject):
             painter.drawLine(x, y, x + cos(theta) * radius, y + sin(theta) * radius)
 
             if self._display_number:
-                painter.drawText(x + radius, y + radius * 2, str(self._id))
+                painter.drawText(x + radius, y + radius * 2, '{:.1}{}'.format(self._team_color,self._bot_id))
             if self.speed_vector_isVisible():
                 v_x, v_y = self._speed_vector
                 x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x + v_x * 180, self._y + v_y * 180)

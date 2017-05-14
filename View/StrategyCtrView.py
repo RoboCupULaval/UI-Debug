@@ -14,7 +14,7 @@ class StrategyCtrView(QWidget):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.init_ui()
-        self.hide()
+        #self.hide()
 
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_combobox)
@@ -69,14 +69,14 @@ class StrategyCtrView(QWidget):
 
         group_vbox.addWidget(QLabel('ID du robot :'))
         self.selectRobot = QComboBox()
-        [self.selectRobot.addItem(str(x)) for x in range(6)]
+        [self.selectRobot.addItem(str(x)) for x in range(12)]
         self.selectRobot.currentIndexChanged.connect(self.handle_selection_robot_event_id)
         group_vbox.addWidget(self.selectRobot)
 
         group_vbox.addWidget(QLabel('Équipe :'))
         self.selectTeam = QComboBox()
-        self.selectTeam.addItem('Yellow')
-        self.selectTeam.addItem('Blue')
+        self.selectTeam.addItem('yellow')
+        self.selectTeam.addItem('blue')
         self.selectTeam.currentIndexChanged.connect(self.handle_selection_robot_event_team)
         group_vbox.addWidget(self.selectTeam)
 
@@ -111,7 +111,7 @@ class StrategyCtrView(QWidget):
     @pyqtSlot(int)
     def handle_selection_robot_event_id(self, index):
         self.parent.deselect_all_robots()
-        self.parent.select_robot(index, True if self.selectTeam.currentText() == 'Yellow' else False)
+        self.parent.select_robot(index, self.selectTeam.currentText())
 
     @pyqtSlot(int)
     def handle_selection_robot_event_team(self, index):
@@ -124,7 +124,8 @@ class StrategyCtrView(QWidget):
             self.parent.deselect_all_robots()
         elif index == 1:
             id_bot = self.selectRobot.currentIndex()
-            self.parent.select_robot(id_bot, True if self.selectTeam.currentText() == 'Yellow' else False)
+            team_color = self.selectTeam.currentText()
+            self.parent.select_robot(id_bot, team_color)
 
     def hideEvent(self, event):
         self.parent.deselect_all_robots()
@@ -186,9 +187,6 @@ class StrategyCtrView(QWidget):
 
     def send_tactic(self):
         id_bot = int(self.selectRobot.currentText())
-        is_yellow = True if self.selectTeam == 'Yellow' else False
-        if not is_yellow:
-            id_bot += 6
         tactic = str(self.selectTactic.currentText())
         args = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
@@ -196,7 +194,7 @@ class StrategyCtrView(QWidget):
             self.parent.model_dataout.send_tactic(id_bot, tactic=tactic, target=target, args=args)
 
     def send_tactic_stop(self):
-        for id_bot in range(6):
+        for id_bot in range(12):   # TODO (pturgeon): Changer pour constante globable (ou liste?)
             self.parent.model_dataout.send_tactic(id_bot, 'tStop', args=None)
 
     def send_strat_stop(self):

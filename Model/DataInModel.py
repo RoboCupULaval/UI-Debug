@@ -36,9 +36,9 @@ class DataInModel(Thread):
         # Stockage de données
         self._data_logging = list()
         self._robot_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
-                                                                 [dict(zip(list(range(6)),
+                                                                 [dict(zip(list(range(12)),
                                                                            [dict(zip(['tactic', 'action', 'target'],
-                                                                                    ['None', 'None', 'None'])) for _ in range(6)]
+                                                                                    ['None', 'None', 'None'])) for _ in range(12)]
                                                                            )) for _ in range(2)])))
 
         self._game_state = TimeListState('GameState', {'yellow': 'None', 'blue': 'None'})
@@ -75,8 +75,8 @@ class DataInModel(Thread):
     def _initialization(self):
         """ Initialise la structure de données du DataInModel et des threads """
         self._data_draw['notset'] = list()
-        self._data_draw['robots_yellow'] = [list() for _ in range(6)]
-        self._data_draw['robots_blue'] = [list() for _ in range(6)]
+        self._data_draw['robots_yellow'] = [list() for _ in range(12)]
+        self._data_draw['robots_blue'] = [list() for _ in range(12)]
         self._logger.debug('INIT: object')
 
 

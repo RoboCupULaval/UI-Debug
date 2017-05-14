@@ -38,7 +38,7 @@ class FieldView(QWidget):
         self.setCursor(Qt.OpenHandCursor)
 
         # Option
-        self.option_vanishing = True
+        self.option_vanishing = False
         self.option_show_number = False
         self.option_show_vector = False
         self.option_target_mode = False
@@ -81,7 +81,7 @@ class FieldView(QWidget):
 
         self._action_lock_camera = QAction(self)
         self._action_lock_camera.triggered.connect(self.toggle_lock_camera)
-        self.toggle_lock_camera()
+        #self.toggle_lock_camera()
         self.tool_bar.addAction(self._action_lock_camera)
 
         self._action_delete_draws = QAction(self)
@@ -161,11 +161,11 @@ class FieldView(QWidget):
         if QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.ArrowCursor)
             self._action_lock_camera.setIcon(QIcon('Img/lock.png'))
-            self._action_lock_camera.setToolTip('Déverrouiller Caméra')
+            self._action_lock_camera.setToolTip('Déverrouiller caméra')
         else:
             self.setCursor(Qt.OpenHandCursor)
             self._action_lock_camera.setIcon(QIcon('Img/lock_open.png'))
-            self._action_lock_camera.setToolTip('Verrouiller Caméra')
+            self._action_lock_camera.setToolTip('Verrouiller caméra')
 
     def toggle_frame_rate(self):
         """ Afficher/Cacher la fréquence de rafraîchissement de l'écran """
@@ -180,6 +180,7 @@ class FieldView(QWidget):
 
     def init_graph_mobs(self):
         """ Initialisation des objets graphiques """
+        max_robots_in_team = 12   # TODO : Variable globale?
 
         # Élément graphique pour les dessins
         self.graph_draw['field-ground'] = self.controller.get_drawing_object('field-ground')()
@@ -188,13 +189,13 @@ class FieldView(QWidget):
         self.graph_draw['field-lines'].show()
         self.graph_draw['frame-rate'] = self.controller.get_drawing_object('frame-rate')()
         self.graph_draw['frame-rate'].hide()
-        self.graph_draw['robots_yellow'] = [list() for _ in range(6)]
-        self.graph_draw['robots_blue'] = [list() for _ in range(6)]
+        self.graph_draw['robots_yellow'] = [list() for _ in range(max_robots_in_team)]
+        self.graph_draw['robots_blue'] = [list() for _ in range(max_robots_in_team)]
 
         # Élément mobile graphique (Robots, balle et cible)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
-        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, is_yellow=True) for x in range(6)]
-        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, is_yellow=False) for x in range(6, 12)]
+        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, 'yellow') for x in range(max_robots_in_team)]
+        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, 'blue') for x in range(max_robots_in_team)]
         self.graph_mobs['target'] = self.controller.get_drawing_object('target')()
         # TODO : show // init setters
 
@@ -210,15 +211,15 @@ class FieldView(QWidget):
             self.graph_mobs['ball'].setPos(x, y)
         self.graph_mobs['ball'].show()
 
-    def set_bot_pos(self, bot_id, x, y, theta):
+    def set_bot_pos(self, bot_id, team_color, x, y, theta):
         """ Modifie la position et l'orientation d'un robot sur la fenêtre du terrain """
-        if 0 <= bot_id < 6:
+        if team_color =='yellow':
             self.graph_mobs['robots_yellow'][bot_id].setPos(x, y)
             self.graph_mobs['robots_yellow'][bot_id].setRotation(theta)
-        elif 6 <= bot_id < 12:
-            self.graph_mobs['robots_blue'][bot_id - 6].setPos(x, y)
-            self.graph_mobs['robots_blue'][bot_id - 6].setRotation(theta)
-        self.show_bot(bot_id)
+        elif team_color == 'blue':
+            self.graph_mobs['robots_blue'][bot_id].setPos(x, y)
+            self.graph_mobs['robots_blue'][bot_id].setRotation(theta)
+        self.show_bot(bot_id, team_color)
 
     def set_target_pos(self, x, y):
         """ Modifie la position de la cible """
@@ -228,25 +229,25 @@ class FieldView(QWidget):
         """ Cache la balle dans la fenêtre de terrain """
         self.graph_mobs['ball'].hide()
 
-    def hide_bot(self, bot_id):
+    def hide_bot(self, bot_id, team_color):
         """ Cache un robot dans la fenêtre de terrain """
-        if 0 <= bot_id < 6:
+        if team_color =='yellow':
             self.graph_mobs['robots_yellow'][bot_id].hide()
             self.graph_mobs['robots_numbers'][bot_id].hide()
-        elif 6 <= bot_id < 12:
-            self.graph_mobs['robots_blue'][bot_id - 6].hide()
+        elif team_color == 'blue':
+            self.graph_mobs['robots_blue'][bot_id].hide()
             self.graph_mobs['robots_numbers'][bot_id].hide()
 
     def show_ball(self):
         """ Affiche la balle dans la fenêtre de terrain """
         self.graph_mobs['ball'].show()
 
-    def show_bot(self, bot_id):
+    def show_bot(self, bot_id, team_color):
         """ Affiche un robot dans la fenêtre du terrain """
-        if 0 <= bot_id < 6:
+        if team_color == 'yellow':
             self.graph_mobs['robots_yellow'][bot_id].show()
-        elif 6 <= bot_id < 12:
-            self.graph_mobs['robots_blue'][bot_id - 6].show()
+        elif team_color == 'blue':
+            self.graph_mobs['robots_blue'][bot_id].show()
 
     def show_number_option(self):
         """ Affiche les numéros des robots """
@@ -260,9 +261,9 @@ class FieldView(QWidget):
         for mob in self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']:
             mob.deselect()
 
-    def select_robot(self, index, is_yellow):
-        for i, mob in enumerate(self.graph_mobs['robots_yellow'] if is_yellow else self.graph_mobs['robots_blue']):
-            if i == index:
+    def select_robot(self, bot_id, team_color):
+        for i, mob in enumerate(self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']):
+            if i == bot_id:
                 mob.select()
             else:
                 mob.deselect()
@@ -304,10 +305,18 @@ class FieldView(QWidget):
     def get_nearest_mob_from_position(self, x, y):
         """ Requête pour obtenir la distance, le numéro et le dessin du robot le plus près d'une position """
         nearest = []
-        for i, mob in enumerate(self.graph_mobs['robots_yellow'] + self.graph_mobs['robots_blue']):
+        for id, mob in enumerate(self.graph_mobs['robots_yellow']):
+            team_color = 'yellow'
             mob_x, mob_y, _ = mob.get_position_on_screen()
             distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
-            mob_ordered = distance, i, mob
+            mob_ordered = distance, id, team_color, mob
+            nearest.append(mob_ordered)
+
+        for id, mob in enumerate(self.graph_mobs['robots_blue']):
+            team_color = 'blue'
+            mob_x, mob_y, _ = mob.get_position_on_screen()
+            distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
+            mob_ordered = distance, id, team_color, mob
             nearest.append(mob_ordered)
         return min(nearest)
 
@@ -328,10 +337,10 @@ class FieldView(QWidget):
     def mousePressEvent(self, event):
         """ Gère l'événement du clic simple de la souris """
         if self.controller.get_tactic_controller_is_visible():
-            distance, number, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
+            distance, robot_id, team_color, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
             if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen:
-                self.select_robot(number % 6, True if number <= 5 else False)
-                self.controller.force_tactic_controller_select_robot(number)
+                self.select_robot(robot_id, team_color)
+                self.controller.force_tactic_controller_select_robot(robot_id, team_color)
 
     def mouseDoubleClickEvent(self, event):
         """ Gère l'événement double-clic de la souris """

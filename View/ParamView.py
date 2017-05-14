@@ -109,26 +109,26 @@ class ParamView(QDialog):
         layout_field = QFormLayout()
         group_field.setLayout(layout_field)
 
-        # => Taille du terrain (Longueur / Hauteur)
-        layout_field.addRow(QLabel('\nDimension du Terrain'))
+        # => Taille du terrain (Longueur / Largeur)
+        layout_field.addRow(QLabel('\nDimension du terrain'))
+        self.form_field_length = QLineEdit()
+        layout_field.addRow(QLabel('longueur :'), self.form_field_length)
         self.form_field_width = QLineEdit()
         layout_field.addRow(QLabel('largeur :'), self.form_field_width)
-        self.form_field_height = QLineEdit()
-        layout_field.addRow(QLabel('hauteur :'), self.form_field_height)
 
-        # => Taille du but (Longueur / Hauteur)
-        layout_field.addRow(QLabel('\nDimension des Buts'))
+        # => Taille du but (largeur / profondeur)
+        layout_field.addRow(QLabel('\nDimension des buts'))
+        self.form_goal_depth = QLineEdit()
+        layout_field.addRow(QLabel('profondeur :'), self.form_goal_depth)
         self.form_goal_width = QLineEdit()
         layout_field.addRow(QLabel('largeur :'), self.form_goal_width)
-        self.form_goal_height = QLineEdit()
-        layout_field.addRow(QLabel('hauteur :'), self.form_goal_height)
 
         # => Taille de la zone de réparation (Rayon / Ligne)
         layout_field.addRow(QLabel('\nZone des buts'))
-        self.form_goal_radius = QLineEdit()
-        layout_field.addRow(QLabel('rayon :'), self.form_goal_radius)
-        self.form_goal_line = QLineEdit()
-        layout_field.addRow(QLabel('hauteur :'), self.form_goal_line)
+        self.form_defense_radius = QLineEdit()
+        layout_field.addRow(QLabel('rayon :'), self.form_defense_radius)
+        self.form_defense_stretch = QLineEdit()
+        layout_field.addRow(QLabel('largeur :'), self.form_defense_stretch)
 
         # => Taille de la zone centrale (Rayon)
         layout_field.addRow(QLabel('\nRayon central'))
@@ -178,13 +178,6 @@ class ParamView(QDialog):
 
     def restore_default_values(self):
         # FIELD DIMENSION
-        self.form_field_width.setText(str(QtToolBox.field_ctrl.size_default[0]))
-        self.form_field_height.setText(str(QtToolBox.field_ctrl.size_default[1]))
-        self.form_goal_width.setText(str(QtToolBox.field_ctrl.goal_size_default[0]))
-        self.form_goal_height.setText(str(QtToolBox.field_ctrl.goal_size_default[1]))
-        self.form_goal_radius.setText(str(QtToolBox.field_ctrl.goal_radius_default))
-        self.form_goal_line.setText(str(QtToolBox.field_ctrl.goal_line_default))
-        self.form_center_radius.setText(str(QtToolBox.field_ctrl.radius_center_default))
         self.form_ratio_mobs.setText(str(QtToolBox.field_ctrl.ratio_field_mobs_default))
 
         # NETWORK
@@ -202,16 +195,16 @@ class ParamView(QDialog):
         self._apply_param()
 
     def restore_values(self):
-        self.form_field_width.setText(str(QtToolBox.field_ctrl.size[0]))
-        self.form_field_height.setText(str(QtToolBox.field_ctrl.size[1]))
+        self.form_field_length.setText(str(QtToolBox.field_ctrl.field_length))
+        self.form_field_width.setText(str(QtToolBox.field_ctrl.field_width))
 
-        self.form_goal_width.setText(str(QtToolBox.field_ctrl.goal_size[0]))
-        self.form_goal_height.setText(str(QtToolBox.field_ctrl.goal_size[1]))
+        self.form_goal_depth.setText(str(QtToolBox.field_ctrl.goal_depth))
+        self.form_goal_width.setText(str(QtToolBox.field_ctrl.goal_width))
 
-        self.form_goal_radius.setText(str(QtToolBox.field_ctrl.goal_radius))
-        self.form_goal_line.setText(str(QtToolBox.field_ctrl.goal_line))
+        self.form_defense_radius.setText(str(QtToolBox.field_ctrl.defense_radius))
+        self.form_defense_stretch.setText(str(QtToolBox.field_ctrl.defense_stretch))
 
-        self.form_center_radius.setText(str(QtToolBox.field_ctrl.radius_center))
+        self.form_center_radius.setText(str(QtToolBox.field_ctrl.center_circle_radius))
 
         self.form_ratio_mobs.setText(str(QtToolBox.field_ctrl.ratio_field_mobs))
 
@@ -241,52 +234,52 @@ class ParamView(QDialog):
         style_good = "QLineEdit {background: rgb(255, 255, 255)}"
 
         try:
+            self.form_field_length.setStyleSheet(style_good)
+            QtToolBox.field_ctrl.field_length = int(self.form_field_length.text())
+        except Exception as e:
+            self.form_field_length.setStyleSheet(style_bad)
+            is_wrong = True
+
+        try:
             self.form_field_width.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.size[0] = int(self.form_field_width.text())
+            QtToolBox.field_ctrl.field_width = int(self.form_field_width.text())
         except Exception as e:
             self.form_field_width.setStyleSheet(style_bad)
             is_wrong = True
 
         try:
-            self.form_field_height.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.size[1] = int(self.form_field_height.text())
+            self.form_goal_depth.setStyleSheet(style_good)
+            QtToolBox.field_ctrl.goal_depth = int(self.form_goal_depth.text())
         except Exception as e:
-            self.form_field_height.setStyleSheet(style_bad)
+            self.form_goal_depth.setStyleSheet(style_bad)
             is_wrong = True
 
         try:
             self.form_goal_width.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_size[0] = int(self.form_goal_width.text())
+            QtToolBox.field_ctrl.goal_width = int(self.form_goal_width.text())
         except Exception as e:
             self.form_goal_width.setStyleSheet(style_bad)
             is_wrong = True
 
         try:
-            self.form_goal_height.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_size[1] = int(self.form_goal_height.text())
-        except Exception as e:
-            self.form_goal_height.setStyleSheet(style_bad)
-            is_wrong = True
-
-        try:
             self.form_center_radius.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.radius_center = int(self.form_center_radius.text())
+            QtToolBox.field_ctrl.center_circle_radius = int(self.form_center_radius.text())
         except Exception as e:
             self.form_center_radius.setStyleSheet(style_bad)
             is_wrong = True
 
         try:
-            self.form_goal_radius.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_radius = int(self.form_goal_radius.text())
+            self.form_defense_radius.setStyleSheet(style_good)
+            QtToolBox.field_ctrl.defense_radius = int(self.form_defense_radius.text())
         except Exception as e:
-            self.form_goal_radius.setStyleSheet(style_bad)
+            self.form_defense_radius.setStyleSheet(style_bad)
             is_wrong = True
 
         try:
-            self.form_goal_line.setStyleSheet(style_good)
-            QtToolBox.field_ctrl.goal_line = int(self.form_goal_line.text())
+            self.form_defense_stretch.setStyleSheet(style_good)
+            QtToolBox.field_ctrl.defense_stretch = int(self.form_defense_stretch.text())
         except Exception as e:
-            self.form_goal_line.setStyleSheet(style_bad)
+            self.form_defense_stretch.setStyleSheet(style_bad)
             is_wrong = True
 
         try:
