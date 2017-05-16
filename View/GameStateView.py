@@ -68,100 +68,33 @@ class GameStateView(QWidget):
         self._layout.setHorizontalSpacing(0)
 
         self._active_team = 'blue'  # TODO (pturgeon):
-
-        # Main header
-        label_blue_team = QLabel(self._active_team+' team')
-        label_blue_team.setMargin(5)
-        label_blue_team.setAlignment(Qt.AlignCenter)
-        label_blue_team.setStyleSheet(self._get_style_sheet(self._active_team))
-        self._layout.addWidget(label_blue_team, 1, 1)
-
-        self._label_strat_blue = QLabel('None')
-        self._label_strat_blue.setMargin(5)
-        self._label_strat_blue.setAlignment(Qt.AlignCenter)
-        self._label_strat_blue.setStyleSheet(self._get_style_sheet(self._active_team))
-        self._layout.addWidget(self._label_strat_blue, 1, 2, 1, 3)
-
-        #label_yellow_team = QLabel('Équipe Jaune')
-        #label_yellow_team.setMargin(5)
-        #label_yellow_team.setAlignment(Qt.AlignCenter)
-        #label_yellow_team.setStyleSheet(self._get_style_sheet(is_yellow=True))
-        #self._layout.addWidget(label_yellow_team, 1, 5)
-
-        #self._label_strat_yellow = QLabel('None')
-        #self._label_strat_yellow.setMargin(5)
-        #self._label_strat_yellow.setAlignment(Qt.AlignCenter)
-        #self._label_strat_yellow.setStyleSheet(self._get_style_sheet(is_yellow=True))
-        #self._layout.addWidget(self._label_strat_yellow, 1, 6, 1, 3)
-
-        # Sub header
-        for i, header in enumerate(['Robot', 'Tactique', 'Action', 'Target'], start=1):
-            label = QLabel(header)
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet(self._get_style_sheet(bold=True))
-            self._layout.addWidget(label, 2, i)
-
         self._list_active_robots = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # TODO (pturgeon): Créer variable globale
 
-        # id robot
-        for i in range(len( self._list_active_robots)):
-            label = QLabel(str( self._list_active_robots[i]))
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet(self._get_style_sheet(bold=True))
-            self._layout.addWidget(label, 3 + i, 1)
-
-        # None value everywhere else
-        for i in range(len( self._list_active_robots)):
-            for j in [1, 2, 3]:
-                label = QLabel('None')
-                label.setAlignment(Qt.AlignCenter)
-                label.setStyleSheet(self._get_style_sheet(color='#222222'))
-                self._layout.addWidget(label, 3 + i, 1 + j)
-
-
-
-
-
-        '''test'''
-        '''http://www.programcreek.com/python/example/82631/PyQt5.QtWidgets.QScrollArea'''
-        '''http://stackoverflow.com/questions/9624281/how-to-associate-a-horizontal-scrollbar-to-multiple-groupbox'''
-        self.setWindowModality(Qt.ApplicationModal)
-        self.setMaximumSize(400, 230)
-        self.setMinimumSize(400, 230)
-        self.resize(400, 230)
-
         self.scrollArea = QScrollArea(self)
-        self.scrollArea.setGeometry(QRect(5, 5, 390, 190))
+        self.scrollArea.setGeometry(QRect(0, 0, 390, 190))
         self.scrollArea.setWidgetResizable(True)
-
-        self.plainTextEdit = QPlainTextEdit()
-        self.plainTextEdit.setGeometry(QRect(0, 0, 390, 190))
-        self.plainTextEdit.setPlainText('toto')
 
         self.scrolllayout = QVBoxLayout()
         self.scrollwidget = QWidget()
+        self.setMaximumWidth(250)
         self.scrollwidget.setLayout(self.scrolllayout)
-        self.groupboxes = []  # Keep a reference to groupboxes for later use
-        for i in range(8):  # 8 groupboxes with textedit in them
-            groupbox = QGroupBox('%d' % i)
-            grouplayout = QHBoxLayout()
-            grouptext = QTextEdit()
+        self.groupboxes = []
+        for id in self._list_active_robots:
+            groupbox = QGroupBox('%d' % id)
+            grouplayout = QVBoxLayout()
+            grouptext = QLabel()
+            grouplayout.addWidget(grouptext)
+            grouptext = QLabel()
+            grouplayout.addWidget(grouptext)
+            grouptext = QLabel()
             grouplayout.addWidget(grouptext)
             groupbox.setLayout(grouplayout)
+            #groupbox.setStyleSheet('QGroupBox {background-color:rgb(255,25,255);border:10px solid rgb(25, 255, 255);}')
             self.scrolllayout.addWidget(groupbox)
             self.groupboxes.append(groupbox)
 
         self.scrollArea.setWidget(self.scrollwidget)
-
-        self.acceptButton = QPushButton(self)
-        self.acceptButton.setGeometry(QRect(280, 200, 100, 25))
-        self.acceptButton.setText("Ok")
-
-        self.rejectButton = QPushButton(self)
-        self.rejectButton.setGeometry(QRect(160, 200, 100, 25))
-        self.rejectButton.setText("Cancel")
-        '''test fini'''
-
+        self._layout.addWidget(self.scrollArea)
 
     def init_loop(self):
         self._logger.debug('INIT: Robot State Loop')
@@ -191,64 +124,12 @@ class GameStateView(QWidget):
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')
             if robot_state is not None:
-                #_active_team = 'blue' # TODO (pturgeon): pouvoir afficher l'équipe jaune dans le tableau
-                self._list_active_robots = []
-                for id in robot_state[self._active_team].keys():
-                    if robot_state[self._active_team][id]['action'] is not None:
-                        self._list_active_robots.append(id)
-                self._list_active_robots = sorted(self._list_active_robots)
-                print(self._list_active_robots)
-
-                # pour chaque ligne
-                for i in range(len(self._list_active_robots)):
-                    line = 3 + i
-                    id = self._list_active_robots[i]
-                    for state in robot_state[self._active_team][id].keys():
-                        if state == 'action':
-                            col = 3
-                        elif state == 'target':
-                            col = 4
-                        else:
-                            col = 2
-                        object = self._layout.itemAtPosition(line, col)
-                        object.widget().setText(str(robot_state[self._active_team][id][state]))
-                    object = self._layout.itemAtPosition(line, 1)
-                    object.widget().setText(str(self._list_active_robots[i]))
-
-                for line in range(i+4, 15):
-                    for col in range(1, 5):
-                        object = self._layout.itemAtPosition(line, col)
-                        if object is not None:
-                            object.widget().close()
-                        else:
-                            break
-
-
-
-                '''for team in robot_state.keys():
-                    if team == 'blue':
-                        t_col = 2
-                    else:
-                        t_col = 6
-                    for id in robot_state[team].keys():
-                        line = 3 + id
-                        for state in robot_state[team][id].keys():
-                            if state == 'action':
-                                col = t_col + 1
-                            elif state == 'target':
-                                col = t_col + 2
-                            else:
-                                col = t_col
-
-                            object = self._layout.itemAtPosition(line, col)
-                            if object is not None:
-                                if not object.widget().text() == str(robot_state[team][id][state]):
-                                    self._logger.debug(
-                                        'RUN: {}.{}.{} = {} at {}, {}'.format(team, id, state, robot_state[team][id][state],
-                                                                              line, col))
-                                    object.widget().setText(str(robot_state[team][id][state]))
-                            else:
-                                self._logger.warn('RUN: NoneType detected at {}, {}'.format(line, col))'''
+                for n, id in enumerate(self._list_active_robots): # Pour chaque robot
+                    if id in robot_state[self._active_team]:
+                        if 'tactic' in robot_state[self._active_team][id]:
+                            self.groupboxes[n].layout().itemAt(0).widget().setText(str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].layout().itemAt(1).widget().setText(str(robot_state[self._active_team][id]['action']))
+                            self.groupboxes[n].layout().itemAt(2).widget().setText(str(robot_state[self._active_team][id]['target']))
 
     def show_hide(self):
         self._logger.debug('TRIGGER: Show/Hide')

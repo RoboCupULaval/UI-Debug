@@ -80,16 +80,17 @@ class MainController(QWidget):
         # => Field | Filter | StratController (Horizontal)
         sub_layout = QHBoxLayout()
         sub_layout.setContentsMargins(0, 0, 0, 0)
+        sub_layout.addWidget(self.view_robot_state)
         sub_layout.addWidget(self.view_screen)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
+
 
         # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
         top_layout.addWidget(self.view_media)
-        top_layout.addWidget(self.view_robot_state)
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)

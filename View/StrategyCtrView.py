@@ -21,7 +21,7 @@ class StrategyCtrView(QWidget):
         self.update_timer.start(500)
 
     def init_ui(self):
-        self.setFixedWidth(300)
+        self.setFixedWidth(250)
         # Création des pages d'onglet
         self.page_controller = QTabWidget(self)
         self.page_strategy = QWidget()
