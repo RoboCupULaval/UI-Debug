@@ -2,8 +2,11 @@
 
 import logging
 from threading import Thread
+
+from PyQt5.QtCore import QThread
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QScrollArea, QPlainTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QTextEdit
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt, QRect, pyqtSlot
 from PyQt5 import QtGui
 
 
@@ -11,6 +14,9 @@ __author__ = 'RoboCupULaval'
 
 
 class GameStateView(QWidget):
+
+    update_team_color = pyqtSignal(str)
+
     def __init__(self, controller=None, debug=False):
         super().__init__(controller)
         self._logger = logging.getLogger(GameStateView.__name__)
@@ -25,15 +31,16 @@ class GameStateView(QWidget):
         self._layout = QGridLayout()
 
         # CORE SYSTEM
-        self._robot_state_loop = Thread()
-        self._game_state_loop = Thread()
+        self._robot_state_loop = QThread()
+        self._game_state_loop = QThread()
 
         # INITIALIZATION
         self.init_logger()
         self.init_ui()
         self.init_loop()
-        #self.hide()
+        self.hide()
         self._logger.debug('CONSTRUCT: ... End')
+
 
     def _get_style_sheet(self, team=None, bold=False, color='black'):
         param_sheet = ' ; '.join(['color:{}'.format(color),
@@ -121,6 +128,10 @@ class GameStateView(QWidget):
     def update_robot_state(self):
         self._logger.debug('RUN: Thread RobotState')
         while True:
+            if self._ctrl.get_team_color() != self._active_team:
+                self._active_team = self._ctrl.get_team_color()
+                self.update_team_color.emit(self._active_team)
+
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')
             if robot_state is not None:

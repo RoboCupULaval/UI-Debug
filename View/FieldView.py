@@ -39,7 +39,6 @@ class FieldView(QWidget):
 
         # Option
         self.option_vanishing = False
-        self.option_show_number = False
         self.option_show_vector = False
         self.option_target_mode = False
 

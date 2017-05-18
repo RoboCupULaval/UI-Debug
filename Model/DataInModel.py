@@ -6,6 +6,7 @@ from time import time, sleep
 
 from threading import Thread, Event
 
+from Model.DataObject.AccessorData import TeamColorAcc
 from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
 from Model.DataObject.AccessorData.FieldGeometryAcc import FieldGeometryAcc
 from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
@@ -32,6 +33,8 @@ class DataInModel(Thread):
         self._controller = controller
         self._recorder = None
         self._recorder_is_enable = False
+
+        self._team_color = 'blue' #TODO Faire fonctionner l'update auto de l'IA
 
         # Stockage de données
         self._data_logging = list()
@@ -90,6 +93,8 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
         self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
         self._distrib_sepcific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
+        self._distrib_sepcific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
+
         self._logger.debug('INIT: Distributor')
 
     def _init_logger(self):
@@ -180,6 +185,11 @@ class DataInModel(Thread):
         self._robot_state.append(data.data.copy())
         self._event_robot_state.set()
 
+    def _distrib_TeamColor(self, data):
+        self._logger.debug('DISTRIB: TeamColor')
+        print('hello')
+        self._team_color = data['team_color']
+
     # === PRIVATE METHODS ===
 
     def _extract_and_distribute_data(self, package):
@@ -216,6 +226,9 @@ class DataInModel(Thread):
 
     def get_robot_state_copy(self):
         return self._robot_state.copy()
+
+    def get_team_color(self):
+        return self._team_color
 
     def waiting_for_pause_event(self):
         self._logger.debug('WAITING FOR: Pause event')

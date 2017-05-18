@@ -87,9 +87,9 @@ class FrameModel:
         self._current_frame = frame
         self._update_view_screen_ball()
         list_blue_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}  # TODO : Créer une variable globale
-        self._update_view_screen_robot(list_blue_bot_id, 'yellow')
+        self._update_view_screen_robot(list_blue_bot_id, 'blue')
         list_yellow_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
-        self._update_view_screen_robot(list_yellow_bot_id, 'blue')
+        self._update_view_screen_robot(list_yellow_bot_id, 'yellow')
 
     def _update_view_screen_ball(self):
         """ Mise à jour des données de la vue de la balle """

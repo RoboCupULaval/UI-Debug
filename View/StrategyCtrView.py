@@ -14,28 +14,44 @@ class StrategyCtrView(QWidget):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.init_ui()
-        #self.hide()
+        self.hide()
 
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_combobox)
         self.update_timer.start(500)
 
     def init_ui(self):
+        self._active_team = 'green'
+
         self.setFixedWidth(250)
         # Création des pages d'onglet
         self.page_controller = QTabWidget(self)
+        self.page_team = QWidget()
         self.page_strategy = QWidget()
         self.page_tactic = QWidget()
 
         # Création du contenu des pages
+        # + Page Team
+        self.page_team_vbox = QVBoxLayout()
+
+        self.selectTeam = QLabel()
+        self.selectTeam.setText(self.parent.get_team_color())
+
+        self.page_team_but_play = QPushButton("Play")
+        but_play_font = QFont()
+        but_play_font.setBold(True)
+        self.page_team_but_play.setFont(but_play_font)
+        self.page_team_but_play.setStyleSheet('QPushButton {color:green;}')
+
+        self.page_team_vbox.addWidget(self.selectTeam)
+        self.page_team_vbox.addWidget(self.page_team_but_play)
+
+        self.page_team.setLayout(self.page_team_vbox)
+
         # + Page Strategy
         self.page_strat_vbox = QVBoxLayout()
         self.selectStrat = QComboBox()
         self.selectStrat.addItem('Aucune Stratégie disponible')
-
-        self.selectStratTeam = QComboBox()
-        self.selectStratTeam.addItem('Yellow')
-        self.selectStratTeam.addItem('Blue')
 
         self.page_strat_but_apply = QPushButton('Appliquer')
         self.page_strat_but_apply.clicked.connect(self.send_strat)
@@ -49,7 +65,6 @@ class StrategyCtrView(QWidget):
         qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
         strat_combox = QVBoxLayout()
         strat_combox.addWidget(self.selectStrat)
-        strat_combox.addWidget(self.selectStratTeam)
         qgroup.setLayout(strat_combox)
 
         but_group = QHBoxLayout()
@@ -73,13 +88,6 @@ class StrategyCtrView(QWidget):
         self.selectRobot.currentIndexChanged.connect(self.handle_selection_robot_event_id)
         group_vbox.addWidget(self.selectRobot)
 
-        group_vbox.addWidget(QLabel('Équipe :'))
-        self.selectTeam = QComboBox()
-        self.selectTeam.addItem('yellow')
-        self.selectTeam.addItem('blue')
-        self.selectTeam.currentIndexChanged.connect(self.handle_selection_robot_event_team)
-        group_vbox.addWidget(self.selectTeam)
-
         group_vbox.addWidget(QLabel('Tactique à appliquer :'))
         self.selectTactic = QComboBox()
         self.selectTactic.addItem('Aucune Tactique disponible')
@@ -98,12 +106,19 @@ class StrategyCtrView(QWidget):
         tact_stop_but.clicked.connect(self.send_tactic_stop)
         but_group_tact.addWidget(tact_stop_but)
 
+        tact_stop_all_but = QPushButton('STOP ALL')
+        tact_stop_all_but.setFont(but_cancel_font)
+        tact_stop_all_but.setStyleSheet('QPushButton {color:red;}')
+        tact_stop_all_but.clicked.connect(self.send_tactic_stop_all)
+
         self.page_tact_vbox.addWidget(group_bot_select)
         self.page_tact_vbox.addLayout(but_group_tact)
+        self.page_tact_vbox.addWidget(tact_stop_all_but)
 
         self.page_tactic.setLayout(self.page_tact_vbox)
 
         # + Onglets
+        self.page_controller.addTab(self.page_team, 'Équipe')
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
         self.page_controller.currentChanged.connect(self.tab_selected)
@@ -111,21 +126,26 @@ class StrategyCtrView(QWidget):
     @pyqtSlot(int)
     def handle_selection_robot_event_id(self, index):
         self.parent.deselect_all_robots()
-        self.parent.select_robot(index, self.selectTeam.currentText())
+        self.parent.select_robot(index, self.parent.get_team_color())
 
     @pyqtSlot(int)
     def handle_selection_robot_event_team(self, index):
         self.parent.deselect_all_robots()
-        self.parent.select_robot(self.selectRobot.currentIndex(), True if index == 0 else False)
+        self.parent.select_robot(self.selectRobot.currentIndex(), self.parent.get_team_color())
 
     @pyqtSlot(int)
     def tab_selected(self, index):
-        if index == 0:
+        if index == 0 or index == 1:
             self.parent.deselect_all_robots()
-        elif index == 1:
+        elif index == 2:
             id_bot = self.selectRobot.currentIndex()
-            team_color = self.selectTeam.currentText()
-            self.parent.select_robot(id_bot, team_color)
+            self.parent.select_robot(id_bot, self.parent.get_team_color())
+
+    @pyqtSlot(str)
+    def handle_team_color(self, team_color):
+        self._active_team = team_color.lower()
+        print('tata')
+        self.selectTeam.setText(self.parent.get_team_color())  #TODO : Metttre la premiere lettre majuscule
 
     def hideEvent(self, event):
         self.parent.deselect_all_robots()
@@ -181,9 +201,8 @@ class StrategyCtrView(QWidget):
 
     def send_strat(self):
         strat = str(self.selectStrat.currentText())
-        team = str(self.selectStratTeam.currentText()).lower()
         if not strat == 'Aucune Stratégie disponible':
-            self.parent.model_dataout.send_strategy(strat, team)
+            self.parent.model_dataout.send_strategy(strat, self.parent.get_team_color())
 
     def send_tactic(self):
         id_bot = int(self.selectRobot.currentText())
@@ -191,15 +210,18 @@ class StrategyCtrView(QWidget):
         args = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
         if not tactic == 'Aucune Tactique disponible':
-            self.parent.model_dataout.send_tactic(id_bot, tactic=tactic, target=target, args=args)
+            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), tactic=tactic, target=target, args=args)
 
     def send_tactic_stop(self):
-        for id_bot in range(12):   # TODO (pturgeon): Changer pour constante globable (ou liste?)
-            self.parent.model_dataout.send_tactic(id_bot, 'tStop', args=None)
+        id_bot = int(self.selectRobot.currentText())
+        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'tStop', args=None)
+
+    def send_tactic_stop_all(self):
+        for id_bot in range(12):  # TODO (pturgeon): Changer pour constante globable (ou liste?)
+            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'tStop', args=None)
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strategy('pStop', 'yellow')
-        self.parent.model_dataout.send_strategy('pStop', 'blue')
+        self.parent.model_dataout.send_strategy('pStop', self.parent.get_team_color())
 
     def toggle_show_hide(self):
         if self.isVisible():

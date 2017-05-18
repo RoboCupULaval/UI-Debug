@@ -31,8 +31,8 @@ class RobotStateAcc(BaseDataAccessor):
             for id in self.data[team].keys():
                 assert isinstance(id, int), \
                     "data[{}][{}]: {} n'a pas le format attendu (int)".format(team, id, type(id))
-                assert 0 <= id <= 5, \
-                    "data[{}][{}]: {} doit être compris entre 0 et 5".format(team, id, id)
+                assert 0 <= id <= 11, \
+                    "data[{}][{}]: {} doit être compris entre 0 et 11".format(team, id, id)
                 for state in self.data[team][id]:
                     assert isinstance(state, str), \
                         "data[{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state)
