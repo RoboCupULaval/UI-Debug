@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
 from PyQt5.QtWidgets import QLineEdit
+from PyQt5.QtWidgets import QSpacerItem
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
                             QPushButton, QGroupBox, QHBoxLayout, QLabel
 from PyQt5.QtGui import QFont
@@ -23,12 +24,15 @@ class StrategyCtrView(QWidget):
     def init_ui(self):
         self._active_team = 'green'
 
-        self.setFixedWidth(250)
         # Création des pages d'onglet
+        self.main_layout = QVBoxLayout(self)
         self.page_controller = QTabWidget(self)
         self.page_team = QWidget()
         self.page_strategy = QWidget()
         self.page_tactic = QWidget()
+        self.main_layout.addWidget(self.page_controller)
+        self._layout = self.main_layout
+        self.setMaximumWidth(250)
 
         # Création du contenu des pages
         # + Page Team

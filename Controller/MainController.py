@@ -325,12 +325,7 @@ class MainController(QWidget):
 
     def force_tactic_controller_select_robot(self, bot_id, team_color):
         """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
-        if team_color == 'blue':
-            self.view_controller.selectTeam.setCurrentIndex(0)
-            self.view_controller.selectRobot.setCurrentIndex(bot_id)
-        else:
-            self.view_controller.selectTeam.setCurrentIndex(1)
-            self.view_controller.selectRobot.setCurrentIndex(bot_id)
+        self.view_controller.selectRobot.setCurrentIndex(bot_id)
 
     def get_cursor_position_from_screen(self):
         """ Récupère la position du curseur depuis le terrain """

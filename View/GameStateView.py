@@ -5,6 +5,8 @@ from threading import Thread
 
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QTreeWidget
+from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QScrollArea, QPlainTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QTextEdit
 from PyQt5.QtCore import Qt, QRect, pyqtSlot
 from PyQt5 import QtGui
@@ -81,26 +83,28 @@ class GameStateView(QWidget):
         self.scrollArea.setGeometry(QRect(0, 0, 390, 190))
         self.scrollArea.setWidgetResizable(True)
 
-        self.scrolllayout = QVBoxLayout()
-        self.scrollwidget = QWidget()
+        self.treeWidget = QTreeWidget()
+        self.treeWidget.setHeaderLabels(["Robots", ""])
+        self.treeWidget.setColumnCount(2)
         self.setMaximumWidth(250)
-        self.scrollwidget.setLayout(self.scrolllayout)
         self.groupboxes = []
         for id in self._list_active_robots:
-            groupbox = QGroupBox('%d' % id)
-            grouplayout = QVBoxLayout()
-            grouptext = QLabel()
-            grouplayout.addWidget(grouptext)
-            grouptext = QLabel()
-            grouplayout.addWidget(grouptext)
-            grouptext = QLabel()
-            grouplayout.addWidget(grouptext)
-            groupbox.setLayout(grouplayout)
-            #groupbox.setStyleSheet('QGroupBox {background-color:rgb(255,25,255);border:10px solid rgb(25, 255, 255);}')
-            self.scrolllayout.addWidget(groupbox)
-            self.groupboxes.append(groupbox)
+            subItem = QTreeWidgetItem(self.treeWidget)
+            subItem.setText(0, "Robot " + str(id))
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0,"Tactic")
+            for n in range(10):
+                subSubSubItem = QTreeWidgetItem(subSubItem)
+                subSubSubItem.setText(1, "Dummy tactic")
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0,"Action")
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0,"Target")
+            if id < 6:
+                subItem.setExpanded(True)
+            self.groupboxes.append(subItem)
 
-        self.scrollArea.setWidget(self.scrollwidget)
+        self.scrollArea.setWidget(self.treeWidget)
         self._layout.addWidget(self.scrollArea)
 
     def init_loop(self):
@@ -138,9 +142,9 @@ class GameStateView(QWidget):
                 for n, id in enumerate(self._list_active_robots): # Pour chaque robot
                     if id in robot_state[self._active_team]:
                         if 'tactic' in robot_state[self._active_team][id]:
-                            self.groupboxes[n].layout().itemAt(0).widget().setText(str(robot_state[self._active_team][id]['tactic']))
-                            self.groupboxes[n].layout().itemAt(1).widget().setText(str(robot_state[self._active_team][id]['action']))
-                            self.groupboxes[n].layout().itemAt(2).widget().setText(str(robot_state[self._active_team][id]['target']))
+                            self.groupboxes[n].child(0).setText(1, str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].child(1).setText(1, str(robot_state[self._active_team][id]['action']))
+                            self.groupboxes[n].child(2).setText(1, str(robot_state[self._active_team][id]['target']))
 
     def show_hide(self):
         self._logger.debug('TRIGGER: Show/Hide')
