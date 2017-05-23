@@ -5,6 +5,9 @@ from threading import Thread
 
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QBrush
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QProgressBar
 from PyQt5.QtWidgets import QTreeWidget
 from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QScrollArea, QPlainTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QTextEdit
@@ -87,10 +90,40 @@ class GameStateView(QWidget):
         self.treeWidget.setHeaderLabels(["Robots", ""])
         self.treeWidget.setColumnCount(2)
         self.setMaximumWidth(250)
+
+        #self.batt = QtGui.QProgressBar(self)
+        #self.batt.setValue(1)
+
         self.groupboxes = []
         for id in self._list_active_robots:
             subItem = QTreeWidgetItem(self.treeWidget)
             subItem.setText(0, "Robot " + str(id))
+
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0, "State")
+            state = QPushButton()
+            state.setStyleSheet('QPushButton {background:red;border-radius: 3px;}')
+            state.setText("OFF") # TODO (pturgeon):
+            state.setMaximumHeight(15)
+            state.setMaximumWidth(75)
+            self.treeWidget.setItemWidget(subSubItem, 1, state)
+
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0, "Visible")
+            subSubItem.setText(1, "True")  # TODO (pturgeon):
+
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0, "Batt Level")
+            pbar = QProgressBar(self)
+            pbar.setValue(10)# TODO (pturgeon):
+            pbar.setRange(0, 100)
+            pbar.setStyleSheet('QProgressBar:horizontal { border: 1px solid gray; border-radius: 3px; background: white; '
+                               'padding: 1px; text-align: right; margin-right: 37px; } QProgressBar::chunk:horizontal '
+                               '{ background: red ;margin-right: 2px; /* space */ width: 10px; }')
+            pbar.setMaximumHeight(13)
+            pbar.setMaximumWidth(75)
+            self.treeWidget.setItemWidget(subSubItem, 1, pbar)
+
             subSubItem = QTreeWidgetItem(subItem)
             subSubItem.setText(0,"Tactic")
             for n in range(10):
@@ -142,9 +175,9 @@ class GameStateView(QWidget):
                 for n, id in enumerate(self._list_active_robots): # Pour chaque robot
                     if id in robot_state[self._active_team]:
                         if 'tactic' in robot_state[self._active_team][id]:
-                            self.groupboxes[n].child(0).setText(1, str(robot_state[self._active_team][id]['tactic']))
-                            self.groupboxes[n].child(1).setText(1, str(robot_state[self._active_team][id]['action']))
-                            self.groupboxes[n].child(2).setText(1, str(robot_state[self._active_team][id]['target']))
+                            self.groupboxes[n].child(3).setText(1, str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].child(4).setText(1, str(robot_state[self._active_team][id]['action']))
+                            self.groupboxes[n].child(5).setText(1, str(robot_state[self._active_team][id]['target']))
 
     def show_hide(self):
         self._logger.debug('TRIGGER: Show/Hide')
