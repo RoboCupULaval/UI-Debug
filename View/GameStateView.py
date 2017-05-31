@@ -102,7 +102,7 @@ class GameStateView(QWidget):
             subSubItem = QTreeWidgetItem(subItem)
             subSubItem.setText(0, "State")
             state = QPushButton()
-            state.setStyleSheet('QPushButton {background:red;border-radius: 3px;}')
+            state.setStyleSheet('QPushButton {color:red;border-radius: 3px;}')
             state.setText("OFF") # TODO (pturgeon):
             state.setMaximumHeight(15)
             state.setMaximumWidth(75)
