@@ -69,7 +69,7 @@ class StrategyCtrView(QWidget):
         self.currentStrategy.setText("Unknown")
         self.page_autonomous_form.addRow("Strategy :", self.currentStrategy)
 
-        self.page_autonomous_but_play = QPushButton("Play")
+        self.page_autonomous_but_play = QPushButton("Start")
         self.page_autonomous_but_play.clicked.connect(self.send_start_auto)
         but_play_font = QFont()
         but_play_font.setBold(True)
