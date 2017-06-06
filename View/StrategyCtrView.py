@@ -51,35 +51,33 @@ class StrategyCtrView(QWidget):
 
         self.teamColorLabel = QLabel()
         self.teamColorLabel.setText(self.parent.get_team_color().capitalize())
-        self.page_autonomous_form.addRow("Team color : ", self.teamColorLabel)
-
-        self.autoStatus = QLabel()
-        self.autoStatus.setText("Unknown")
-        self.page_autonomous_form.addRow("Auto status : ", self.autoStatus)
+        self.page_autonomous_form.addRow("Team :", self.teamColorLabel)
 
         self.currentRefCommand = QLabel()
         self.currentRefCommand.setText("Unknown")
-        self.page_autonomous_form.addRow("Referee command : ", self.currentRefCommand)
+        self.page_autonomous_form.addRow("Ref. cmd :", self.currentRefCommand)
 
         self.currentGameStage = QLabel()
         self.currentGameStage.setText("Unknown")
-        self.page_autonomous_form.addRow("Game stage : ", self.currentGameStage)
+        self.page_autonomous_form.addRow("Stage :", self.currentGameStage)
 
         self.autoState = QLabel()
         self.autoState.setText("Unknown")
-        self.page_autonomous_form.addRow("Current state : ", self.autoState)
+        self.page_autonomous_form.addRow("State :", self.autoState)
 
         self.currentStrategy = QLabel()
         self.currentStrategy.setText("Unknown")
-        self.page_autonomous_form.addRow("Current strategy : ", self.currentStrategy)
+        self.page_autonomous_form.addRow("Strategy :", self.currentStrategy)
 
         self.page_autonomous_but_play = QPushButton("Play")
+        self.page_autonomous_but_play.clicked.connect(self.send_start_auto)
         but_play_font = QFont()
         but_play_font.setBold(True)
         self.page_autonomous_but_play.setFont(but_play_font)
         self.page_autonomous_but_play.setStyleSheet('QPushButton {color:green;}')
 
         self.page_autonomous_but_stop = QPushButton("Stop")
+        self.page_autonomous_but_stop.clicked.connect(self.send_stop_auto)
         self.page_autonomous_but_stop.setFont(but_play_font)
         self.page_autonomous_but_stop.setStyleSheet('QPushButton {color:red;}')
         self.page_autonomous_but_stop.setVisible(False)
@@ -271,6 +269,12 @@ class StrategyCtrView(QWidget):
             self.show()
         self.parent.resize_window()
 
+    def send_start_auto(self):
+        self.parent.model_dataout.send_auto_play(True)
+
+    def send_stop_auto(self):
+        self.parent.model_dataout.send_auto_play(False)
+
     def update_auto_state(self):
         while True:
             if self.parent.get_team_color() != self._active_team:
@@ -285,7 +289,3 @@ class StrategyCtrView(QWidget):
                 self.autoState.setText(auto_state['state'])
                 self.page_autonomous_but_stop.setVisible(auto_state['status'])
                 self.page_autonomous_but_play.setVisible(not auto_state['status'])
-                if auto_state['status']:
-                    self.autoStatus.setText('Playing')
-                else:
-                    self.autoStatus.setText('Stopped')
