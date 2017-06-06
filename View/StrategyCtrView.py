@@ -1,4 +1,6 @@
 # Under MIT License, see LICENSE.txt
+from PyQt5.QtCore import QThread
+from PyQt5.QtWidgets import QFormLayout
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QSpacerItem
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
@@ -17,9 +19,17 @@ class StrategyCtrView(QWidget):
         self.init_ui()
         self.hide()
 
+        self._auto_state_loop = QThread()
+        self.init_loop()
+
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_combobox)
         self.update_timer.start(500)
+
+    def init_loop(self):
+        self._auto_state_loop.run = self.update_auto_state
+        self._auto_state_loop.daemon = True
+        self._auto_state_loop.start()
 
     def init_ui(self):
         self._active_team = 'green'
@@ -27,7 +37,7 @@ class StrategyCtrView(QWidget):
         # Création des pages d'onglet
         self.main_layout = QVBoxLayout(self)
         self.page_controller = QTabWidget(self)
-        self.page_team = QWidget()
+        self.page_autonomous = QWidget()
         self.page_strategy = QWidget()
         self.page_tactic = QWidget()
         self.main_layout.addWidget(self.page_controller)
@@ -36,21 +46,49 @@ class StrategyCtrView(QWidget):
 
         # Création du contenu des pages
         # + Page Team
-        self.page_team_vbox = QVBoxLayout()
+        self.page_autonomous_vbox = QVBoxLayout()
+        self.page_autonomous_form = QFormLayout()
 
-        self.selectTeam = QLabel()
-        self.selectTeam.setText(self.parent.get_team_color())
+        self.teamColorLabel = QLabel()
+        self.teamColorLabel.setText(self.parent.get_team_color().capitalize())
+        self.page_autonomous_form.addRow("Team color : ", self.teamColorLabel)
 
-        self.page_team_but_play = QPushButton("Play")
+        self.autoStatus = QLabel()
+        self.autoStatus.setText("Unknown")
+        self.page_autonomous_form.addRow("Auto status : ", self.autoStatus)
+
+        self.currentRefCommand = QLabel()
+        self.currentRefCommand.setText("Unknown")
+        self.page_autonomous_form.addRow("Referee command : ", self.currentRefCommand)
+
+        self.currentGameStage = QLabel()
+        self.currentGameStage.setText("Unknown")
+        self.page_autonomous_form.addRow("Game stage : ", self.currentGameStage)
+
+        self.autoState = QLabel()
+        self.autoState.setText("Unknown")
+        self.page_autonomous_form.addRow("Current state : ", self.autoState)
+
+        self.currentStrategy = QLabel()
+        self.currentStrategy.setText("Unknown")
+        self.page_autonomous_form.addRow("Current strategy : ", self.currentStrategy)
+
+        self.page_autonomous_but_play = QPushButton("Play")
         but_play_font = QFont()
         but_play_font.setBold(True)
-        self.page_team_but_play.setFont(but_play_font)
-        self.page_team_but_play.setStyleSheet('QPushButton {color:green;}')
+        self.page_autonomous_but_play.setFont(but_play_font)
+        self.page_autonomous_but_play.setStyleSheet('QPushButton {color:green;}')
 
-        self.page_team_vbox.addWidget(self.selectTeam)
-        self.page_team_vbox.addWidget(self.page_team_but_play)
+        self.page_autonomous_but_stop = QPushButton("Stop")
+        self.page_autonomous_but_stop.setFont(but_play_font)
+        self.page_autonomous_but_stop.setStyleSheet('QPushButton {color:red;}')
+        self.page_autonomous_but_stop.setVisible(False)
 
-        self.page_team.setLayout(self.page_team_vbox)
+        self.page_autonomous_vbox.addLayout(self.page_autonomous_form)
+        self.page_autonomous_vbox.addWidget(self.page_autonomous_but_play)
+        self.page_autonomous_vbox.addWidget(self.page_autonomous_but_stop)
+
+        self.page_autonomous.setLayout(self.page_autonomous_vbox)
 
         # + Page Strategy
         self.page_strat_vbox = QVBoxLayout()
@@ -122,7 +160,7 @@ class StrategyCtrView(QWidget):
         self.page_tactic.setLayout(self.page_tact_vbox)
 
         # + Onglets
-        self.page_controller.addTab(self.page_team, 'Équipe')
+        self.page_controller.addTab(self.page_autonomous, 'AutoPlay')
         self.page_controller.addTab(self.page_strategy, 'Stratégie')
         self.page_controller.addTab(self.page_tactic, 'Tactique')
         self.page_controller.currentChanged.connect(self.tab_selected)
@@ -148,8 +186,7 @@ class StrategyCtrView(QWidget):
     @pyqtSlot(str)
     def handle_team_color(self, team_color):
         self._active_team = team_color.lower()
-        print('tata')
-        self.selectTeam.setText(self.parent.get_team_color())  #TODO : Metttre la premiere lettre majuscule
+        self.teamColorLabel.setText(self.parent.get_team_color().capitalize())
 
     def hideEvent(self, event):
         self.parent.deselect_all_robots()
@@ -233,3 +270,22 @@ class StrategyCtrView(QWidget):
         else:
             self.show()
         self.parent.resize_window()
+
+    def update_auto_state(self):
+        while True:
+            if self.parent.get_team_color() != self._active_team:
+                self._active_team = self.parent.get_team_color()
+                self.teamColorLabel.setText(self._active_team.capitalize())
+
+            auto_state = self.parent.waiting_for_auto_state()
+            if auto_state is not None:
+                self.currentRefCommand.setText(auto_state['referee_cmd'])
+                self.currentGameStage.setText(auto_state['game_stage'])
+                self.currentStrategy.setText(auto_state['current_strategy'])
+                self.autoState.setText(auto_state['state'])
+                self.page_autonomous_but_stop.setVisible(auto_state['status'])
+                self.page_autonomous_but_play.setVisible(not auto_state['status'])
+                if auto_state['status']:
+                    self.autoStatus.setText('Playing')
+                else:
+                    self.autoStatus.setText('Stopped')

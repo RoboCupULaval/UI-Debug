@@ -20,8 +20,6 @@ __author__ = 'RoboCupULaval'
 
 class GameStateView(QWidget):
 
-    update_team_color = pyqtSignal(str)
-
     def __init__(self, controller=None, debug=False):
         super().__init__(controller)
         self._logger = logging.getLogger(GameStateView.__name__)
@@ -167,7 +165,6 @@ class GameStateView(QWidget):
         while True:
             if self._ctrl.get_team_color() != self._active_team:
                 self._active_team = self._ctrl.get_team_color()
-                self.update_team_color.emit(self._active_team)
 
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')

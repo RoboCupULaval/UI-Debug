@@ -107,8 +107,6 @@ class MainController(QWidget):
         self.model_frame.set_recorder(self.model_recorder)
         self.model_datain.set_recorder(self.model_recorder)
 
-        #self.view_robot_state.connect(self.view_controller, PyQt5.QtCore.SIGNAL('update_team_color(string)'), self.view_controller.handle_team_color)
-        self.view_robot_state.update_team_color.connect(self.view_controller.handle_team_color)
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -385,6 +383,9 @@ class MainController(QWidget):
 
     def waiting_for_robot_state(self):
         return self.model_datain.waiting_for_robot_state_event()
+
+    def waiting_for_auto_state(self):
+        return self.model_datain.waiting_for_auto_state_event()
 
     def waiting_for_game_state(self):
         return self.model_datain.waiting_for_game_state_event()

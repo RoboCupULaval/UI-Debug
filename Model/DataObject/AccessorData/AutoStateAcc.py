@@ -6,21 +6,23 @@ from Model.DataObject.AccessorData.BaseDataAccessor import BaseDataAccessor
 __author__ = 'RoboCupULaval'
 
 
-class TeamColorAcc(BaseDataAccessor):
+class AutoStateAcc(BaseDataAccessor):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
 
     @catch_format_error
     def _check_obligatory_data(self):
+        assert isinstance(self.data, dict), \
+            "data: {} n'est pas un dictionnaire.".format(type(self.data))
         keys = self.data.keys()
 
         for key in keys:
             assert isinstance(key, str), \
                 "data[{}]: {} la clé n'a pas le format attendu (str)".format(key, type(key))
-            assert key == 'team_color', \
-                "data[{}] n'est pas une clé validee : team_color".format(key)
-            assert isinstance(self.data[key], str), \
+            assert key in {'referee_cmd', 'game_stage', 'current_strategy', 'status', 'state'}, \
+                "data[{}] n'est pas une clé validee (referee_cmd | game_stage | current_strategy)".format(key)
+            assert isinstance(self.data[key], str) or isinstance(self.data[key], bool), \
                 "data[{}]: {} n'a pas le format attendu (str)".format(key, type(self.data[key]))
 
     @catch_format_error
@@ -33,6 +35,6 @@ class TeamColorAcc(BaseDataAccessor):
 
     @staticmethod
     def get_type():
-        return 1004
+        return 1005
 
 
