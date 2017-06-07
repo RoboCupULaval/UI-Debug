@@ -20,10 +20,10 @@ class AutoStateAcc(BaseDataAccessor):
         for key in keys:
             assert isinstance(key, str), \
                 "data[{}]: {} la clé n'a pas le format attendu (str)".format(key, type(key))
-            assert key in {'referee_cmd', 'game_stage', 'current_strategy', 'status', 'state'}, \
+            assert key in {'referee_cmd', 'game_stage', 'current_strategy', 'status', 'state', 'referee_team_info'}, \
                 "data[{}] n'est pas une clé validee (referee_cmd | game_stage | current_strategy)".format(key)
-            assert isinstance(self.data[key], str) or isinstance(self.data[key], bool), \
-                "data[{}]: {} n'a pas le format attendu (str)".format(key, type(self.data[key]))
+            assert isinstance(self.data[key], str) or isinstance(self.data[key], bool) or isinstance(self.data[key], dict), \
+                "data[{}]: {} n'a pas le format attendu (str, bool or dict)".format(key, type(self.data[key]))
 
     @catch_format_error
     def _check_optional_data(self):
