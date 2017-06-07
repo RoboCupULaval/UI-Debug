@@ -6,11 +6,12 @@ from time import time, sleep
 
 from threading import Thread, Event
 
+from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
 from Model.DataObject.AccessorData.TeamColorAcc import TeamColorAcc
 from Model.DataObject.AccessorData.AutoStateAcc import AutoStateAcc
 from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
 from Model.DataObject.AccessorData.FieldGeometryAcc import FieldGeometryAcc
-from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
+from Model.DataObject.AccessorData.RobotStrategicStateAcc import RobotStrategicStateAcc
 from Model.DataObject.AccessorData.GameStateAcc import GameStateAcc
 from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
 from Model.DataObject.DataFactory import DataFactory
@@ -93,11 +94,12 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[StratGeneralAcc.__name__] = self._distrib_StratGeneral
         self._distrib_sepcific_packet[BaseDataLog.__name__] = self._distrib_BaseDataLog
         self._distrib_sepcific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
-        self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
+        self._distrib_sepcific_packet[RobotStrategicStateAcc.__name__] = self._distrib_RobotStrategicState
         self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
         self._distrib_sepcific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
         self._distrib_sepcific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
         self._distrib_sepcific_packet[AutoStateAcc.__name__] = self._distrib_AutoState
+        self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
 
         self._logger.debug('INIT: Distributor')
 
@@ -183,9 +185,9 @@ class DataInModel(Thread):
         self._logger.debug('DISTRIB: HandShake')
         self._controller.send_handshake()
 
-    def _distrib_RobotState(self, data):
+    def _distrib_RobotStrategicState(self, data):
         """ Traite le paquet spécifique RobotState """
-        self._logger.debug('DISTRIB: RobotState')
+        self._logger.debug('DISTRIB: RobotStrategicState')
         self._robot_state.append(data.data.copy())
         self._event_robot_state.set()
 
@@ -197,6 +199,13 @@ class DataInModel(Thread):
         self._logger.debug('DISTRIB: AutoState')
         self._auto_state.append(data.data.copy())
         self._event_auto_state.set()
+
+    def _distrib_RobotState(self, data):
+        self._logger.debug('DISTRIB: RobotState')
+        print("Lol")
+        #self._auto_state.append(data.data.copy())
+        #self._event_auto_state.set()
+
 
     # === PRIVATE METHODS ===
 
