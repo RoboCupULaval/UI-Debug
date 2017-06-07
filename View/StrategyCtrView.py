@@ -80,6 +80,14 @@ class StrategyCtrView(QWidget):
         self.currentGameStage.setText(0, "Stage")
         self.currentGameStage.setText(1, "Unknown")
 
+        self.stageTimeLeftItem = QTreeWidgetItem(self.refereeInfo)
+        self.stageTimeLeftItem.setText(0, "Stage time left")
+        self.stageTimeLeft = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
+        self.stageTimeLeft.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.stageTimeLeft.setReadOnly(True)
+        self.stageTimeLeft.setDisplayFormat("m:ss.zzz")
+        self.treeWidget.setItemWidget(self.stageTimeLeftItem, 1, self.stageTimeLeft)
+
         self.autoPlayInfo = QTreeWidgetItem(self.treeWidget)
         self.autoPlayInfo.setText(0, "AutoPlay info")
         self.autoState = QTreeWidgetItem(self.autoPlayInfo)
@@ -345,6 +353,7 @@ class StrategyCtrView(QWidget):
                 self.autoState.setText(1, auto_state['state'])
                 self.page_autonomous_but_stop.setVisible(auto_state['status'])
                 self.page_autonomous_but_play.setVisible(not auto_state['status'])
+                self.stageTimeLeft.setTime(QTime().fromMSecsSinceStartOfDay(auto_state["game_stage_time_left"]/1000))
 
             for team in ("ours", "theirs"):
                 info = auto_state["referee_team_info"][team]
