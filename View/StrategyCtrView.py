@@ -85,7 +85,7 @@ class StrategyCtrView(QWidget):
         self.stageTimeLeft = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
         self.stageTimeLeft.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.stageTimeLeft.setReadOnly(True)
-        self.stageTimeLeft.setDisplayFormat("m:ss.zzz")
+        self.stageTimeLeft.setDisplayFormat("m:ss")
         self.treeWidget.setItemWidget(self.stageTimeLeftItem, 1, self.stageTimeLeft)
 
         self.autoPlayInfo = QTreeWidgetItem(self.treeWidget)
@@ -120,7 +120,7 @@ class StrategyCtrView(QWidget):
             self.teamInfo[team]["yellow_card_times"] = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
             self.teamInfo[team]["yellow_card_times"].setButtonSymbols(QAbstractSpinBox.NoButtons)
             self.teamInfo[team]["yellow_card_times"].setReadOnly(True)
-            self.teamInfo[team]["yellow_card_times"].setDisplayFormat("m:ss.zzz")
+            self.teamInfo[team]["yellow_card_times"].setDisplayFormat("m:ss")
             self.treeWidget.setItemWidget(self.teamInfo[team]["yellow_card_times_item"], 1, self.teamInfo[team]["yellow_card_times"])
             self.teamInfo[team]["timeouts"] = QTreeWidgetItem(self.teamInfo[team]["item"])
             self.teamInfo[team]["timeouts"].setText(0, "Timeouts")
@@ -130,7 +130,7 @@ class StrategyCtrView(QWidget):
             self.teamInfo[team]["timeout_time"] = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
             self.teamInfo[team]["timeout_time"].setButtonSymbols(QAbstractSpinBox.NoButtons)
             self.teamInfo[team]["timeout_time"].setReadOnly(True)
-            self.teamInfo[team]["timeout_time"].setDisplayFormat("m:ss.zzz")
+            self.teamInfo[team]["timeout_time"].setDisplayFormat("m:ss")
             self.treeWidget.setItemWidget(self.teamInfo[team]["timeout_time_item"], 1, self.teamInfo[team]["timeout_time"])
 
         self.page_autonomous_but_play = QPushButton("Start")
