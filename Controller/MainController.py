@@ -381,6 +381,9 @@ class MainController(QWidget):
         """ Envoie la géométrie du terrain """
         self.model_dataout.send_geometry(QtToolBox.field_ctrl)
 
+    def waiting_for_robot_strategic_state(self):
+        return self.model_datain.waiting_for_robot_strategic_state_event()
+
     def waiting_for_robot_state(self):
         return self.model_datain.waiting_for_robot_state_event()
 

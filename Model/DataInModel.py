@@ -36,12 +36,13 @@ class DataInModel(Thread):
         self._recorder = None
         self._recorder_is_enable = False
 
-        self._team_color = 'yellow' #TODO Faire fonctionner l'update auto de l'IA
+        self._team_color = 'blue' #TODO Faire fonctionner l'update auto de l'IA
 
         # Stockage de données
         self._data_logging = list()
-        self._robot_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
-                                                                 [dict(zip(list(range(12)),
+        self._robot_state = None
+        self._robot_strategic_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
+                                                                           [dict(zip(list(range(12)),
                                                                            [dict(zip(['tactic', 'action', 'target'],
                                                                                     ['None', 'None', 'None'])) for _ in range(12)]
                                                                            )) for _ in range(2)])))
@@ -59,6 +60,7 @@ class DataInModel(Thread):
         self.daemon = True
 
         # Événement
+        self._event_robot_strategic_state = Event()
         self._event_robot_state = Event()
         self._event_game_state = Event()
         self._event_auto_state = Event()
@@ -188,8 +190,8 @@ class DataInModel(Thread):
     def _distrib_RobotStrategicState(self, data):
         """ Traite le paquet spécifique RobotState """
         self._logger.debug('DISTRIB: RobotStrategicState')
-        self._robot_state.append(data.data.copy())
-        self._event_robot_state.set()
+        self._robot_strategic_state.append(data.data.copy())
+        self._event_robot_strategic_state.set()
 
     def _distrib_TeamColor(self, data):
         self._logger.debug('DISTRIB: TeamColor')
@@ -202,9 +204,8 @@ class DataInModel(Thread):
 
     def _distrib_RobotState(self, data):
         self._logger.debug('DISTRIB: RobotState')
-        print("Lol")
-        #self._auto_state.append(data.data.copy())
-        #self._event_auto_state.set()
+        self._robot_state = data.data.copy()
+        self._event_robot_state.set()
 
 
     # === PRIVATE METHODS ===
@@ -242,7 +243,7 @@ class DataInModel(Thread):
         return self._game_state.copy()
 
     def get_robot_state_copy(self):
-        return self._robot_state.copy()
+        return self._robot_strategic_state.copy()
 
     def get_team_color(self):
         return self._team_color
@@ -251,17 +252,24 @@ class DataInModel(Thread):
         self._logger.debug('WAITING FOR: Pause event')
         self._event_pause.wait()
 
-    def waiting_for_robot_state_event(self):
-        self._logger.debug('WAITING FOR: Robot State')
+    def waiting_for_robot_strategic_state_event(self):
+        self._logger.debug('WAITING FOR: Robot Strategic State')
         if self._recorder_is_enable:
             sleep(1 / 30)
-            self._logger.debug('CATCH: Recorded Robot State')
+            self._logger.debug('CATCH: Recorded Robot Strategic State')
             return self._recorder.get_robot_state()
         else:
+            self._event_robot_strategic_state.wait()
+            self._event_robot_strategic_state.clear()
             self._logger.debug('CATCH: Robot State')
-            self._event_robot_state.wait()
-            self._event_robot_state.clear()
-            return self._robot_state[-1]
+            return self._robot_strategic_state[-1]
+
+    def waiting_for_robot_state_event(self):
+        self._logger.debug('WAITING FOR: Robot State')
+        self._event_robot_state.wait()
+        self._event_robot_state.clear()
+        self._logger.debug('CATCH: Robot State')
+        return self._robot_state
 
     def waiting_for_auto_state_event(self):
         self._logger.debug('WAITING FOR: Auto State')
@@ -344,7 +352,7 @@ class DataInModel(Thread):
             self._recorder.init(game_state=self.get_game_state_copy(), robot_state=self.get_robot_state_copy())
             self._recorder_is_enable = True
             self._event_game_state.set()
-            self._event_robot_state.set()
+            self._event_robot_strategic_state.set()
             self._event_auto_state.set()
 
     def disable_recorder(self):
@@ -353,5 +361,5 @@ class DataInModel(Thread):
         if self._recorder is not None:
             self._recorder_is_enable = False
             self._event_game_state.set()
-            self._event_robot_state.set()
+            self._event_robot_strategic_state.set()
             self._event_auto_state.set()

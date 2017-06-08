@@ -18,6 +18,8 @@ from PyQt5 import QtGui
 __author__ = 'RoboCupULaval'
 
 
+
+
 class GameStateView(QWidget):
 
     def __init__(self, controller=None, debug=False):
@@ -35,6 +37,7 @@ class GameStateView(QWidget):
 
         # CORE SYSTEM
         self._robot_state_loop = QThread()
+        self._robot_strategic_state_loop = QThread()
         self._game_state_loop = QThread()
 
         # INITIALIZATION
@@ -139,6 +142,11 @@ class GameStateView(QWidget):
         self._layout.addWidget(self.scrollArea)
 
     def init_loop(self):
+        self._logger.debug('INIT: Robot Strategic State Loop')
+        self._robot_strategic_state_loop.run = self.update_robot_strategic_state
+        self._robot_strategic_state_loop.daemon = True
+        self._robot_strategic_state_loop.start()
+
         self._logger.debug('INIT: Robot State Loop')
         self._robot_state_loop.run = self.update_robot_state
         self._robot_state_loop.daemon = True
@@ -160,6 +168,23 @@ class GameStateView(QWidget):
                 if not self._layout.itemAtPosition(1, 2).widget().text() == str(game_state['blue']):
                     self._layout.itemAtPosition(1, 2).widget().setText(str(game_state['blue']))
 
+    def update_robot_strategic_state(self):
+        self._logger.debug('RUN: Thread RobotStrategicState')
+        while True:
+            if self._ctrl.get_team_color() != self._active_team:
+                self._active_team = self._ctrl.get_team_color()
+
+            robot_state = self._ctrl.waiting_for_robot_strategic_state()
+            self._logger.debug('RUN: Received robot strategic state')
+            if robot_state is not None:
+                for n, id in enumerate(self._list_active_robots): # Pour chaque robot
+                    if id in robot_state[self._active_team]:
+                        if 'tactic' in robot_state[self._active_team][id]:
+                            self.groupboxes[n].child(3).setText(1, str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].child(3).child(0).setText(1, str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].child(4).setText(1, str(robot_state[self._active_team][id]['action']))
+                            self.groupboxes[n].child(5).setText(1, str(robot_state[self._active_team][id]['target']))
+
     def update_robot_state(self):
         self._logger.debug('RUN: Thread RobotState')
         while True:
@@ -169,12 +194,12 @@ class GameStateView(QWidget):
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')
             if robot_state is not None:
-                for n, id in enumerate(self._list_active_robots): # Pour chaque robot
+                for n, id in enumerate(self._list_active_robots):  # Pour chaque robot
                     if id in robot_state[self._active_team]:
-                        if 'tactic' in robot_state[self._active_team][id]:
-                            self.groupboxes[n].child(3).setText(1, str(robot_state[self._active_team][id]['tactic']))
-                            self.groupboxes[n].child(4).setText(1, str(robot_state[self._active_team][id]['action']))
-                            self.groupboxes[n].child(5).setText(1, str(robot_state[self._active_team][id]['target']))
+
+                        progressBar = self.treeWidget.itemWidget(self.groupboxes[n].child(2), 1)
+                        progressBar.setValue(robot_state[self._active_team][id]['battery_lvl'])
+
 
     def show_hide(self):
         self._logger.debug('TRIGGER: Show/Hide')
