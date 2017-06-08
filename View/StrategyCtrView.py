@@ -27,7 +27,7 @@ class StrategyCtrView(QWidget):
         self.init_ui()
         self.hide()
 
-        self._auto_state_loop = QThread()
+        self._play_info_loop = QThread()
         self.init_loop()
 
         self.update_timer = QTimer()
@@ -35,9 +35,9 @@ class StrategyCtrView(QWidget):
         self.update_timer.start(500)
 
     def init_loop(self):
-        self._auto_state_loop.run = self.update_auto_state
-        self._auto_state_loop.daemon = True
-        self._auto_state_loop.start()
+        self._play_info_loop.run = self.update_play_info
+        self._play_info_loop.daemon = True
+        self._play_info_loop.start()
 
     def init_ui(self):
         self._active_team = 'green'
@@ -339,24 +339,25 @@ class StrategyCtrView(QWidget):
     def send_stop_auto(self):
         self.parent.model_dataout.send_auto_play(False)
 
-    def update_auto_state(self):
+    def update_play_info(self):
         while True:
             if self.parent.get_team_color() != self._active_team:
                 self._active_team = self.parent.get_team_color()
                 self.teamColorRow.setText(1, self._active_team.capitalize())
 
-            auto_state = self.parent.waiting_for_auto_state()
-            if auto_state is not None:
-                self.currentRefCommand.setText(1, auto_state['referee_cmd'])
-                self.currentGameStage.setText(1, auto_state['game_stage'])
-                self.currentStrategy.setText(1, auto_state['current_strategy'])
-                self.autoState.setText(1, auto_state['state'])
-                self.page_autonomous_but_stop.setVisible(auto_state['status'])
-                self.page_autonomous_but_play.setVisible(not auto_state['status'])
-                self.stageTimeLeft.setTime(QTime().fromMSecsSinceStartOfDay(auto_state["game_stage_time_left"]/1000))
+            play_info = self.parent.waiting_for_play_info()
+            if play_info is not None:
+                self.currentRefCommand.setText(1, play_info['referee']['command'])
+                self.currentGameStage.setText(1, play_info['referee']['stage'])
+                self.stageTimeLeft.setTime(QTime().fromMSecsSinceStartOfDay(play_info['referee']['stage_time_left']/1000))
+
+                self.currentStrategy.setText(1, play_info['auto_play']['selected_strategy'])
+                self.autoState.setText(1, play_info['auto_play']['current_state'])
+                self.page_autonomous_but_stop.setVisible(play_info['auto_flag'])
+                self.page_autonomous_but_play.setVisible(not play_info['auto_flag'])
 
             for team in ("ours", "theirs"):
-                info = auto_state["referee_team_info"][team]
+                info = play_info["referee_team"][team]
                 self.teamInfo[team]["item"].setText(0, info["name"])
                 self.teamInfo[team]["goalie"].setText(1, str(info["goalie"]))
                 self.teamInfo[team]["score"].setText(1, str(info["score"]))

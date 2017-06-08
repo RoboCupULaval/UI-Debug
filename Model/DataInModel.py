@@ -8,7 +8,7 @@ from threading import Thread, Event
 
 from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
 from Model.DataObject.AccessorData.TeamColorAcc import TeamColorAcc
-from Model.DataObject.AccessorData.AutoStateAcc import AutoStateAcc
+from Model.DataObject.AccessorData.PlayInfoAcc import PlayInfoAcc
 from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
 from Model.DataObject.AccessorData.FieldGeometryAcc import FieldGeometryAcc
 from Model.DataObject.AccessorData.RobotStrategicStateAcc import RobotStrategicStateAcc
@@ -52,7 +52,9 @@ class DataInModel(Thread):
         self._data_draw = dict()
         self._distrib_sepcific_packet = dict()
         self._data_STA_config = None
-        self._auto_state = TimeListState('AutoState', {'referee_cmd': 'None', 'game_stage': 'None', 'current_strategy': 'None'})
+        self._play_info = TimeListState('PlayInfo', {'referee_info': 'None',
+                                                     'referee_team_info': 'None',
+                                                     'auto_play_info': 'None'})
 
         # Système interne
         self._datain_factory = DataFactory()
@@ -63,7 +65,7 @@ class DataInModel(Thread):
         self._event_robot_strategic_state = Event()
         self._event_robot_state = Event()
         self._event_game_state = Event()
-        self._event_auto_state = Event()
+        self._event_play_info = Event()
         self._event_log = Event()
         self._event_draw = Event()
         self._event_pause = Event()
@@ -100,8 +102,8 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
         self._distrib_sepcific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
         self._distrib_sepcific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
-        self._distrib_sepcific_packet[AutoStateAcc.__name__] = self._distrib_AutoState
         self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
+        self._distrib_sepcific_packet[PlayInfoAcc.__name__] = self._distrib_PlayInfo
 
         self._logger.debug('INIT: Distributor')
 
@@ -197,10 +199,10 @@ class DataInModel(Thread):
         self._logger.debug('DISTRIB: TeamColor')
         self._team_color = data.data['team_color']
 
-    def _distrib_AutoState(self, data):
+    def _distrib_PlayInfo(self, data):
         self._logger.debug('DISTRIB: AutoState')
-        self._auto_state.append(data.data.copy())
-        self._event_auto_state.set()
+        self._play_info.append(data.data.copy())
+        self._event_play_info.set()
 
     def _distrib_RobotState(self, data):
         self._logger.debug('DISTRIB: RobotState')
@@ -271,17 +273,17 @@ class DataInModel(Thread):
         self._logger.debug('CATCH: Robot State')
         return self._robot_state
 
-    def waiting_for_auto_state_event(self):
-        self._logger.debug('WAITING FOR: Auto State')
+    def waiting_for_play_info_event(self):
+        self._logger.debug('WAITING FOR: Play Info')
         if self._recorder_is_enable:
             sleep(1 / 30)
-            self._logger.debug('CATCH: Recorded Auto State')
+            self._logger.debug('CATCH: Recorded Play Info')
             return self._recorder.get_auto_state()
         else:
-            self._logger.debug('CATCH: Robot State')
-            self._event_auto_state.wait()
-            self._event_auto_state.clear()
-            return self._auto_state[-1]
+            self._logger.debug('CATCH: Play Info')
+            self._event_play_info.wait()
+            self._event_play_info.clear()
+            return self._play_info[-1]
 
     def waiting_for_game_state_event(self):
         self._logger.debug('WAITING FOR: Game State')
@@ -353,7 +355,7 @@ class DataInModel(Thread):
             self._recorder_is_enable = True
             self._event_game_state.set()
             self._event_robot_strategic_state.set()
-            self._event_auto_state.set()
+            self._event_play_info.set()
 
     def disable_recorder(self):
         """ Désactiver l'enregistreur sur le modèle de frame """
@@ -362,4 +364,4 @@ class DataInModel(Thread):
             self._recorder_is_enable = False
             self._event_game_state.set()
             self._event_robot_strategic_state.set()
-            self._event_auto_state.set()
+            self._event_play_info.set()
