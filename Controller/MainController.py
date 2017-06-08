@@ -384,8 +384,8 @@ class MainController(QWidget):
     def waiting_for_robot_state(self):
         return self.model_datain.waiting_for_robot_state_event()
 
-    def waiting_for_auto_state(self):
-        return self.model_datain.waiting_for_auto_state_event()
+    def waiting_for_play_info(self):
+        return self.model_datain.waiting_for_play_info_event()
 
     def waiting_for_game_state(self):
         return self.model_datain.waiting_for_game_state_event()

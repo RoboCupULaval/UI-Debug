@@ -6,7 +6,7 @@ from Model.DataObject.AccessorData.BaseDataAccessor import BaseDataAccessor
 __author__ = 'RoboCupULaval'
 
 
-class AutoStateAcc(BaseDataAccessor):
+class PlayInfoAcc(BaseDataAccessor):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -20,12 +20,10 @@ class AutoStateAcc(BaseDataAccessor):
         for key in keys:
             assert isinstance(key, str), \
                 "data[{}]: {} la clé n'a pas le format attendu (str)".format(key, type(key))
-            assert key in {'referee_cmd', 'game_stage', 'current_strategy', 'status',
-                           'state', 'referee_team_info', 'game_stage_time_left'}, \
-                "data[{}] n'est pas une clé validee (referee_cmd | game_stage | current_strategy)".format(key)
-            assert isinstance(self.data[key], str) or isinstance(self.data[key], bool) \
-                   or isinstance(self.data[key], dict) or isinstance(self.data[key], int), \
-                "data[{}]: {} n'a pas le format attendu (str, bool or dict)".format(key, type(self.data[key]))
+            assert key in {'referee', 'referee_team', 'auto_play', 'auto_flag'}, \
+                "data[{}] n'est pas une clé validee".format(key)
+            assert isinstance(self.data[key], dict) or isinstance(self.data[key], bool), \
+                "data[{}]: {} n'a pas le format attendu (dict | bool)".format(key, type(self.data[key]))
 
     @catch_format_error
     def _check_optional_data(self):
