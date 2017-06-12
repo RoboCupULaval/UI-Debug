@@ -193,14 +193,13 @@ class FieldView(QWidget):
 
         # Élément mobile graphique (Robots, balle et cible)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
-<<<<<<< HEAD
-        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, 'yellow') for x in range(max_robots_in_team)]
-        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, 'blue') for x in range(max_robots_in_team)]
-=======
-        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, is_yellow=True) for x in range(6)]
-        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, is_yellow=False) for x in range(6, 12)]
 
->>>>>>> 404c8be3519f91dd591f34aa3ec8bea5b6284954
+        self.graph_mobs['robots_yellow'] = [self.controller.get_drawing_object('robot')(x, 'yellow')
+                                            for x in range(max_robots_in_team)]
+        self.graph_mobs['robots_blue'] = [self.controller.get_drawing_object('robot')(x, 'blue')
+                                          for x in range(max_robots_in_team)]
+
+
         self.graph_mobs['target'] = self.controller.get_drawing_object('target')()
         # TODO : show // init setters
 
