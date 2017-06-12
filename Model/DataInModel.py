@@ -61,7 +61,6 @@ class DataInModel(Thread):
 
         # Réseau
         self._udp_receiver = None
-        self._last_packet = None
 
         # Contrôleur
         self._pause = False
@@ -118,7 +117,6 @@ class DataInModel(Thread):
         self._logger.debug('Thread RUNNING')
         while True:
             self.waiting_for_pause_event()
-            package = None
             try:
                 self._logger.debug('RUN: get Last data from udp server')
                 package = self._udp_receiver.waiting_for_last_data()

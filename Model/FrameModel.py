@@ -71,7 +71,10 @@ class FrameModel:
     def _get_last_frame(self):
         """ Récupère le dernier frame de la vision ou de l'enregistreur """
         if not self._recorder_is_enable:
-            return self._vision.get_latest_frame()
+            try:
+                return self._vision.get_latest_frame()
+            except:
+                return self._recorder.get_last_frame()
         else:
             return self._recorder.get_last_frame()
 

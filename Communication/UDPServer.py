@@ -3,6 +3,7 @@
 import logging
 import pickle
 import socket
+from queue import Queue
 from threading import Thread, Event
 
 __author__ = 'RoboCupULaval'
@@ -24,7 +25,7 @@ class UDPServer(Thread):
         self._event_restart = Event()
         self._is_running = False
 
-        self._data = []
+        self._data_queue = Queue()
         self._msg_logging = []
         self._logger = logging.getLogger(name)
 
@@ -115,12 +116,12 @@ class UDPServer(Thread):
                 try:
                     self._logger.debug("WAITING FOR: new package")
                     data, addr = self._sock.recvfrom(65565)
-                    if not len(self._data) or not data == self._data[-1]:
-                        data = self._num, data
-                        self._data.append(data)
-                        self._logger.debug("RECV {}: len {} from {}, {}".format(self._num, len(data[1]), addr[0], addr[1]))
-                        self._num += 1
-                        self._event_input.set()
+                    #if not len(self._data) or not data == self._data[-1]:
+                    data = self._num, data
+                    self._data_queue.put(data)
+                    self._logger.debug("RECV {}: len {} from {}, {}".format(self._num, len(data[1]), addr[0], addr[1]))
+                    self._num += 1
+                    self._event_input.set()
                 except socket.timeout:
                     self._logger.debug("TIMEOUT: recvfrom")
             self._sock.close()
@@ -132,12 +133,12 @@ class UDPServer(Thread):
         self._event_connexion.wait()
 
     def waiting_for_last_data(self):
-        if len(self._data) == 0:
+        if self._data_queue.empty():
             self._logger.debug('WAITING FOR: Data in')
             self._event_input.wait()
         raw_data = None
         try:
-            raw_data = self._data.pop(0)
+            raw_data = self._data_queue.get()
             self._logger.debug("GET: data {}".format(len(raw_data)))
         finally:
             self._event_input.clear()

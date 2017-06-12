@@ -1,6 +1,5 @@
 # Under GNU GPLv3 License, see LICENSE.txt
 
-from math import cos, sin, atan2
 from time import time
 from abc import abstractmethod
 from Controller.AbstractDrawingObject import AbstractDrawingObject
