@@ -6,7 +6,7 @@ from Model.DataObject.AccessorData.BaseDataAccessor import BaseDataAccessor
 __author__ = 'RoboCupULaval'
 
 
-class RobotStateAcc(BaseDataAccessor):
+class RobotStrategicStateAcc(BaseDataAccessor):
     def __init__(self, data_in):
         super().__init__(data_in)
         self._format_data()
@@ -33,10 +33,17 @@ class RobotStateAcc(BaseDataAccessor):
                     "data[{}][{}]: {} n'a pas le format attendu (int)".format(team, id, type(id))
                 assert 0 <= id <= 11, \
                     "data[{}][{}]: {} doit être compris entre 0 et 11".format(team, id, id)
-                assert "time_since_last_response" in self.data[team][id].keys(), \
-                    "data[{}][{}]: {} doit contenir un time_since_last_response".format(team, id, id)
-                assert "battery_lvl" in self.data[team][id].keys(), \
-                    "data[{}][{}]: {} doit contenir un battery_lvl".format(team, id, id)
+                for state in self.data[team][id]:
+                    assert isinstance(state, str), \
+                        "data[{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state)
+                    assert state in {'target', 'action', 'tactic'}, \
+                        "data[{}][{}]: {} devrait avoir la valeur suivante ('target' | 'action' | 'tactic')".format(team, id, state)
+                    if state == 'target':
+                        assert self._point_is_valid(self.data[team][id][state]), \
+                            "data[{}][{}][{}]: {} n'est pas un point valide".format(team, id, state, self.data[team][id][state])
+                    else:
+                        assert isinstance(self.data[team][id][state], str), \
+                            "data[{}][{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state, type(self.data[team][id][state]))
 
     @staticmethod
     def get_default_data_dict():
@@ -45,4 +52,6 @@ class RobotStateAcc(BaseDataAccessor):
 
     @staticmethod
     def get_type():
-        return 1006
+        return 1002
+
+

@@ -1,6 +1,8 @@
 # Under MIT License, see LICENSE.txt
 
 from PyQt5.QtCore import QTimer
+
+from Model.DataObject.SendingData.SendingAutoPlay import SendingAutoPlay
 from Model.DataObject.SendingData.SendingStrategy import SendingStrategy
 from Model.DataObject.SendingData.SendingToggleHumanCtrl import SendingToggleHumanCtrl
 from Model.DataObject.SendingData.SendingTactic import SendingTactic
@@ -29,13 +31,14 @@ class DataOutModel:
     def update_screen(self):
         self._controller.update_target_on_screen()
 
-    def send_tactic(self, id_bot, tactic, target=(0, 0), goal=(0, 0), args=None):
+    def send_tactic(self, id_bot, team_color, tactic, target=(0, 0), goal=(0, 0), args=None):
         target = int(target[0]), int(target[1])
         goal = int(goal[0]), int(goal[1])
         if args is None:
             args = []
         pkg = SendingTactic().set_data(tactic=tactic,
                                        id=id_bot,
+                                       team=team_color,
                                        target=target,
                                        goal=goal,
                                        args=args)
@@ -43,6 +46,10 @@ class DataOutModel:
 
     def send_strategy(self, strat, team):
         pkg = SendingStrategy().set_data(strategy=strat, team=team)
+        self._udp_sender.send_message(pkg.get_binary())
+
+    def send_auto_play(self, status):
+        pkg = SendingAutoPlay().set_data(status=status)
         self._udp_sender.send_message(pkg.get_binary())
 
     def send_toggle_human_control(self, result):

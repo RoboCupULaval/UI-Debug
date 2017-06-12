@@ -2,6 +2,7 @@
 
 from signal import signal, SIGINT
 
+import PyQt5
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox
 from PyQt5.QtGui import QIcon
@@ -80,16 +81,17 @@ class MainController(QWidget):
         # => Field | Filter | StratController (Horizontal)
         sub_layout = QHBoxLayout()
         sub_layout.setContentsMargins(0, 0, 0, 0)
+        sub_layout.addWidget(self.view_robot_state)
         sub_layout.addWidget(self.view_screen)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
+
 
         # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
         top_layout.addLayout(sub_layout)
         top_layout.addWidget(self.view_media)
-        top_layout.addWidget(self.view_robot_state)
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)
@@ -104,6 +106,7 @@ class MainController(QWidget):
         self.model_frame.start()
         self.model_frame.set_recorder(self.model_recorder)
         self.model_datain.set_recorder(self.model_recorder)
+
 
     def init_menubar(self):
         # Titre des menus et dimension
@@ -134,7 +137,7 @@ class MainController(QWidget):
         # => Menu Vue
         fieldMenu = viewMenu.addMenu('Terrain')
 
-        toggleFrameRate = QAction("Afficher/Cacher la fréquence", self, checkable=True)
+        toggleFrameRate = QAction("Afficher la fréquence", self, checkable=True)
         toggleFrameRate.triggered.connect(self.view_screen.toggle_frame_rate)
         fieldMenu.addAction(toggleFrameRate)
 
@@ -166,6 +169,7 @@ class MainController(QWidget):
 
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
         vanishAction.triggered.connect(self.view_screen.toggle_vanish_option)
+        vanishAction.trigger()
         botMenu.addAction(vanishAction)
 
         vectorAction = QAction('Afficher Vecteur vitesse des robots', self, checkable=True)
@@ -174,6 +178,7 @@ class MainController(QWidget):
 
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
         nuumbAction.triggered.connect(self.view_screen.show_number_option)
+        nuumbAction.trigger()
         botMenu.addAction(nuumbAction)
 
         viewMenu.addSeparator()
@@ -190,6 +195,7 @@ class MainController(QWidget):
 
         StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
         StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
+        StrategyControllerAction.trigger()
         toolMenu.addAction(StrategyControllerAction)
 
         toolMenu.addSeparator()
@@ -200,10 +206,12 @@ class MainController(QWidget):
 
         robStateAction = QAction('État des robots', self, checkable=True)
         robStateAction.triggered.connect(self.view_robot_state.show_hide)
+        robStateAction.trigger()
         toolMenu.addAction(robStateAction)
 
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
+        loggerAction.trigger()
         toolMenu.addAction(loggerAction)
 
     def init_signals(self):
@@ -253,7 +261,7 @@ class MainController(QWidget):
 
     def hide_mob(self, bot_id=None, team_color=None):
         """ Cache l'objet mobile si l'information n'est pas update """
-        if self.view_screen.isVisible() and not self.view_screen.option_vanishing:
+        if self.view_screen.isVisible() and self.view_screen.option_vanishing:
             if bot_id is None:
                 self.view_screen.hide_ball()
             else:
@@ -315,12 +323,7 @@ class MainController(QWidget):
 
     def force_tactic_controller_select_robot(self, bot_id, team_color):
         """ Force le sélection du robot indiqué par l'index dans la combobox du contrôleur tactique """
-        if team_color == 'blue':
-            self.view_controller.selectTeam.setCurrentIndex(1)
-            self.view_controller.selectRobot.setCurrentIndex(bot_id)
-        else:
-            self.view_controller.selectTeam.setCurrentIndex(0)
-            self.view_controller.selectRobot.setCurrentIndex(bot_id)
+        self.view_controller.selectRobot.setCurrentIndex(bot_id)
 
     def get_cursor_position_from_screen(self):
         """ Récupère la position du curseur depuis le terrain """
@@ -378,11 +381,20 @@ class MainController(QWidget):
         """ Envoie la géométrie du terrain """
         self.model_dataout.send_geometry(QtToolBox.field_ctrl)
 
+    def waiting_for_robot_strategic_state(self):
+        return self.model_datain.waiting_for_robot_strategic_state_event()
+
     def waiting_for_robot_state(self):
         return self.model_datain.waiting_for_robot_state_event()
 
+    def waiting_for_play_info(self):
+        return self.model_datain.waiting_for_play_info_event()
+
     def waiting_for_game_state(self):
         return self.model_datain.waiting_for_game_state_event()
+
+    def get_team_color(self):
+        return self.model_datain.get_team_color()
 
     # === RECORDER METHODS ===
     def recorder_is_playing(self):

@@ -39,7 +39,6 @@ class FieldView(QWidget):
 
         # Option
         self.option_vanishing = False
-        self.option_show_number = False
         self.option_show_vector = False
         self.option_target_mode = False
 
@@ -344,7 +343,7 @@ class FieldView(QWidget):
         """ Gère l'événement du clic simple de la souris """
         if self.controller.get_tactic_controller_is_visible():
             distance, robot_id, team_color, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
-            if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen:
+            if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen and team_color == self.controller.get_team_color():
                 self.select_robot(robot_id, team_color)
                 self.controller.force_tactic_controller_select_robot(robot_id, team_color)
 

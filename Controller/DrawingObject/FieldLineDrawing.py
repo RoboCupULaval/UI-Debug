@@ -18,12 +18,10 @@ class FieldLineDrawing(BaseDrawingObject):
             painter.setBrush(QtToolBox.create_brush(is_visible=False))
             painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
                                                 style='SolidLine',
-                                                width=2))
-
+                                                width=3))
             # Rectangle de contour du terrain
             x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
             length, width = QtToolBox.field_ctrl.get_size_to_screen()
-            painter.drawRect(x, y, length, width)
 
             # Rectangle des buts
             goal_depth = QtToolBox.field_ctrl.goal_depth
@@ -33,10 +31,23 @@ class FieldLineDrawing(BaseDrawingObject):
             goal_width_resize = goal_width * QtToolBox.field_ctrl.ratio_screen
             x_goal = x - goal_depth_resize
             y_goal = y + width / 2 - goal_width_resize / 2
+            painter.setPen(QtToolBox.create_pen(color=(0, 0, 255),
+                                                style='SolidLine',
+                                                width=3))
             painter.drawRect(x_goal, y_goal, goal_depth_resize, goal_width_resize)
             x_goal = x + length
             y_goal = y + width / 2 - goal_width_resize / 2
+            painter.setPen(QtToolBox.create_pen(color=(255, 255, 0),
+                                                style='SolidLine',
+                                                width=3))
             painter.drawRect(x_goal, y_goal, goal_depth_resize, goal_width_resize)
+
+            painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
+                                                style='SolidLine',
+                                                width=3))
+
+            # Rectangle de contour du terrain
+            painter.drawRect(x, y, length, width)
 
             # Ligne de la surface de réparation
             rad_width = QtToolBox.field_ctrl.defense_radius * QtToolBox.field_ctrl.ratio_screen
