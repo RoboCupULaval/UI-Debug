@@ -125,8 +125,11 @@ class DataInModel(Thread):
                 self._extract_and_distribute_data(package)
             except AttributeError as e:
                 self._logger.warn(type(e).__name__ + str(e))
+            except TypeError:
+                pass
             finally:
                 self._last_packet = package[0] if package is not None else None
+
         self._logger.debug('Thread RUN STOPPING')
 
     # === DISTRIBUTOR ===
