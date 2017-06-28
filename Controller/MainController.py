@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
+from qtpy import QtCore
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
@@ -35,18 +36,19 @@ __author__ = 'RoboCupULaval'
 
 class MainController(QWidget):
     # TODO: Dissocier Controller de la fenêtre principale
-    def __init__(self):
+    def __init__(self, port):
         super().__init__()
-
+        #port = QtCore.QMetaType.type('QVector<int>')
+        self.receiving_port = port
         # Création des Contrôleurs
         self.draw_handler = DrawingObjectFactory(self)
 
         # Communication
         # self.network_data_in = UDPServer(self)
         self.network_data_in = UDPServer(name='UDPServer', debug=False)
-        self.network_vision = Vision()
+        self.network_vision = Vision(port=self.receiving_port)
         self.ai_server_is_serial = False
-        self.udp_config = UDPConfig()
+        self.udp_config = UDPConfig(port=self.receiving_port)
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
