@@ -21,13 +21,13 @@ class FrameModel:
         self._recorder = None
 
         # Initialisation des variables de données
-        self._max_data_queue = 3000
+        self._max_data_queue = 1
         self._data_queue_received = deque(maxlen=self._max_data_queue)
         self._current_frame = None
 
         # Initialisation des variables pour le frame catcher
         self._last_frame_caught_time = datetime.min
-        self._frame_catcher_update_rate = 60.0        # Fréquence d'update en Hz
+        self._frame_catcher_update_rate = 1000.0        # Fréquence d'update en Hz
         self._frame_catcher_timer = QTimer()
 
         # Contrôleur

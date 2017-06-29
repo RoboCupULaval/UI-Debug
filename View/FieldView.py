@@ -17,7 +17,7 @@ class FieldView(QWidget):
     """
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
-    frame_rate = 30
+    frame_rate = 100
 
     def __init__(self, controller, debug=False):
         super().__init__(controller)
