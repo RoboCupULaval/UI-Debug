@@ -6,9 +6,12 @@ from time import time, sleep
 
 from threading import Thread, Event
 
+from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
+from Model.DataObject.AccessorData.TeamColorAcc import TeamColorAcc
+from Model.DataObject.AccessorData.PlayInfoAcc import PlayInfoAcc
 from Model.DataObject.AccessorData.StratGeneralAcc import StratGeneralAcc
 from Model.DataObject.AccessorData.FieldGeometryAcc import FieldGeometryAcc
-from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
+from Model.DataObject.AccessorData.RobotStrategicStateAcc import RobotStrategicStateAcc
 from Model.DataObject.AccessorData.GameStateAcc import GameStateAcc
 from Model.DataObject.AccessorData.VeryLargeDataAcc import VeryLargeDataAcc
 from Model.DataObject.DataFactory import DataFactory
@@ -33,10 +36,13 @@ class DataInModel(Thread):
         self._recorder = None
         self._recorder_is_enable = False
 
+        self._team_color = 'blue' #TODO Faire fonctionner l'update auto de l'IA
+
         # Stockage de données
         self._data_logging = list()
-        self._robot_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
-                                                                 [dict(zip(list(range(12)),
+        self._robot_state = None
+        self._robot_strategic_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
+                                                                           [dict(zip(list(range(12)),
                                                                            [dict(zip(['tactic', 'action', 'target'],
                                                                                     ['None', 'None', 'None'])) for _ in range(12)]
                                                                            )) for _ in range(2)])))
@@ -46,6 +52,9 @@ class DataInModel(Thread):
         self._data_draw = dict()
         self._distrib_sepcific_packet = dict()
         self._data_STA_config = None
+        self._play_info = TimeListState('PlayInfo', {'referee_info': 'None',
+                                                     'referee_team_info': 'None',
+                                                     'auto_play_info': 'None'})
 
         # Système interne
         self._datain_factory = DataFactory()
@@ -53,15 +62,16 @@ class DataInModel(Thread):
         self.daemon = True
 
         # Événement
+        self._event_robot_strategic_state = Event()
         self._event_robot_state = Event()
         self._event_game_state = Event()
+        self._event_play_info = Event()
         self._event_log = Event()
         self._event_draw = Event()
         self._event_pause = Event()
 
         # Réseau
         self._udp_receiver = None
-        self._last_packet = None
 
         # Contrôleur
         self._pause = False
@@ -87,9 +97,13 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[StratGeneralAcc.__name__] = self._distrib_StratGeneral
         self._distrib_sepcific_packet[BaseDataLog.__name__] = self._distrib_BaseDataLog
         self._distrib_sepcific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
-        self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
+        self._distrib_sepcific_packet[RobotStrategicStateAcc.__name__] = self._distrib_RobotStrategicState
         self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
         self._distrib_sepcific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
+        self._distrib_sepcific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
+        self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
+        self._distrib_sepcific_packet[PlayInfoAcc.__name__] = self._distrib_PlayInfo
+
         self._logger.debug('INIT: Distributor')
 
     def _init_logger(self):
@@ -118,15 +132,17 @@ class DataInModel(Thread):
         self._logger.debug('Thread RUNNING')
         while True:
             self.waiting_for_pause_event()
-            package = None
             try:
                 self._logger.debug('RUN: get Last data from udp server')
                 package = self._udp_receiver.waiting_for_last_data()
                 self._extract_and_distribute_data(package)
             except AttributeError as e:
                 self._logger.warn(type(e).__name__ + str(e))
+            except TypeError:
+                pass
             finally:
                 self._last_packet = package[0] if package is not None else None
+
         self._logger.debug('Thread RUN STOPPING')
 
     # === DISTRIBUTOR ===
@@ -174,11 +190,26 @@ class DataInModel(Thread):
         self._logger.debug('DISTRIB: HandShake')
         self._controller.send_handshake()
 
-    def _distrib_RobotState(self, data):
+    def _distrib_RobotStrategicState(self, data):
         """ Traite le paquet spécifique RobotState """
+        self._logger.debug('DISTRIB: RobotStrategicState')
+        self._robot_strategic_state.append(data.data.copy())
+        self._event_robot_strategic_state.set()
+
+    def _distrib_TeamColor(self, data):
+        self._logger.debug('DISTRIB: TeamColor')
+        self._team_color = data.data['team_color']
+
+    def _distrib_PlayInfo(self, data):
+        self._logger.debug('DISTRIB: AutoState')
+        self._play_info.append(data.data.copy())
+        self._event_play_info.set()
+
+    def _distrib_RobotState(self, data):
         self._logger.debug('DISTRIB: RobotState')
-        self._robot_state.append(data.data.copy())
+        self._robot_state = data.data.copy()
         self._event_robot_state.set()
+
 
     # === PRIVATE METHODS ===
 
@@ -215,23 +246,45 @@ class DataInModel(Thread):
         return self._game_state.copy()
 
     def get_robot_state_copy(self):
-        return self._robot_state.copy()
+        return self._robot_strategic_state.copy()
+
+    def get_team_color(self):
+        return self._team_color
 
     def waiting_for_pause_event(self):
         self._logger.debug('WAITING FOR: Pause event')
         self._event_pause.wait()
 
-    def waiting_for_robot_state_event(self):
-        self._logger.debug('WAITING FOR: Robot State')
+    def waiting_for_robot_strategic_state_event(self):
+        self._logger.debug('WAITING FOR: Robot Strategic State')
         if self._recorder_is_enable:
             sleep(1 / 30)
-            self._logger.debug('CATCH: Recorded Robot State')
+            self._logger.debug('CATCH: Recorded Robot Strategic State')
             return self._recorder.get_robot_state()
         else:
+            self._event_robot_strategic_state.wait()
+            self._event_robot_strategic_state.clear()
             self._logger.debug('CATCH: Robot State')
-            self._event_robot_state.wait()
-            self._event_robot_state.clear()
-            return self._robot_state[-1]
+            return self._robot_strategic_state[-1]
+
+    def waiting_for_robot_state_event(self):
+        self._logger.debug('WAITING FOR: Robot State')
+        self._event_robot_state.wait()
+        self._event_robot_state.clear()
+        self._logger.debug('CATCH: Robot State')
+        return self._robot_state
+
+    def waiting_for_play_info_event(self):
+        self._logger.debug('WAITING FOR: Play Info')
+        if self._recorder_is_enable:
+            sleep(1 / 30)
+            self._logger.debug('CATCH: Recorded Play Info')
+            return self._recorder.get_auto_state()
+        else:
+            self._logger.debug('CATCH: Play Info')
+            self._event_play_info.wait()
+            self._event_play_info.clear()
+            return self._play_info[-1]
 
     def waiting_for_game_state_event(self):
         self._logger.debug('WAITING FOR: Game State')
@@ -302,7 +355,8 @@ class DataInModel(Thread):
             self._recorder.init(game_state=self.get_game_state_copy(), robot_state=self.get_robot_state_copy())
             self._recorder_is_enable = True
             self._event_game_state.set()
-            self._event_robot_state.set()
+            self._event_robot_strategic_state.set()
+            self._event_play_info.set()
 
     def disable_recorder(self):
         """ Désactiver l'enregistreur sur le modèle de frame """
@@ -310,4 +364,5 @@ class DataInModel(Thread):
         if self._recorder is not None:
             self._recorder_is_enable = False
             self._event_game_state.set()
-            self._event_robot_state.set()
+            self._event_robot_strategic_state.set()
+            self._event_play_info.set()

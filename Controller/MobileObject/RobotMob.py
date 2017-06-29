@@ -16,7 +16,7 @@ class RobotMob(BaseMobileObject):
         BaseMobileObject.__init__(self, x, y, theta)
         self._bot_id = bot_id
         self._team_color = team_color
-        self._display_number = True
+        self._display_number = False
         self._display_select = False
         self._display_vector = False
         self._radius = 180 / 2

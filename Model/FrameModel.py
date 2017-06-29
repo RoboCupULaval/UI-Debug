@@ -71,7 +71,10 @@ class FrameModel:
     def _get_last_frame(self):
         """ Récupère le dernier frame de la vision ou de l'enregistreur """
         if not self._recorder_is_enable:
-            return self._vision.get_latest_frame()
+            try:
+                return self._vision.get_latest_frame()
+            except:
+                return self._recorder.get_last_frame()
         else:
             return self._recorder.get_last_frame()
 
@@ -87,9 +90,9 @@ class FrameModel:
         self._current_frame = frame
         self._update_view_screen_ball()
         list_blue_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}  # TODO : Créer une variable globale
-        self._update_view_screen_robot(list_blue_bot_id, 'yellow')
+        self._update_view_screen_robot(list_blue_bot_id, 'blue')
         list_yellow_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
-        self._update_view_screen_robot(list_yellow_bot_id, 'blue')
+        self._update_view_screen_robot(list_yellow_bot_id, 'yellow')
 
     def _update_view_screen_ball(self):
         """ Mise à jour des données de la vue de la balle """

@@ -4,9 +4,9 @@ __author__ = 'RoboCupULaval'
 
 
 class UDPConfig():
-    def __init__(self, host="224.5.23.2", port=10020):
+    def __init__(self, host="224.5.23.2", port=10024):
         self._default_ip = "224.5.23.2"
-        self._default_port = 10020
+        self._default_port = 10024
         self._ip = host
         self._port = port
 

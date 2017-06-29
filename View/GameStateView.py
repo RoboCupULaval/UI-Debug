@@ -2,13 +2,26 @@
 
 import logging
 from threading import Thread
-from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel
-from PyQt5.QtCore import Qt
+
+from PyQt5.QtCore import QThread
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QBrush
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QProgressBar
+from PyQt5.QtWidgets import QTreeWidget
+from PyQt5.QtWidgets import QTreeWidgetItem
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QScrollArea, QPlainTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QTextEdit
+from PyQt5.QtCore import Qt, QRect, pyqtSlot
+from PyQt5 import QtGui
+
 
 __author__ = 'RoboCupULaval'
 
 
+
+
 class GameStateView(QWidget):
+
     def __init__(self, controller=None, debug=False):
         super().__init__(controller)
         self._logger = logging.getLogger(GameStateView.__name__)
@@ -23,23 +36,25 @@ class GameStateView(QWidget):
         self._layout = QGridLayout()
 
         # CORE SYSTEM
-        self._robot_state_loop = Thread()
-        self._game_state_loop = Thread()
+        self._robot_state_loop = QThread()
+        self._robot_strategic_state_loop = QThread()
+        self._game_state_loop = QThread()
 
         # INITIALIZATION
         self.init_logger()
         self.init_ui()
         self.init_loop()
-        #self.hide()
+        self.hide()
         self._logger.debug('CONSTRUCT: ... End')
 
-    def _get_style_sheet(self, is_yellow=None, bold=False, color='black'):
+
+    def _get_style_sheet(self, team=None, bold=False, color='black'):
         param_sheet = ' ; '.join(['color:{}'.format(color),
                                 'border-style: solid',
                                 'border-color: black',
                                 'border-width: 1px'])
-        if is_yellow is not None:
-            if is_yellow:
+        if team is not None:
+            if team == 'yellow':
                 color = '#ffff88'
             else:
                 color = '#8888ff'
@@ -65,57 +80,73 @@ class GameStateView(QWidget):
         self._layout.setVerticalSpacing(0)
         self._layout.setHorizontalSpacing(0)
 
-        # Main header
-        label_blue_team = QLabel('Équipe Bleue')
-        label_blue_team.setMargin(5)
-        label_blue_team.setAlignment(Qt.AlignCenter)
-        label_blue_team.setStyleSheet(self._get_style_sheet(is_yellow=False))
-        self._layout.addWidget(label_blue_team, 1, 1)
+        self._active_team = 'blue'  # TODO (pturgeon):
+        self._list_active_robots = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # TODO (pturgeon): Créer variable globale
 
-        self._label_strat_blue = QLabel('None')
-        self._label_strat_blue.setMargin(5)
-        self._label_strat_blue.setAlignment(Qt.AlignCenter)
-        self._label_strat_blue.setStyleSheet(self._get_style_sheet(is_yellow=False))
-        self._layout.addWidget(self._label_strat_blue, 1, 2, 1, 3)
+        self.scrollArea = QScrollArea(self)
+        self.scrollArea.setGeometry(QRect(0, 0, 390, 190))
+        self.scrollArea.setWidgetResizable(True)
 
-        label_yellow_team = QLabel('Équipe Jaune')
-        label_yellow_team.setMargin(5)
-        label_yellow_team.setAlignment(Qt.AlignCenter)
-        label_yellow_team.setStyleSheet(self._get_style_sheet(is_yellow=True))
-        self._layout.addWidget(label_yellow_team, 1, 5)
+        self.treeWidget = QTreeWidget()
+        self.treeWidget.setHeaderLabels(["Robots", ""])
+        self.treeWidget.setColumnCount(2)
+        self.setMaximumWidth(250)
 
-        self._label_strat_yellow = QLabel('None')
-        self._label_strat_yellow.setMargin(5)
-        self._label_strat_yellow.setAlignment(Qt.AlignCenter)
-        self._label_strat_yellow.setStyleSheet(self._get_style_sheet(is_yellow=True))
-        self._layout.addWidget(self._label_strat_yellow, 1, 6, 1, 3)
+        #self.batt = QtGui.QProgressBar(self)
+        #self.batt.setValue(1)
 
-        # Sub header
-        for i, header in enumerate(['Robot', 'Tactique', 'Action', 'Target']*2, start=1):
-            label = QLabel(header)
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet(self._get_style_sheet(bold=True))
-            self._layout.addWidget(label, 2, i)
+        self.groupboxes = []
+        for id in self._list_active_robots:
+            subItem = QTreeWidgetItem(self.treeWidget)
+            subItem.setText(0, "Robot " + str(id))
 
-        list_active_robots = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  # TODO (pturgeon): Créer variable globale
-        #list.remove(2)
-        # id robot
-        for i in range(len(list_active_robots)):
-            for j in range(2):
-                label = QLabel(str(list_active_robots[i]))
-                label.setAlignment(Qt.AlignCenter)
-                label.setStyleSheet(self._get_style_sheet(bold=True))
-                self._layout.addWidget(label, 3 + i, 1 + 4 * j)
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0, "State")
+            state = QPushButton()
+            state.setStyleSheet('QPushButton {color:red;border-radius: 3px;}')
+            state.setText("OFF") # TODO (pturgeon):
+            state.setMaximumHeight(15)
+            state.setMaximumWidth(75)
+            self.treeWidget.setItemWidget(subSubItem, 1, state)
 
-        # None value everywhere else
-        for i in range(len(list_active_robots)):
-            for j in [1, 2, 3, 5, 6, 7]:
-                label = QLabel('None')
-                label.setAlignment(Qt.AlignCenter)
-                label.setStyleSheet(self._get_style_sheet(color='#222222'))
-                self._layout.addWidget(label, 3 + i, 1 + j)
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0, "Visible")
+            subSubItem.setText(1, "True")  # TODO (pturgeon):
+
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0, "Batt Level")
+            pbar = QProgressBar(self)
+            pbar.setValue(10)# TODO (pturgeon):
+            pbar.setRange(0, 100)
+            pbar.setStyleSheet('QProgressBar:horizontal { border: 1px solid gray; border-radius: 3px; background: white; '
+                               'padding: 1px; text-align: right; margin-right: 37px; } QProgressBar::chunk:horizontal '
+                               '{ background: red ;margin-right: 2px; /* space */ width: 10px; }')
+            pbar.setMaximumHeight(13)
+            pbar.setMaximumWidth(75)
+            self.treeWidget.setItemWidget(subSubItem, 1, pbar)
+
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0,"Tactic")
+            for n in range(10):
+                subSubSubItem = QTreeWidgetItem(subSubItem)
+                subSubSubItem.setText(1, "Dummy tactic")
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0,"Action")
+            subSubItem = QTreeWidgetItem(subItem)
+            subSubItem.setText(0,"Target")
+            if id < 6:
+                subItem.setExpanded(True)
+            self.groupboxes.append(subItem)
+
+        self.scrollArea.setWidget(self.treeWidget)
+        self._layout.addWidget(self.scrollArea)
 
     def init_loop(self):
+        self._logger.debug('INIT: Robot Strategic State Loop')
+        self._robot_strategic_state_loop.run = self.update_robot_strategic_state
+        self._robot_strategic_state_loop.daemon = True
+        self._robot_strategic_state_loop.start()
+
         self._logger.debug('INIT: Robot State Loop')
         self._robot_state_loop.run = self.update_robot_state
         self._robot_state_loop.daemon = True
@@ -137,37 +168,38 @@ class GameStateView(QWidget):
                 if not self._layout.itemAtPosition(1, 2).widget().text() == str(game_state['blue']):
                     self._layout.itemAtPosition(1, 2).widget().setText(str(game_state['blue']))
 
+    def update_robot_strategic_state(self):
+        self._logger.debug('RUN: Thread RobotStrategicState')
+        while True:
+            if self._ctrl.get_team_color() != self._active_team:
+                self._active_team = self._ctrl.get_team_color()
+
+            robot_state = self._ctrl.waiting_for_robot_strategic_state()
+            self._logger.debug('RUN: Received robot strategic state')
+            if robot_state is not None:
+                for n, id in enumerate(self._list_active_robots): # Pour chaque robot
+                    if id in robot_state[self._active_team]:
+                        if 'tactic' in robot_state[self._active_team][id]:
+                            self.groupboxes[n].child(3).setText(1, str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].child(3).child(0).setText(1, str(robot_state[self._active_team][id]['tactic']))
+                            self.groupboxes[n].child(4).setText(1, str(robot_state[self._active_team][id]['action']))
+                            self.groupboxes[n].child(5).setText(1, str(robot_state[self._active_team][id]['target']))
+
     def update_robot_state(self):
         self._logger.debug('RUN: Thread RobotState')
         while True:
+            if self._ctrl.get_team_color() != self._active_team:
+                self._active_team = self._ctrl.get_team_color()
+
             robot_state = self._ctrl.waiting_for_robot_state()
             self._logger.debug('RUN: Received robot state')
-            print(robot_state)
             if robot_state is not None:
-                for team in robot_state.keys():
-                    if team == 'blue':
-                        t_col = 2
-                    else:
-                        t_col = 6
-                    for id in robot_state[team].keys():
-                        line = 3 + id
-                        for state in robot_state[team][id].keys():
-                            if state == 'action':
-                                col = t_col + 1
-                            elif state == 'target':
-                                col = t_col + 2
-                            else:
-                                col = t_col
+                for n, id in enumerate(self._list_active_robots):  # Pour chaque robot
+                    if id in robot_state[self._active_team]:
 
-                            object = self._layout.itemAtPosition(line, col)
-                            if object is not None:
-                                if not object.widget().text() == str(robot_state[team][id][state]):
-                                    self._logger.debug(
-                                        'RUN: {}.{}.{} = {} at {}, {}'.format(team, id, state, robot_state[team][id][state],
-                                                                              line, col))
-                                    object.widget().setText(str(robot_state[team][id][state]))
-                            else:
-                                self._logger.warn('RUN: NoneType detected at {}, {}'.format(line, col))
+                        progressBar = self.treeWidget.itemWidget(self.groupboxes[n].child(2), 1)
+                        progressBar.setValue(robot_state[self._active_team][id]['battery_lvl'])
+
 
     def show_hide(self):
         self._logger.debug('TRIGGER: Show/Hide')

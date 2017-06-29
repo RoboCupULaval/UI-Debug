@@ -34,6 +34,7 @@ class RecorderModel:
         self._data_frames = None
         self._game_state = None
         self._robot_state = None
+        self._auto_state = None
 
         self._cursor_pst = None
         self._nb_frame = None
@@ -174,6 +175,13 @@ class RecorderModel:
             return self._robot_state[self._data_frames[self._cursor_pst][0]]
         else:
             return self._robot_state[-1]
+
+    @recorder_checker
+    def get_auto_state(self):
+        if self._last_req_time is not None:
+            return self._auto_state[self._data_frames[self._cursor_pst][0]]
+        else:
+            return self._auto_state[-1]
 
     @recorder_checker
     def get_cursor_percentage(self):
