@@ -237,10 +237,8 @@ class FieldView(QWidget):
         """ Cache un robot dans la fenêtre de terrain """
         if team_color =='yellow':
             self.graph_mobs['robots_yellow'][bot_id].hide()
-            self.graph_mobs['robots_numbers'][bot_id].hide()
         elif team_color == 'blue':
             self.graph_mobs['robots_blue'][bot_id].hide()
-            self.graph_mobs['robots_numbers'][bot_id].hide()
 
     def show_ball(self):
         """ Affiche la balle dans la fenêtre de terrain """

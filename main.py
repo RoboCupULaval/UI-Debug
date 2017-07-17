@@ -26,6 +26,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     if args.use_type == 'sim':
         port = 10024
+    if args.use_type == 'kalman':
+        port = 10022
     else:
         port = 10020
 
