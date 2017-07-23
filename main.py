@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 import sys
 import argparse
-
+import warnings
 
 
 from PyQt5.QtWidgets import QApplication
@@ -28,7 +28,10 @@ if __name__ == '__main__':
         port = 10024
     elif args.use_type == 'kalman':
         port = 10022
-    else:  # real-life
+    elif args.use_type == 'real':
+        port = 10020
+    else:  # force real-life
+        warnings.warn("Unrecognized use_type argument. force real-life.", SyntaxWarning, stacklevel=2)
         port = 10020
 
     f = MainController(port)
