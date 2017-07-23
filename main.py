@@ -26,9 +26,9 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     if args.use_type == 'sim':
         port = 10024
-    if args.use_type == 'kalman':
+    elif args.use_type == 'kalman':
         port = 10022
-    else:
+    else:  # real-life
         port = 10020
 
     f = MainController(port)
