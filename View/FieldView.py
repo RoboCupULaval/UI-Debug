@@ -18,6 +18,7 @@ class FieldView(QWidget):
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
     frame_rate = 100
+    vanishing_delay = 0.25
 
     def __init__(self, controller, debug=False):
         super().__init__(controller)
@@ -30,6 +31,7 @@ class FieldView(QWidget):
         self.controller = controller
         self.last_frame = 0
         self.graph_mobs = dict()
+        self.vanishing_memory = dict()
         self.graph_draw = dict()
         self.draw_filterable = dict()
         self.list_filter = ['None']
@@ -191,6 +193,10 @@ class FieldView(QWidget):
         self.graph_draw['robots_yellow'] = [list() for _ in range(max_robots_in_team)]
         self.graph_draw['robots_blue'] = [list() for _ in range(max_robots_in_team)]
 
+        self.vanishing_memory['ball'] = 0
+        self.vanishing_memory['robots_yellow'] = [0 for _ in range(max_robots_in_team)]
+        self.vanishing_memory['robots_blue'] = [0 for _ in range(max_robots_in_team)]
+
         # Élément mobile graphique (Robots, balle et cible)
         self.graph_mobs['ball'] = self.controller.get_drawing_object('ball')()
 
@@ -231,27 +237,34 @@ class FieldView(QWidget):
 
     def hide_ball(self):
         """ Cache la balle dans la fenêtre de terrain """
-        self.graph_mobs['ball'].hide()
+        if (time() - self.vanishing_memory['ball']) >= self.vanishing_delay:
+            self.graph_mobs['ball'].hide()
+            self.vanishing_memory['ball'] = time()
 
     def hide_bot(self, bot_id, team_color):
         """ Cache un robot dans la fenêtre de terrain """
-        if team_color =='yellow':
+        if team_color =='yellow' and\
+                (time() - self.vanishing_memory['robots_yellow'][bot_id]) >= self.vanishing_delay:
             self.graph_mobs['robots_yellow'][bot_id].hide()
-            self.graph_mobs['robots_numbers'][bot_id].hide()
-        elif team_color == 'blue':
+            self.vanishing_memory['robots_yellow'][bot_id] = time()
+        elif team_color == 'blue'and\
+                (time() - self.vanishing_memory['robots_blue'][bot_id]) >= self.vanishing_delay:
             self.graph_mobs['robots_blue'][bot_id].hide()
-            self.graph_mobs['robots_numbers'][bot_id].hide()
+            self.vanishing_memory['robots_blue'][bot_id] = time()
 
     def show_ball(self):
         """ Affiche la balle dans la fenêtre de terrain """
         self.graph_mobs['ball'].show()
+        self.vanishing_memory['ball'] = time()
 
     def show_bot(self, bot_id, team_color):
         """ Affiche un robot dans la fenêtre du terrain """
         if team_color == 'yellow':
             self.graph_mobs['robots_yellow'][bot_id].show()
+            self.vanishing_memory['robots_yellow'][bot_id] = time()
         elif team_color == 'blue':
             self.graph_mobs['robots_blue'][bot_id].show()
+            self.vanishing_memory['robots_blue'][bot_id] = time()
 
     def show_number_option(self):
         """ Affiche les numéros des robots """
