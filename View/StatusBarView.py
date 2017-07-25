@@ -37,6 +37,7 @@ class StatusBarView(QWidget):
         self.label_coord_mouse.setText("[X: {:>5} | Y: {:>5}]".format(str(x), str(y)))
 
     def init_ui(self):
+        self.setFixedHeight(25)
         layout = QHBoxLayout()
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setAlignment(Qt.AlignLeft)

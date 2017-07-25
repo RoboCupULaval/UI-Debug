@@ -3,6 +3,7 @@
 from signal import signal, SIGINT
 
 import PyQt5
+from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox
 from PyQt5.QtGui import QIcon
@@ -60,7 +61,7 @@ class MainController(QWidget):
         self.main_window = MainWindow()
         self.view_menu = QMenuBar(self)
         self.view_logger = LoggerView(self)
-        self.view_screen = FieldView(self)
+        self.view_field_screen = FieldView(self)
         self.view_filter = FilterCtrlView(self)
         self.view_param = ParamView(self)
         self.view_controller = StrategyCtrView(self)
@@ -77,22 +78,23 @@ class MainController(QWidget):
         # Initialisation de la fenêtre
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
-        self.resize(975, 750)
+        self.resize(975, 550)
 
         # Initialisation des Layouts
         # => Field | Filter | StratController (Horizontal)
-        sub_layout = QHBoxLayout()
+        sub_layout = QSplitter(self)
+
         sub_layout.setContentsMargins(0, 0, 0, 0)
         sub_layout.addWidget(self.view_robot_state)
-        sub_layout.addWidget(self.view_screen)
+        sub_layout.addWidget(self.view_field_screen)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
-
+        QSplitter.setSizes(sub_layout, [200, 500, 100, 100])
 
         # => Menu | SubLayout | Media | Logger | Status (Vertical)
         top_layout = QVBoxLayout()
         top_layout.addWidget(self.view_menu)
-        top_layout.addLayout(sub_layout)
+        top_layout.addWidget(sub_layout)
         top_layout.addWidget(self.view_media)
         top_layout.addWidget(self.view_logger)
         top_layout.addWidget(self.view_status)
@@ -140,7 +142,7 @@ class MainController(QWidget):
         fieldMenu = viewMenu.addMenu('Terrain')
 
         toggleFrameRate = QAction("Afficher la fréquence", self, checkable=True)
-        toggleFrameRate.triggered.connect(self.view_screen.toggle_frame_rate)
+        toggleFrameRate.triggered.connect(self.view_field_screen.toggle_frame_rate)
         fieldMenu.addAction(toggleFrameRate)
 
         fieldMenu.addSeparator()
@@ -158,11 +160,11 @@ class MainController(QWidget):
         camMenu = viewMenu.addMenu('Camera')
 
         resetCamAction = QAction("Réinitialiser la caméra", self)
-        resetCamAction.triggered.connect(self.view_screen.reset_camera)
+        resetCamAction.triggered.connect(self.view_field_screen.reset_camera)
         camMenu.addAction(resetCamAction)
 
         lockCamAction = QAction("Bloquer la caméra", self)
-        lockCamAction.triggered.connect(self.view_screen.toggle_lock_camera)
+        lockCamAction.triggered.connect(self.view_field_screen.toggle_lock_camera)
         camMenu.addAction(lockCamAction)
 
         viewMenu.addSeparator()
@@ -170,16 +172,16 @@ class MainController(QWidget):
         botMenu = viewMenu.addMenu('Robot')
 
         vanishAction = QAction('Afficher Vanishing', self, checkable=True)
-        vanishAction.triggered.connect(self.view_screen.toggle_vanish_option)
+        vanishAction.triggered.connect(self.view_field_screen.toggle_vanish_option)
         vanishAction.trigger()
         botMenu.addAction(vanishAction)
 
         vectorAction = QAction('Afficher Vecteur vitesse des robots', self, checkable=True)
-        vectorAction.triggered.connect(self.view_screen.toggle_vector_option)
+        vectorAction.triggered.connect(self.view_field_screen.toggle_vector_option)
         botMenu.addAction(vectorAction)
 
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
-        nuumbAction.triggered.connect(self.view_screen.show_number_option)
+        nuumbAction.triggered.connect(self.view_field_screen.show_number_option)
         nuumbAction.trigger()
         botMenu.addAction(nuumbAction)
 
@@ -245,17 +247,17 @@ class MainController(QWidget):
         try:
             qt_draw = self.draw_handler.get_qt_draw_object(draw)
             if qt_draw is not None:
-                self.view_screen.load_draw(qt_draw)
+                self.view_field_screen.load_draw(qt_draw)
         except:
             pass
 
     def set_ball_pos_on_screen(self, x, y):
         """ Modifie la position de la balle sur le terrain """
-        self.view_screen.set_ball_pos(x, y)
+        self.view_field_screen.set_ball_pos(x, y)
 
     def set_robot_pos_on_screen(self, bot_id, team_color, pst, theta):
         """ Modifie la position et l'orientation d'un robot sur le terrain """
-        self.view_screen.set_bot_pos(bot_id, team_color, pst[0], pst[1], theta)
+        self.view_field_screen.set_bot_pos(bot_id, team_color, pst[0], pst[1], theta)
 
     def set_field_size(self, frame_field_size):
         """ Modifie la dimension du terrain provenant des frames de vision"""
@@ -263,16 +265,16 @@ class MainController(QWidget):
 
     def hide_mob(self, bot_id=None, team_color=None):
         """ Cache l'objet mobile si l'information n'est pas update """
-        if self.view_screen.isVisible() and self.view_screen.option_vanishing:
+        if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
             if bot_id is None:
-                self.view_screen.hide_ball()
+                self.view_field_screen.hide_ball()
             else:
-                self.view_screen.hide_bot(bot_id, team_color)
+                self.view_field_screen.hide_bot(bot_id, team_color)
 
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """
         try:
-            self.view_screen.auto_toggle_visible_target()
+            self.view_field_screen.auto_toggle_visible_target()
         except:
             pass
 
@@ -301,23 +303,23 @@ class MainController(QWidget):
 
     def get_list_of_filters(self):
         """ Récupère la liste des filtres d'affichage """
-        name_filter = list(self.view_screen.draw_filterable.keys())
-        name_filter += list(self.view_screen.multiple_points_map.keys())
+        name_filter = list(self.view_field_screen.draw_filterable.keys())
+        name_filter += list(self.view_field_screen.multiple_points_map.keys())
         name_filter = set(name_filter)
         name_filter.add('None')
         return name_filter
 
     def set_list_of_filters(self, list_filter):
         """ Assigne une liste de filtres d'affichage """
-        self.view_screen.list_filter = list_filter
+        self.view_field_screen.list_filter = list_filter
 
     def deselect_all_robots(self):
         """ Désélectionne tous les robots sur le terrain """
-        self.view_screen.deselect_all_robots()
+        self.view_field_screen.deselect_all_robots()
 
     def select_robot(self, bot_id, team_color):
         """ Sélectionne le robot spécifié par l'index sur le terrain """
-        self.view_screen.select_robot(bot_id, team_color)
+        self.view_field_screen.select_robot(bot_id, team_color)
 
     def get_tactic_controller_is_visible(self):
         """ Requête pour savoir le l'onglet de la page tactique est visible """
@@ -329,7 +331,7 @@ class MainController(QWidget):
 
     def get_cursor_position_from_screen(self):
         """ Récupère la position du curseur depuis le terrain """
-        x, y = self.view_screen.get_cursor_position()
+        x, y = self.view_field_screen.get_cursor_position()
         coord_x, coord_y = QtToolBox.field_ctrl.convert_screen_to_real_pst(x, y)
         return int(coord_x), int(coord_y)
 
@@ -344,7 +346,7 @@ class MainController(QWidget):
 
     def get_fps(self):
         """ Récupère la fréquence de rafraîchissement de l'écran """
-        return self.view_screen.get_fps()
+        return self.view_field_screen.get_fps()
 
     def get_is_serial(self):
         """ Récupère si le serveur de strategyIA est en mode serial (True) ou udp (False)"""

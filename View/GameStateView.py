@@ -90,7 +90,7 @@ class GameStateView(QWidget):
         self.treeWidget = QTreeWidget()
         self.treeWidget.setHeaderLabels(["Robots", ""])
         self.treeWidget.setColumnCount(2)
-        self.setMaximumWidth(250)
+        #self.setMaximumWidth(250)
 
         #self.batt = QtGui.QProgressBar(self)
         #self.batt.setValue(1)
