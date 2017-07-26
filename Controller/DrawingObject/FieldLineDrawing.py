@@ -16,9 +16,7 @@ class FieldLineDrawing(BaseDrawingObject):
         if self.isVisible():
             # Dessine les lignes
             painter.setBrush(QtToolBox.create_brush(is_visible=False))
-            painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
-                                                style='SolidLine',
-                                                width=3))
+
             # Rectangle de contour du terrain
             x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
             length, width = QtToolBox.field_ctrl.get_size_to_screen()
@@ -44,7 +42,7 @@ class FieldLineDrawing(BaseDrawingObject):
 
             painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
                                                 style='SolidLine',
-                                                width=3))
+                                                width= QtToolBox.field_ctrl.line_width * QtToolBox.field_ctrl.ratio_screen))
 
             # Rectangle de contour du terrain
             painter.drawRect(x, y, length, width)
