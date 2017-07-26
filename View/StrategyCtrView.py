@@ -50,7 +50,6 @@ class StrategyCtrView(QWidget):
         self.page_tactic = QWidget()
         self.main_layout.addWidget(self.page_controller)
         self._layout = self.main_layout
-        #self.setMaximumWidth(250)
 
         # Création du contenu des pages
         # + Page Team
@@ -62,7 +61,6 @@ class StrategyCtrView(QWidget):
         self.treeWidget = QTreeWidget()
         self.treeWidget.setHeaderLabels(["", ""])
         self.treeWidget.setColumnCount(2)
-        #self.setMaximumWidth(250)
         self.page_autonomous_scrollarea.setWidget(self.treeWidget)
 
         self.teamColorRow = QTreeWidgetItem(self.treeWidget)
