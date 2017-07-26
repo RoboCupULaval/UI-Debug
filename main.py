@@ -25,11 +25,11 @@ if __name__ == '__main__':
     args = argumentParser(None)
     app = QApplication(sys.argv)
     if args.use_type == 'sim':
-        port = 10024
+        port = 10026
     elif args.use_type == 'kalman':
         port = 10022
     elif args.use_type == 'real':
-        port = 10020
+        port = 10025
     else:  # force real-life
         warnings.warn("Unrecognized use_type argument. force real-life.", SyntaxWarning, stacklevel=2)
         port = 10020

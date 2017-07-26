@@ -25,23 +25,29 @@ class FieldController(object):
         # Dimension du terrain
         self.marge = 250 # C'est quoi ca??
         self._ratio_field_mobs = 1 # C'est quoi ca??
-        # TODO (pturgeon): Utiliser les dimensions en commentaires ci-dessous
+        # TODO (pturgeon): Utiliser les dimensions de compétition en commentaires ci-dessous
         # self._line_width = 10
         self._field_length = 9000
         self._field_width = 6000
-        # self._boundary_width = 300
-        # self._referee_width = 400
+        # self._boundary_width = 250
+        # self._referee_width = 425
         self._goal_width = 1000
-        self._goal_depth = 180
+        self._goal_depth = 200
         # self._goal_wall_width = 20
-        self._center_circle_radius = 1000
+        self._center_circle_radius = 500
         self._defense_radius = 1000
         self._defense_stretch = 500
-        # self._free_kick_from_defense_dist = 700
-        # self._penalty_spot_from_field_line_dist = 450
-        # self._penalty_line_from_spot_dist = 350
+        # self._free_kick_from_defense_dist = 200
+        self._penalty_spot_from_field_line_dist = 750 # Dist. d'un penality kick de la ligne du fond de terrain
+        self._penalty_line_from_spot_dist = 400 # limite derrière le penality kick pour les autres robots
 
+    @property
+    def penalty_spot_from_field_line_dist(self):
+        return self._penalty_spot_from_field_line_dist
 
+    @property
+    def penalty_line_from_spot_dist(self):
+        return self._penalty_line_from_spot_dist
 
     @property
     def field_length(self):
@@ -189,6 +195,6 @@ class FieldController(object):
         self._defense_radius = field.defense_radius
         self._defense_stretch = field.defense_stretch
         # self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
-        # self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
-        # self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
+        self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
+        self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
 

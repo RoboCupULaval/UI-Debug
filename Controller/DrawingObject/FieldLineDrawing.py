@@ -99,6 +99,23 @@ class FieldLineDrawing(BaseDrawingObject):
             x2, y2 = x + length / 2, y + width
             painter.drawLine(x1, y1, x2, y2)
 
+            # Ligne centrale longitudinale (d'un but à l'autre)
+            x1, y1 = x, y + width/2
+            x2, y2 = x + length,  y + width/2
+            painter.drawLine(x1, y1, x2, y2)
+
+            # Ligne penality 1
+            ratio = QtToolBox.field_ctrl.ratio_screen
+            dist_from_goal_line = QtToolBox.field_ctrl.penalty_line_from_spot_dist + QtToolBox.field_ctrl.penalty_spot_from_field_line_dist
+            x1, y1 = x + dist_from_goal_line * ratio, y + width / 2 - 5  # TODO : faire selon la vision
+            x2, y2 = x + dist_from_goal_line * ratio, y + width / 2 + 5
+            painter.drawLine(x1, y1, x2, y2)
+
+            # Ligne penality 2
+            x1, y1 = x + length - dist_from_goal_line * ratio, y + width / 2 - 5  # TODO : faire selon la vision
+            x2, y2 = x + length - dist_from_goal_line * ratio, y + width / 2 + 5
+            painter.drawLine(x1, y1, x2, y2)
+
             # Cercle central
             radius = QtToolBox.field_ctrl.center_circle_radius * QtToolBox.field_ctrl.ratio_screen
             x, y = x + length / 2, y + width / 2
