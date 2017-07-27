@@ -25,7 +25,7 @@ if __name__ == '__main__':
     args = argumentParser(None)
     app = QApplication(sys.argv)
     if args.use_type == 'sim':
-        port = 10024
+        port = 10227
     elif args.use_type == 'kalman':
         port = 10022
     elif args.use_type == 'real':
