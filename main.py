@@ -18,6 +18,8 @@ def argumentParser(argument):
                         help='use_type = sim: utilise les data de grsim dans le port 10024 (il faut set le port de '
                              'grsim a 10024 pour que ca marche) use_type = real: utilise le port normal de la '
                              'vision (10020)')
+    parser.add_argument('team_color', metavar='team_color', type=str, default='blue',
+                        help='team_color, soit blue (default) ou yellow')
     args_ = parser.parse_args(argument)
     return args_
 
@@ -33,8 +35,12 @@ if __name__ == '__main__':
     else:  # force real-life
         warnings.warn("Unrecognized use_type argument. force real-life.", SyntaxWarning, stacklevel=2)
         port = 10020
+    if args.team_color == 'blue':
+        ui_cmd_rcv_port = 20021
+    else:
+        ui_cmd_rcv_port = 20031
 
-    f = MainController(port)
+    f = MainController(port, ui_cmd_rcv_port)
     f.show()
     sys.exit(app.exec_())
     #except NameError:
