@@ -51,6 +51,6 @@ if __name__ == '__main__':
 
     f = MainController(int(config["vision_port"]), int(config["referee_port"]), ui_cmd_sender_port, ui_cmd_receiver_port)
     f.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
     #except NameError:
     #    pass
