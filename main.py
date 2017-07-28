@@ -42,11 +42,11 @@ if __name__ == '__main__':
     config = load_config(args.use_type)
 
     if args.team_color == "blue":
-        ui_cmd_sender_port = 14421
-        ui_cmd_receiver_port = 15521
+        ui_cmd_sender_port = 14444
+        ui_cmd_receiver_port = 15555
     else:
-        ui_cmd_sender_port = 16621
-        ui_cmd_receiver_port = 17721
+        ui_cmd_sender_port = 16666
+        ui_cmd_receiver_port = 17777
 
     f = MainController(int(config["vision_port"]), int(config["referee_port"]), ui_cmd_sender_port, ui_cmd_receiver_port)
     f.show()
