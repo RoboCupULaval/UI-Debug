@@ -63,7 +63,6 @@ class FrameModel:
             if not self._frame_has_been_processed(frame):
                 self._last_frame_caught_time = datetime.now()
                 self._update_view_screen_mobs(datetime.now(), frame)
-                print(frame.geometry)
                 if frame.geometry.field.line_width !=0:
                     self._update_field_size(frame)
 

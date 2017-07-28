@@ -41,12 +41,13 @@ if __name__ == '__main__':
 
     config = load_config(args.use_type)
 
+    # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
     if args.team_color == "blue":
-        ui_cmd_sender_port = 14444
-        ui_cmd_receiver_port = 15555
+        ui_cmd_sender_port = 14444   # DO NOT TOUCH
+        ui_cmd_receiver_port = 15555 # DO NOT TOUCH
     else:
-        ui_cmd_sender_port = 16666
-        ui_cmd_receiver_port = 17777
+        ui_cmd_sender_port = 16666   # DO NOT TOUCH
+        ui_cmd_receiver_port = 17777 # DO NOT TOUCH
 
     f = MainController(int(config["vision_port"]), int(config["referee_port"]), ui_cmd_sender_port, ui_cmd_receiver_port)
     f.show()
