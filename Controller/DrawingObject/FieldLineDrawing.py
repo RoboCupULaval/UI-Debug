@@ -16,9 +16,7 @@ class FieldLineDrawing(BaseDrawingObject):
         if self.isVisible():
             # Dessine les lignes
             painter.setBrush(QtToolBox.create_brush(is_visible=False))
-            painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
-                                                style='SolidLine',
-                                                width=3))
+
             # Rectangle de contour du terrain
             x, y = QtToolBox.field_ctrl.get_top_left_to_screen()
             length, width = QtToolBox.field_ctrl.get_size_to_screen()
@@ -44,7 +42,7 @@ class FieldLineDrawing(BaseDrawingObject):
 
             painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
                                                 style='SolidLine',
-                                                width=3))
+                                                width= QtToolBox.field_ctrl.line_width * QtToolBox.field_ctrl.ratio_screen))
 
             # Rectangle de contour du terrain
             painter.drawRect(x, y, length, width)
@@ -97,6 +95,23 @@ class FieldLineDrawing(BaseDrawingObject):
             # Ligne de demi-terrain
             x1, y1 = x + length / 2, y
             x2, y2 = x + length / 2, y + width
+            painter.drawLine(x1, y1, x2, y2)
+
+            # Ligne centrale longitudinale (d'un but à l'autre)
+            x1, y1 = x, y + width/2
+            x2, y2 = x + length,  y + width/2
+            painter.drawLine(x1, y1, x2, y2)
+
+            # Ligne penality 1
+            ratio = QtToolBox.field_ctrl.ratio_screen
+            dist_from_goal_line = QtToolBox.field_ctrl.penalty_line_from_spot_dist + QtToolBox.field_ctrl.penalty_spot_from_field_line_dist
+            x1, y1 = x + dist_from_goal_line * ratio, y + width / 2 - 5  # TODO : faire selon la vision
+            x2, y2 = x + dist_from_goal_line * ratio, y + width / 2 + 5
+            painter.drawLine(x1, y1, x2, y2)
+
+            # Ligne penality 2
+            x1, y1 = x + length - dist_from_goal_line * ratio, y + width / 2 - 5  # TODO : faire selon la vision
+            x2, y2 = x + length - dist_from_goal_line * ratio, y + width / 2 + 5
             painter.drawLine(x1, y1, x2, y2)
 
             # Cercle central
