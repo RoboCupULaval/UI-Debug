@@ -36,11 +36,13 @@ if __name__ == '__main__':
         warnings.warn("Unrecognized use_type argument. force real-life.", SyntaxWarning, stacklevel=2)
         port = 10020
     if args.team_color == 'blue':
-        ui_cmd_rcv_port = 20021
+        ui_cmd_rcv_port = 30000
+        ui_cmd_sender_port = 40000
     else:
-        ui_cmd_rcv_port = 20031
+        ui_cmd_rcv_port = 30000
+        ui_cmd_sender_port = 40000
 
-    f = MainController(port, ui_cmd_rcv_port)
+    f = MainController(port, ui_cmd_rcv_port, ui_cmd_sender_port)
     f.show()
     sys.exit(app.exec_())
     #except NameError:

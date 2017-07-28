@@ -37,16 +37,12 @@ __author__ = 'RoboCupULaval'
 
 class MainController(QWidget):
     # TODO: Dissocier Controller de la fenêtre principale
-    def __init__(self, port, ui_cmd_rcv_port):
+    def __init__(self, port, ui_cmd_rcv_port, ui_cmd_sender_port):
         super().__init__()
         #port = QtCore.QMetaType.type('QVector<int>')
         self.receiving_port = port
         # Création des Contrôleurs
         self.draw_handler = DrawingObjectFactory(self)
-        if ui_cmd_rcv_port == 20021:
-            ui_cmd_sender_port = 10021
-        else:
-            ui_cmd_sender_port = 10031
 
         # Communication
         # self.network_data_in = UDPServer(self)
