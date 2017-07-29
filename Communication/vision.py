@@ -1,7 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
-from Communication.udp_server import PBPacketReceiver
 from Communication import messages_robocup_ssl_wrapper_pb2 as ssl_wrapper
+from Communication.udp_server import PBPacketReceiver
 
 __author__ = 'RoboCupULaval'
 

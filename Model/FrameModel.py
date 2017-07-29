@@ -63,7 +63,7 @@ class FrameModel:
             if not self._frame_has_been_processed(frame):
                 self._last_frame_caught_time = datetime.now()
                 self._update_view_screen_mobs(datetime.now(), frame)
-                if frame.geometry.field.line_width !=0:
+                if frame.geometry.field.field_width != 0:
                     self._update_field_size(frame)
 
 
@@ -89,9 +89,9 @@ class FrameModel:
         self._current_frame = frame
         self._update_view_screen_ball()
         list_blue_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}  # TODO : Créer une variable globale
-        self._update_view_screen_robot(list_blue_bot_id, 'blue')
+        self._update_view_screen_robot('blue')
         list_yellow_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
-        self._update_view_screen_robot(list_yellow_bot_id, 'yellow')
+        self._update_view_screen_robot('yellow')
 
     def _update_view_screen_ball(self):
         """ Mise à jour des données de la vue de la balle """
@@ -102,25 +102,26 @@ class FrameModel:
         except Exception as e:
             self._controller.hide_mob()
 
-    def _update_view_screen_robot(self, list_id, team_color):
+    def _update_view_screen_robot(self, team_color):
         """ Mise à jour des données de la vue des robots"""
 
         try:
             if team_color == 'yellow':
                 detected_robots = self._current_frame.detection.robots_yellow
+                if detected_robots:
+                    print('yellow')
             elif team_color == 'blue':
                 detected_robots = self._current_frame.detection.robots_blue
+                if detected_robots:
+                    print('blue')
 
             for info_bot in detected_robots:
-                list_id.remove(info_bot.robot_id)
                 bot_id = info_bot.robot_id
                 x = info_bot.x
                 y = info_bot.y
                 theta = info_bot.orientation
                 self._controller.set_robot_pos_on_screen(bot_id, team_color, (x, y), theta)
 
-            for bot_id in list_id:
-                self._controller.hide_mob(bot_id, team_color)
         except Exception as e:
             pass
 

@@ -1,10 +1,16 @@
 # Under MIT License, see LICENSE.txt
 
-from math import cos, sin, atan2
+from math import cos, sin, atan2, sqrt
 
+from ia_gui.src.ia_gui.representation.position import Position
 
 __author__ = 'RoboCupULaval'
 
+
+class FieldCircularArc:
+    pass
+class FieldLineSegment:
+    pass
 
 class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
@@ -186,7 +192,14 @@ class FieldController(object):
 
     def set_field_size(self, field):
         """ Ajuste les dimensions du terrain """
-        # TODO (pturgeon): Utiliser les dimensions en commentaires ci-dessous
+        # if len(field.field_lines) == 0:
+        #     print("legacy")
+        #     self._set_field_size_legacy(field)
+        # else:
+        #     print("new")
+        self._set_field_size_new(field)
+
+    def _set_field_size_legacy(self, field):
         self._line_width = field.line_width
         self._field_length = field.field_length
         self._field_width = field.field_width
@@ -201,4 +214,48 @@ class FieldController(object):
         # self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
         self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
         self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
+
+    def _set_field_size_new(self, field):
+        self.field_lines = self._convert_field_line_segments(field.field_lines)
+        self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+
+        #self._line_width = field.line_width
+        self._field_length = field.field_length #
+        self._field_width = field.field_width #
+        self._boundary_width = field.boundary_width #
+        #self._referee_width = field.referee_width
+        self._goal_width = field.goal_width #
+        self._goal_depth = field.goal_depth #
+        #self._goal_wall_width = field.goal_wall_width
+        self._center_circle_radius = self.field_arcs['CenterCircle'].radius
+        self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
+        self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length/2
+
+
+    def _convert_field_circular_arc(self, field_arcs):
+        result = {}
+        for arc in field_arcs:
+            center = (arc.center.x, arc.center.y)
+            result[arc.name] = FieldCircularArc()
+            result[arc.name].center      = center
+            result[arc.name].radius      = arc.radius
+            result[arc.name].angle_start = arc.a1 # Counter clockwise order
+            result[arc.name].angle_ened  = arc.a2
+            result[arc.name].thickness   = arc.thickness
+        return result
+
+    def _convert_field_line_segments(self, field_lines):
+        result = {}
+        for line in field_lines:
+            p1 = (line.p1.x, line.p1.y)
+            p2 = (line.p2.x, line.p2.y)
+            length = sqrt(line.p1.x**2 + line.p1.y**2)
+            result[line.name] = FieldLineSegment()
+            result[line.name].p1        = p1
+            result[line.name].p2        = p2
+            result[line.name].length    = length
+            result[line.name].thickness = line.thickness
+
+        return result
+
 
