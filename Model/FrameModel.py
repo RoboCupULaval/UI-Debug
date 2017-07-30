@@ -59,23 +59,21 @@ class FrameModel:
     def _catching_frame(self):
         """ Récupère le dernier frame reçu, le met à jour et le sauvegarde """
         if not self._update_is_in_progress():
-            frame = self._get_last_frame()
-            if not self._frame_has_been_processed(frame):
+            frames = self._get_last_frames()
+            #if not self._frame_has_been_processed(frame):
+            for frame in frames:
                 self._last_frame_caught_time = datetime.now()
                 self._update_view_screen_mobs(datetime.now(), frame)
                 if frame.geometry.field.field_width != 0:
                     self._update_field_size(frame)
 
 
-    def _get_last_frame(self):
+    def _get_last_frames(self):
         """ Récupère le dernier frame de la vision ou de l'enregistreur """
         if not self._recorder_is_enable:
-            try:
-                return self._vision.get_latest_frame()
-            except:
-                return self._recorder.get_last_frame()
+            return self._vision.get_latest_frames()
         else:
-            return self._recorder.get_last_frame()
+            return [self._recorder.get_last_frame()]
 
     def _update_field_size(self, frame):
         """ Mise à jour des données de dimensions du terrain"""
@@ -88,9 +86,9 @@ class FrameModel:
             self._data_queue_received.append(frame_pkg)
         self._current_frame = frame
         self._update_view_screen_ball()
-        list_blue_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}  # TODO : Créer une variable globale
+        #if frame.detection.camera_id == 1:
+        #    print(frame.detection.robots_yellow)
         self._update_view_screen_robot('blue')
-        list_yellow_bot_id = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
         self._update_view_screen_robot('yellow')
 
     def _update_view_screen_ball(self):
@@ -108,12 +106,8 @@ class FrameModel:
         try:
             if team_color == 'yellow':
                 detected_robots = self._current_frame.detection.robots_yellow
-                if detected_robots:
-                    print('yellow')
             elif team_color == 'blue':
                 detected_robots = self._current_frame.detection.robots_blue
-                if detected_robots:
-                    print('blue')
 
             for info_bot in detected_robots:
                 bot_id = info_bot.robot_id
