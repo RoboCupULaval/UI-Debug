@@ -2,8 +2,6 @@
 
 from math import cos, sin, atan2, sqrt
 
-from ia_gui.src.ia_gui.representation.position import Position
-
 __author__ = 'RoboCupULaval'
 
 
