@@ -201,22 +201,9 @@ class FieldController(object):
     def set_field_size(self, field):
         if len(field.field_lines) == 0:
             raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
+
         self._set_field_size_new(field)
 
-    def _set_field_size_legacy(self, field):
-        self._line_width = field.line_width
-        self._field_length = field.field_length
-        self._field_width = field.field_width
-
-        self._goal_width = field.goal_width
-        self._goal_depth = field.goal_depth
-
-        self._center_circle_radius = field.center_circle_radius
-        self._defense_radius = field.defense_radius
-        self._defense_stretch = field.defense_stretch
-        
-        self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
-        self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
 
     def _set_field_size_new(self, field):
         self.field_lines = self._convert_field_line_segments(field.field_lines)

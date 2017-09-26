@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
-from qtpy import QtCore
 
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel

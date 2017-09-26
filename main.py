@@ -5,7 +5,6 @@ import warnings
 from configparser import ParsingError, ConfigParser
 
 from PyQt5.QtWidgets import QApplication
-from qtpy import QtCore
 
 from Controller.MainController import MainController
 
