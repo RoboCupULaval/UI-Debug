@@ -11,8 +11,8 @@ import struct
 def getUDPHandler(receiver):
     class ThreadedUDPRequestHandler(BaseRequestHandler):
         def handle(self):
-            data = self.request[0]
-            receiver.set_current_frame(data)
+            frame = self.request[0]
+            receiver.add_frame(frame)
 
     return ThreadedUDPRequestHandler
 
@@ -35,21 +35,28 @@ class ThreadedUDPServer(ThreadingMixIn, UDPServer):
 
 class PBPacketReceiver(object):
     def __init__(self, host, port, packet_type):
-        self.current_packet = None
+        self.received_frames = []
         self.lock = threading.Lock()
         self.packet_type = packet_type
         self.server = ThreadedUDPServer(host, port, self)
 
-    def set_current_frame(self, data):
+    def add_frame(self, frame):
         self.lock.acquire()
-        self.current_data = data
+        self.received_frames.append(frame)
         self.lock.release()
 
-    def get_latest_frame(self):
-        if self.current_data is None:
-            return None
-        packet = self.packet_type()
+    def get_latest_frames(self):
+        if len(self.received_frames) == 0:
+            return []
+
         self.lock.acquire()
-        packet.ParseFromString(self.current_data)
+        frames = self.received_frames.copy()
+        self.received_frames.clear()
         self.lock.release()
-        return packet
+
+        packets = []
+        for frame in frames:
+            packet = self.packet_type()
+            packet.ParseFromString(frame)
+            packets.append(packet)
+        return packets
