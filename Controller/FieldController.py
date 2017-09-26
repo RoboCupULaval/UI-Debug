@@ -222,15 +222,9 @@ class FieldController(object):
 
 
     def _convert_field_circular_arc(self, field_arcs):
-        result = {}
-        for arc in field_arcs:
-            result[arc.name] = FieldCircularArc(arc)
-        return result
+        return {arc.name: FieldCircularArc(arc) for arc in field_arcs}
 
     def _convert_field_line_segments(self, field_lines):
-        result = {}
-        for line in field_lines:
-            result[line.name] = FieldLineSegment(line)
-        return result
+        return {line.name: FieldLineSegment(line) for line in field_lines}
 
 

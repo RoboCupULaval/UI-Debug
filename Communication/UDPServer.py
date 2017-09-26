@@ -10,15 +10,15 @@ __author__ = 'RoboCupULaval'
 
 
 class UDPServer(Thread):
-    def __init__(self, name='UDP', ip="127.0.0.1", rcv_port=20021, snd_port=10221, debug=False):
+    def __init__(self, name='UDP', ip="127.0.0.1", rcv_port=None, snd_port=None, debug=False):
         super().__init__()
         self._num = 0
         self._ip = ip
         self.daemon = True
         self._default_rcv_port = 20021
         self._default_snd_port = 10221
-        self._rcv_port = rcv_port
-        self._snd_port = snd_port
+        self._rcv_port = rcv_port or self._default_rcv_port
+        self._snd_port = snd_port or self._default_snd_port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._event_input = Event()
         self._event_connexion = Event()

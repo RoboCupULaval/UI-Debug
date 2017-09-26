@@ -46,9 +46,6 @@ class GameStateView(QWidget):
         self.update_timer.timeout.connect(self.redraw_callback)
         self.update_timer.start(300)
 
-
-
-
     def _get_style_sheet(self, team=None, bold=False, color='black'):
         param_sheet = ' ; '.join(['color:{}'.format(color),
                                 'border-style: solid',
