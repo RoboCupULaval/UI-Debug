@@ -6,9 +6,19 @@ __author__ = 'RoboCupULaval'
 
 
 class FieldCircularArc:
-    pass
+    def __init__(self, protobuf_arc):
+        self.center = (protobuf_arc.center.x,
+                       protobuf_arc.center.y)
+        self.radius      = protobuf_arc.radius
+        self.angle_start = protobuf_arc.a1 # Counter clockwise order
+        self.angle_end  = protobuf_arc.a2
+        self.thickness   = protobuf_arc.thickness
 class FieldLineSegment:
-    pass
+    def __init__(self, protobuf_line):
+        self.p1 = (protobuf_line.p1.x, protobuf_line.p1.y)
+        self.p2 = (protobuf_line.p2.x, protobuf_line.p2.y)
+        self.length = sqrt(protobuf_line.p1.x**2 + protobuf_line.p1.y**2)
+        self.thickness = protobuf_line.thickness
 
 class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
@@ -189,27 +199,22 @@ class FieldController(object):
         self.ratio_screen = 1 / 10
 
     def set_field_size(self, field):
-        """ Ajuste les dimensions du terrain """
-        # if len(field.field_lines) == 0:
-        #     print("legacy")
-        #     self._set_field_size_legacy(field)
-        # else:
-        #     print("new")
+        if len(field.field_lines) == 0:
+            raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
         self._set_field_size_new(field)
 
     def _set_field_size_legacy(self, field):
         self._line_width = field.line_width
         self._field_length = field.field_length
         self._field_width = field.field_width
-        # self._boundary_width = field.boundary_width
-        # self._referee_width = field.referee_width
+
         self._goal_width = field.goal_width
         self._goal_depth = field.goal_depth
-        #self._goal_wall_width = field.goal_wall_width
+
         self._center_circle_radius = field.center_circle_radius
         self._defense_radius = field.defense_radius
         self._defense_stretch = field.defense_stretch
-        # self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
+        
         self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
         self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
 
@@ -217,14 +222,13 @@ class FieldController(object):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
 
-        #self._line_width = field.line_width
-        self._field_length = field.field_length #
-        self._field_width = field.field_width #
-        self._boundary_width = field.boundary_width #
-        #self._referee_width = field.referee_width
-        self._goal_width = field.goal_width #
-        self._goal_depth = field.goal_depth #
-        #self._goal_wall_width = field.goal_wall_width
+        self._field_length = field.field_length
+        self._field_width = field.field_width
+        self._boundary_width = field.boundary_width
+
+        self._goal_width = field.goal_width
+        self._goal_depth = field.goal_depth
+
         self._center_circle_radius = self.field_arcs['CenterCircle'].radius
         self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
         self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length/2
@@ -233,27 +237,13 @@ class FieldController(object):
     def _convert_field_circular_arc(self, field_arcs):
         result = {}
         for arc in field_arcs:
-            center = (arc.center.x, arc.center.y)
-            result[arc.name] = FieldCircularArc()
-            result[arc.name].center      = center
-            result[arc.name].radius      = arc.radius
-            result[arc.name].angle_start = arc.a1 # Counter clockwise order
-            result[arc.name].angle_ened  = arc.a2
-            result[arc.name].thickness   = arc.thickness
+            result[arc.name] = FieldCircularArc(arc)
         return result
 
     def _convert_field_line_segments(self, field_lines):
         result = {}
         for line in field_lines:
-            p1 = (line.p1.x, line.p1.y)
-            p2 = (line.p2.x, line.p2.y)
-            length = sqrt(line.p1.x**2 + line.p1.y**2)
-            result[line.name] = FieldLineSegment()
-            result[line.name].p1        = p1
-            result[line.name].p2        = p2
-            result[line.name].length    = length
-            result[line.name].thickness = line.thickness
-
+            result[line.name] = FieldLineSegment(line)
         return result
 
 
