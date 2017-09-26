@@ -17,8 +17,8 @@ class FieldView(QWidget):
     """
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
-    frame_rate = 100
-    vanishing_delay = 0.25
+    frame_rate = 30
+    vanishing_delay = 0.0
 
     def __init__(self, controller, debug=False):
         super().__init__(controller)
@@ -49,7 +49,6 @@ class FieldView(QWidget):
         self._cursor_position = 0, 0
 
         # Thread Core
-        self._emit_signal = pyqtSignal
         self._mutex = QMutex()
         self.timer_screen_update = QTimer()
 
@@ -102,7 +101,7 @@ class FieldView(QWidget):
 
     def emit_painting_signal(self):
         """ Émet un signal pour bloquer les ressources et afficher les éléments """
-        self._emit_signal()
+        #self._emit_signal.emit()
         self.update()
 
     def timeout_handler(self):

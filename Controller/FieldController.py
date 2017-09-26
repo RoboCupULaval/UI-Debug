@@ -1,10 +1,24 @@
 # Under MIT License, see LICENSE.txt
 
-from math import cos, sin, atan2
-
+from math import cos, sin, atan2, sqrt
 
 __author__ = 'RoboCupULaval'
 
+
+class FieldCircularArc:
+    def __init__(self, protobuf_arc):
+        self.center = (protobuf_arc.center.x,
+                       protobuf_arc.center.y)
+        self.radius      = protobuf_arc.radius
+        self.angle_start = protobuf_arc.a1 # Counter clockwise order
+        self.angle_end  = protobuf_arc.a2
+        self.thickness   = protobuf_arc.thickness
+class FieldLineSegment:
+    def __init__(self, protobuf_line):
+        self.p1 = (protobuf_line.p1.x, protobuf_line.p1.y)
+        self.p2 = (protobuf_line.p2.x, protobuf_line.p2.y)
+        self.length = sqrt(protobuf_line.p1.x**2 + protobuf_line.p1.y**2)
+        self.thickness = protobuf_line.thickness
 
 class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
@@ -25,23 +39,33 @@ class FieldController(object):
         # Dimension du terrain
         self.marge = 250 # C'est quoi ca??
         self._ratio_field_mobs = 1 # C'est quoi ca??
-        # TODO (pturgeon): Utiliser les dimensions en commentaires ci-dessous
-        # self._line_width = 10
+        # TODO (pturgeon): Utiliser les dimensions de compétition en commentaires ci-dessous
+        self._line_width = 10
         self._field_length = 9000
         self._field_width = 6000
-        # self._boundary_width = 300
-        # self._referee_width = 400
+        # self._boundary_width = 250
+        # self._referee_width = 425
         self._goal_width = 1000
-        self._goal_depth = 180
+        self._goal_depth = 200
         # self._goal_wall_width = 20
-        self._center_circle_radius = 1000
+        self._center_circle_radius = 500
         self._defense_radius = 1000
         self._defense_stretch = 500
-        # self._free_kick_from_defense_dist = 700
-        # self._penalty_spot_from_field_line_dist = 450
-        # self._penalty_line_from_spot_dist = 350
+        # self._free_kick_from_defense_dist = 200
+        self._penalty_spot_from_field_line_dist = 750 # Dist. d'un penality kick de la ligne du fond de terrain
+        self._penalty_line_from_spot_dist = 400 # limite derrière le penality kick pour les autres robots
 
+    @property
+    def line_width(self):
+        return self._line_width
 
+    @property
+    def penalty_spot_from_field_line_dist(self):
+        return self._penalty_spot_from_field_line_dist
+
+    @property
+    def penalty_line_from_spot_dist(self):
+        return self._penalty_line_from_spot_dist
 
     @property
     def field_length(self):
@@ -175,20 +199,32 @@ class FieldController(object):
         self.ratio_screen = 1 / 10
 
     def set_field_size(self, field):
-        """ Ajuste les dimensions du terrain """
-        # TODO (pturgeon): Utiliser les dimensions en commentaires ci-dessous
-        # self._line_width = field.line_width
+        if len(field.field_lines) == 0:
+            raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
+
+        self._set_field_size_new(field)
+
+
+    def _set_field_size_new(self, field):
+        self.field_lines = self._convert_field_line_segments(field.field_lines)
+        self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+
         self._field_length = field.field_length
         self._field_width = field.field_width
-        # self._boundary_width = field.boundary_width
-        # self._referee_width = field.referee_width
+        self._boundary_width = field.boundary_width
+
         self._goal_width = field.goal_width
         self._goal_depth = field.goal_depth
-        #self._goal_wall_width = field.goal_wall_width
-        self._center_circle_radius = field.center_circle_radius
-        self._defense_radius = field.defense_radius
-        self._defense_stretch = field.defense_stretch
-        # self._free_kick_from_defense_dist = field.free_kick_from_defense_dist
-        # self._penalty_spot_from_field_line_dist = field.penalty_spot_from_field_line_dist
-        # self._penalty_line_from_spot_dist = field.penalty_line_from_spot_dist
+
+        self._center_circle_radius = self.field_arcs['CenterCircle'].radius
+        self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
+        self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length/2
+
+
+    def _convert_field_circular_arc(self, field_arcs):
+        return {arc.name: FieldCircularArc(arc) for arc in field_arcs}
+
+    def _convert_field_line_segments(self, field_lines):
+        return {line.name: FieldLineSegment(line) for line in field_lines}
+
 

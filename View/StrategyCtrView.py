@@ -24,6 +24,33 @@ class StrategyCtrView(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.parent = parent
+        self.play_info = None
+        # self.play_info = {'referee_info': 'Unknown',
+        #                   'referee_team_info': 'Unknown',
+        #                   'auto_play_info': 'Unknown',
+        #                   'referee': {'command': '',
+        #                               'stage': '',
+        #                               'stage_time_left': -597707000},
+        #                   'referee_team': {'ours': {'name': '',
+        #                                             'score': 0,
+        #                                             'red_cards': 0,
+        #                                             'yellow_cards': 0,
+        #                                             'yellow_card_times': [],
+        #                                             'timeouts': 0,
+        #                                             'timeout_time': 300000000,
+        #                                             'goalie': 0},
+        #                                    'theirs': {'name': '',
+        #                                               'score': 0,
+        #                                               'red_cards': 0,
+        #                                               'yellow_cards': 0,
+        #                                               'yellow_card_times': [],
+        #                                               'timeouts': 0,
+        #                                               'timeout_time': 300000000,
+        #                                               'goalie': 0}},
+        #                   'auto_play': {'selected_strategy': '',
+        #                                 'current_state': ''},
+        #                   'auto_flag': False}
+
         self.init_ui()
         self.hide()
 
@@ -63,72 +90,8 @@ class StrategyCtrView(QWidget):
         self.treeWidget.setColumnCount(2)
         self.page_autonomous_scrollarea.setWidget(self.treeWidget)
 
-        self.teamColorRow = QTreeWidgetItem(self.treeWidget)
-        self.teamColorRow.setText(0, "Our color")
-        self.teamColorRow.setText(1, self.parent.get_team_color().capitalize())
+        self._populate_play_info()
 
-        self.refereeInfo = QTreeWidgetItem(self.treeWidget)
-        self.refereeInfo.setText(0, "Referee info")
-        self.currentRefCommand = QTreeWidgetItem(self.refereeInfo)
-        self.currentRefCommand.setText(0, "Command")
-        self.currentRefCommand.setText(1, "Unknown")
-
-        self.currentGameStage = QTreeWidgetItem(self.refereeInfo)
-        self.currentGameStage.setText(0, "Stage")
-        self.currentGameStage.setText(1, "Unknown")
-
-        self.stageTimeLeftItem = QTreeWidgetItem(self.refereeInfo)
-        self.stageTimeLeftItem.setText(0, "Stage time left")
-        self.stageTimeLeft = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
-        self.stageTimeLeft.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.stageTimeLeft.setReadOnly(True)
-        self.stageTimeLeft.setDisplayFormat("m:ss")
-        self.treeWidget.setItemWidget(self.stageTimeLeftItem, 1, self.stageTimeLeft)
-
-        self.autoPlayInfo = QTreeWidgetItem(self.treeWidget)
-        self.autoPlayInfo.setText(0, "AutoPlay info")
-        self.autoState = QTreeWidgetItem(self.autoPlayInfo)
-        self.autoState.setText(0, "State")
-        self.autoState.setText(1, "Unknown")
-
-        self.currentStrategy = QTreeWidgetItem(self.autoPlayInfo)
-        self.currentStrategy.setText(0, "Strategy")
-        self.currentStrategy.setText(1, "Unknown")
-
-        self.teamInfo = {}
-        for team in ("ours", "theirs"):
-            self.teamInfo[team] = {}
-            self.teamInfo[team]["item"] = QTreeWidgetItem(self.treeWidget)
-            self.teamInfo[team]["item"].setText(0, "Unknown team")
-            self.teamInfo[team]["goalie"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["goalie"].setText(0, "Goalie ID")
-            self.teamInfo[team]["goalie"].setText(1, "0")
-            self.teamInfo[team]["score"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["score"].setText(0, "Score")
-            self.teamInfo[team]["score"].setText(1, "0")
-            self.teamInfo[team]["red_cards"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["red_cards"].setText(0, "Red cards")
-            self.teamInfo[team]["red_cards"].setText(1, "0")
-            self.teamInfo[team]["yellow_cards"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["yellow_cards"].setText(0, "Yellow cards")
-            self.teamInfo[team]["yellow_cards"].setText(1, "0")
-            self.teamInfo[team]["yellow_card_times_item"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["yellow_card_times_item"].setText(0, "Yellow cards time")
-            self.teamInfo[team]["yellow_card_times"] = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
-            self.teamInfo[team]["yellow_card_times"].setButtonSymbols(QAbstractSpinBox.NoButtons)
-            self.teamInfo[team]["yellow_card_times"].setReadOnly(True)
-            self.teamInfo[team]["yellow_card_times"].setDisplayFormat("m:ss")
-            self.treeWidget.setItemWidget(self.teamInfo[team]["yellow_card_times_item"], 1, self.teamInfo[team]["yellow_card_times"])
-            self.teamInfo[team]["timeouts"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["timeouts"].setText(0, "Timeouts")
-            self.teamInfo[team]["timeouts"].setText(1, "0")
-            self.teamInfo[team]["timeout_time_item"] = QTreeWidgetItem(self.teamInfo[team]["item"])
-            self.teamInfo[team]["timeout_time_item"].setText(0, "Timeout time")
-            self.teamInfo[team]["timeout_time"] = QTimeEdit(QTime().fromMSecsSinceStartOfDay(0))
-            self.teamInfo[team]["timeout_time"].setButtonSymbols(QAbstractSpinBox.NoButtons)
-            self.teamInfo[team]["timeout_time"].setReadOnly(True)
-            self.teamInfo[team]["timeout_time"].setDisplayFormat("m:ss")
-            self.treeWidget.setItemWidget(self.teamInfo[team]["timeout_time_item"], 1, self.teamInfo[team]["timeout_time"])
 
         self.page_autonomous_but_play = QPushButton("Start")
         self.page_autonomous_but_play.clicked.connect(self.send_start_auto)
@@ -268,6 +231,7 @@ class StrategyCtrView(QWidget):
                     if not strat in strats:
                         self.refresh_strat(data['strategy'])
                         break
+        self._populate_play_info()
 
     def get_strat_list(self):
         strat = []
@@ -335,35 +299,105 @@ class StrategyCtrView(QWidget):
 
     def send_stop_auto(self):
         self.parent.model_dataout.send_auto_play(False)
+        
+    def _populate_play_info(self):
+        self.treeWidget.clear()
+
+        if self.play_info is None:
+            return
+
+        self.teamColorRow = QTreeWidgetItem(self.treeWidget)
+        self.teamColorRow.setText(0, "Our color")
+        self.teamColorRow.setText(1, self.parent.get_team_color().capitalize())
+
+        self.refereeInfo = QTreeWidgetItem(self.treeWidget)
+        self.refereeInfo.setText(0, "Referee info")
+        self.refereeInfo.setExpanded(True)
+        self.currentRefCommand = QTreeWidgetItem(self.refereeInfo)
+        self.currentRefCommand.setText(0, "Command")
+        self.currentRefCommand.setText(1, self.play_info['referee']['command'])
+
+        self.currentGameStage = QTreeWidgetItem(self.refereeInfo)
+        self.currentGameStage.setText(0, "Stage")
+        self.currentGameStage.setText(1, self.play_info['referee']['stage'])
+
+        self.stageTimeLeftItem = QTreeWidgetItem(self.refereeInfo)
+        self.stageTimeLeftItem.setText(0, "Stage time left")
+        self.stageTimeLeft = QTimeEdit(QTime().fromMSecsSinceStartOfDay(self.play_info['referee']['stage_time_left'] / 1000))
+        self.stageTimeLeft.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.stageTimeLeft.setReadOnly(True)
+        self.stageTimeLeft.setDisplayFormat("m:ss")
+        self.treeWidget.setItemWidget(self.stageTimeLeftItem, 1, self.stageTimeLeft)
+
+        
+        self.autoPlayInfo = QTreeWidgetItem(self.treeWidget)
+        self.autoPlayInfo.setText(0, "AutoPlay info")
+        self.autoPlayInfo.setExpanded(True)
+        self.autoState = QTreeWidgetItem(self.autoPlayInfo)
+        self.autoState.setText(0, "State")
+        self.autoState.setText(1, self.play_info['auto_play']['current_state'])
+
+        self.currentStrategy = QTreeWidgetItem(self.autoPlayInfo)
+        self.currentStrategy.setText(0, "Strategy")
+        self.currentStrategy.setText(1, self.play_info['auto_play']['selected_strategy'])
+
+
+        self.teamInfo = {}
+        for team in ("ours", "theirs"):
+            info = self.play_info["referee_team"][team]
+            self.teamInfo[team] = {}
+            self.teamInfo[team]["item"] = QTreeWidgetItem(self.treeWidget)
+            self.teamInfo[team]["item"].setText(0, info["name"])
+            self.teamInfo[team]["goalie"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["goalie"].setText(0, "Goalie ID")
+            self.teamInfo[team]["goalie"].setText(1, str(info["goalie"]))
+            self.teamInfo[team]["score"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["score"].setText(0, "Score")
+            self.teamInfo[team]["score"].setText(1,str(info["score"]))
+            self.teamInfo[team]["red_cards"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["red_cards"].setText(0, "Red cards")
+            self.teamInfo[team]["red_cards"].setText(1, str(info["red_cards"]))
+            self.teamInfo[team]["yellow_cards"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["yellow_cards"].setText(0, "Yellow cards")
+            self.teamInfo[team]["yellow_cards"].setText(1, str(info["yellow_cards"]))
+            self.teamInfo[team]["yellow_card_times_item"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["yellow_card_times_item"].setText(0, "Yellow cards time")
+            if len(info["yellow_card_times"]):
+                yellow_card_time = min(info["yellow_card_times"]) / 1000
+            else:
+                yellow_card_time = 0
+            self.teamInfo[team]["yellow_card_times"] = QTimeEdit(QTime().fromMSecsSinceStartOfDay(yellow_card_time))
+            self.teamInfo[team]["yellow_card_times"].setButtonSymbols(QAbstractSpinBox.NoButtons)
+            self.teamInfo[team]["yellow_card_times"].setReadOnly(True)
+            self.teamInfo[team]["yellow_card_times"].setDisplayFormat("m:ss")
+            self.treeWidget.setItemWidget(self.teamInfo[team]["yellow_card_times_item"], 1,
+                                          self.teamInfo[team]["yellow_card_times"])
+            self.teamInfo[team]["timeouts"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["timeouts"].setText(0, "Timeouts")
+            self.teamInfo[team]["timeouts"].setText(1, str(info["timeouts"]))
+            self.teamInfo[team]["timeout_time_item"] = QTreeWidgetItem(self.teamInfo[team]["item"])
+            self.teamInfo[team]["timeout_time_item"].setText(0, "Timeout time")
+            self.teamInfo[team]["timeout_time"] = QTimeEdit(QTime().fromMSecsSinceStartOfDay(info["timeout_time"] / 1000))
+            self.teamInfo[team]["timeout_time"].setButtonSymbols(QAbstractSpinBox.NoButtons)
+            self.teamInfo[team]["timeout_time"].setReadOnly(True)
+            self.teamInfo[team]["timeout_time"].setDisplayFormat("m:ss")
+            self.treeWidget.setItemWidget(self.teamInfo[team]["timeout_time_item"], 1,
+                                          self.teamInfo[team]["timeout_time"])
+            self.teamInfo[team]["item"].setExpanded(True)
+
+        if self.parent.get_team_color() != self._active_team:
+            self._active_team = self.parent.get_team_color()
+            self.teamColorRow.setText(1, self._active_team.capitalize())
+
+        
 
     def update_play_info(self):
         while True:
-            if self.parent.get_team_color() != self._active_team:
-                self._active_team = self.parent.get_team_color()
-                self.teamColorRow.setText(1, self._active_team.capitalize())
 
-            play_info = self.parent.waiting_for_play_info()
-            if play_info is not None:
-                self.currentRefCommand.setText(1, play_info['referee']['command'])
-                self.currentGameStage.setText(1, play_info['referee']['stage'])
-                self.stageTimeLeft.setTime(QTime().fromMSecsSinceStartOfDay(play_info['referee']['stage_time_left']/1000))
+            self.play_info = self.parent.waiting_for_play_info()
 
-                self.currentStrategy.setText(1, play_info['auto_play']['selected_strategy'])
-                self.autoState.setText(1, play_info['auto_play']['current_state'])
-                self.page_autonomous_but_stop.setVisible(play_info['auto_flag'])
-                self.page_autonomous_but_play.setVisible(not play_info['auto_flag'])
+            self.page_autonomous_but_stop.setVisible(self.play_info['auto_flag'])
+            self.page_autonomous_but_play.setVisible(not self.play_info['auto_flag'])
 
-            for team in ("ours", "theirs"):
-                info = play_info["referee_team"][team]
-                self.teamInfo[team]["item"].setText(0, info["name"])
-                self.teamInfo[team]["goalie"].setText(1, str(info["goalie"]))
-                self.teamInfo[team]["score"].setText(1, str(info["score"]))
-                self.teamInfo[team]["red_cards"].setText(1, str(info["red_cards"]))
-                self.teamInfo[team]["yellow_cards"].setText(1, str(info["yellow_cards"]))
-                if len(info["yellow_card_times"]):
-                    yellow_card_time = min(info["yellow_card_times"]) / 1000
-                else:
-                    yellow_card_time = 0
-                self.teamInfo[team]["yellow_card_times"].setTime(QTime().fromMSecsSinceStartOfDay(yellow_card_time))
-                self.teamInfo[team]["timeouts"].setText(1, str(info["timeouts"]))
-                self.teamInfo[team]["timeout_time"].setTime(QTime().fromMSecsSinceStartOfDay(info["timeout_time"]/1000))
+
+

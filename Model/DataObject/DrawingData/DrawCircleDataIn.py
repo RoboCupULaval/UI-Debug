@@ -23,7 +23,7 @@ class DrawCircleDataIn(BaseDataDraw):
             "data['center']: {} n'est pas un point valide.".format(self.data['center'])
         assert 'radius' in keys, \
             "data['radius'] n'existe pas."
-        assert isinstance(self.data['radius'], int), \
+        assert isinstance(self.data['radius'], (int, float)), \
             "data['radius']: {} n'a pas une taille valide (int)".format(type(self.data['radius']))
         assert 0 < self.data['radius'], \
             "data['radius']: {} n'a pas une taille valide (0 < radius)".format(type(self.data['radius']))
