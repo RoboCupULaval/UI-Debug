@@ -1,6 +1,6 @@
 # Under MIT License, see LICENSE.txt
 
-from math import cos, sin, atan2, sqrt
+from math import cos, sin, atan2, sqrt, pi
 
 __author__ = 'RoboCupULaval'
 
@@ -10,8 +10,8 @@ class FieldCircularArc:
         self.center = (protobuf_arc.center.x,
                        protobuf_arc.center.y)
         self.radius      = protobuf_arc.radius
-        self.angle_start = protobuf_arc.a1 # Counter clockwise order
-        self.angle_end  = protobuf_arc.a2
+        self.start_angle = protobuf_arc.a1 * 180 /pi # Counter clockwise order
+        self.end_angle  = protobuf_arc.a2 * 180 / pi
         self.thickness   = protobuf_arc.thickness
 class FieldLineSegment:
     def __init__(self, protobuf_line):
@@ -54,6 +54,9 @@ class FieldController(object):
         # self._free_kick_from_defense_dist = 200
         self._penalty_spot_from_field_line_dist = 750 # Dist. d'un penality kick de la ligne du fond de terrain
         self._penalty_line_from_spot_dist = 400 # limite derrière le penality kick pour les autres robots
+
+        self.field_arcs = {}
+        self.field_lines = {}
 
     @property
     def line_width(self):
@@ -208,6 +211,8 @@ class FieldController(object):
     def _set_field_size_new(self, field):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+        self.field_goal_left = {name: line for name, line in self.field_lines.items() if name.startswith("LeftGoal")}
+        self.field_goal_right = {name: line for name, line in self.field_lines.items() if name.startswith("RightGoal")}
 
         self._field_length = field.field_length
         self._field_width = field.field_width
