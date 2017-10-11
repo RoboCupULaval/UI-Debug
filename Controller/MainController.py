@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
 
 from signal import signal, SIGINT
+from time import sleep
 
 import PyQt5
 from PyQt5.QtWidgets import QSplitter
@@ -9,6 +10,7 @@ from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
 
+from Communication.GrSimReplacementSender import GrSimReplacementSender
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
@@ -49,6 +51,8 @@ class MainController(QWidget):
         self.network_vision = Vision(port=self.receiving_port)
         self.ai_server_is_serial = False
         self.udp_config = UDPConfig(port=self.receiving_port)
+        self.grsim_sender = GrSimReplacementSender()
+
 
         # Création des Modèles
         self.model_frame = FrameModel(self)

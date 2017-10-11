@@ -9,6 +9,7 @@ from threading import Thread, Event
 __author__ = 'RoboCupULaval'
 
 
+# FIXME Why do we have two UDPServer?  One is for Protobuf vision packet the other for StrategyIA communication
 class UDPServer(Thread):
     def __init__(self, name='UDP', ip="127.0.0.1", rcv_port=None, snd_port=None, debug=False):
         super().__init__()

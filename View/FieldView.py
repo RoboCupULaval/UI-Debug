@@ -362,10 +362,18 @@ class FieldView(QWidget):
         """ Gère l'événement double-clic de la souris """
         if not QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.ClosedHandCursor)
-        if self.controller.view_controller.isVisible() and self.controller.view_controller.page_tactic.isVisible():
             x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
-            self.controller.model_dataout.target = (x, y)
-            self.graph_mobs['target'].setPos(x, y)
+
+            if event.buttons() == Qt.RightButton:
+                # GrSim use meter not millimeters
+                self.controller.grsim_sender.set_ball_position((x/1000, y/1000))
+                # If we are playing with tactics we handle double left click
+            elif event.buttons() == Qt.LeftButton \
+                    and self.controller.view_controller.isVisible() \
+                    and self.controller.view_controller.page_tactic.isVisible():
+                self.controller.model_dataout.target = (x, y)
+                self.graph_mobs['target'].setPos(x, y)
+
 
     def mouseReleaseEvent(self, event):
         """ Gère l'événement de relâchement de la touche de la souris """
