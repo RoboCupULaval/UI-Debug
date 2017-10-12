@@ -62,10 +62,10 @@ class FieldLineDrawing(BaseDrawingObject):
 
             # Dessine tous les arcs
             for name, arc in QtToolBox.field_ctrl.field_arcs.items():
-                print(name, arc.thickness)
+                #print(name, arc.thickness)
                 self.drawArc(painter, arc.center, arc.radius, arc.start_angle, arc.end_angle)
             for name, line in QtToolBox.field_ctrl.field_lines.items():
-                print(name, line.thickness)
+                #print(name, line.thickness)
                 self.drawLine(painter, line.p1, line.p2)
 
             painter.setPen(QtToolBox.create_pen(color=(0, 0, 255),

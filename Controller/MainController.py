@@ -262,6 +262,8 @@ class MainController(QWidget):
         """ Modifie la dimension du terrain provenant des frames de vision"""
         QtToolBox.field_ctrl.set_field_size(frame_field_size)
 
+    def hide_ball(self):
+        self.hide_mob(None)
     def hide_mob(self, bot_id=None, team_color=None):
         """ Cache l'objet mobile si l'information n'est pas update """
         if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:

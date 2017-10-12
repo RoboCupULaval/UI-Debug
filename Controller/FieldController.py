@@ -57,6 +57,8 @@ class FieldController(object):
 
         self.field_arcs = {}
         self.field_lines = {}
+        self.field_goal_left = {}
+        self.field_goal_right = {}
 
     @property
     def line_width(self):
