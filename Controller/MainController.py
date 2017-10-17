@@ -6,7 +6,7 @@ from time import sleep
 import PyQt5
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
-                            QAction, QMessageBox
+                            QAction, QMessageBox, QPushButton
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
 
@@ -77,6 +77,9 @@ class MainController(QWidget):
         self.init_menubar()
         self.init_signals()
 
+        # Positions enregistrées des robots
+        self.positions_wrapper = ()
+
     def init_main_window(self):
         # Initialisation de la fenêtre
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
@@ -89,7 +92,28 @@ class MainController(QWidget):
 
         sub_layout.setContentsMargins(0, 0, 0, 0)
         sub_layout.addWidget(self.view_robot_state)
-        sub_layout.addWidget(self.view_field_screen)
+
+        # Ajout des boutons pour sauvegarder et restaurer la position des robots
+        field_widget = QWidget()
+        field_layout = QVBoxLayout()
+
+        buttons_widget = QWidget()
+        buttons_layout = QHBoxLayout(field_widget)
+
+        self.but_save_robot_positions = QPushButton("Save robot positions")
+        self.but_save_robot_positions.clicked.connect(self.save_robot_positions)
+        self.but_restore_robot_positions = QPushButton("Restore robot positions")
+        self.but_restore_robot_positions.clicked.connect(self.restore_robot_position)
+        buttons_layout.addWidget(self.but_save_robot_positions)
+        buttons_layout.addWidget(self.but_restore_robot_positions)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_widget.setLayout(buttons_layout)
+
+        field_layout.addWidget(self.view_field_screen)
+        field_layout.addWidget(buttons_widget)
+        field_widget.setLayout(field_layout)
+
+        sub_layout.addWidget(field_widget)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
         QSplitter.setSizes(sub_layout, [200, 500, 100, 100])
@@ -428,3 +452,10 @@ class MainController(QWidget):
     def recorder_skip_to(self, value):
         self.model_recorder.skip_to(value)
 
+    def save_robot_positions(self):
+        print("saving robot positions")
+        self.positions_wrapper = self.view_field_screen.get_robot_positions_wrapper()
+
+    def restore_robot_position(self):
+        print("restoring robot positions")
+        self.grsim_sender.set_robot_positions(self.positions_wrapper)

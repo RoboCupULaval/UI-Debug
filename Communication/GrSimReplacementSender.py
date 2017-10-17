@@ -2,7 +2,7 @@
 import socket
 
 from Communication.grSim_Packet_pb2 import grSim_Packet
-from Communication.grSim_Replacement_pb2 import grSim_Replacement, grSim_BallReplacement
+from Communication.grSim_Replacement_pb2 import grSim_RobotReplacement
 
 
 def udp_socket(host, port):
@@ -24,7 +24,15 @@ class GrSimReplacementSender:
         packet.replacement.ball.y = position[1]
         packet.replacement.ball.vx = speed[0]
         packet.replacement.ball.vy = speed[1]
+        print(packet)
+        self.client.send(packet.SerializeToString())
 
+    def set_robot_positions(self, positions_wrapper: tuple):
+        packet = grSim_Packet()
+        for position in positions_wrapper:
+            packet.replacement.robots.add(x=position[0], y=position[1], dir=position[2], id=position[3],
+                                          yellowteam=position[4])
+        print(packet)
         self.client.send(packet.SerializeToString())
 
 

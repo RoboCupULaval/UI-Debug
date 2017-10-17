@@ -2,13 +2,13 @@
 import logging
 from time import time
 
-from PyQt5.QtCore import Qt, pyqtSignal, QMutex, QTimer, QEvent
-from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy
+from PyQt5.QtCore import Qt, QMutex, QTimer, QEvent
 from PyQt5.QtGui import QIcon, QPainter
+from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy
 
-from Controller.QtToolBox import QtToolBox
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
+from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
 
@@ -416,3 +416,22 @@ class FieldView(QWidget):
         self.draw_field_lines(painter)
         self.draw_mobs(painter)
         painter.end()
+
+    def get_robot_positions_wrapper(self):
+        positions_wrapper = []
+
+        for i, mob in enumerate(self.graph_mobs['robots_yellow']):
+            if mob.isVisible():
+                position = mob.get_position_on_screen()
+                x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(position[0], position[1])
+                # GrSim use meter not millimeters
+                positions_wrapper.append((x / 1000, y / 1000, position[2], i, True))
+
+        for i, mob in enumerate(self.graph_mobs['robots_blue']):
+            if mob.isVisible():
+                position = mob.get_position_on_screen()
+                x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(position[0], position[1])
+                # GrSim use meter not millimeters
+                positions_wrapper.append((x / 1000, y / 1000, position[2], i, False))
+
+        return tuple(positions_wrapper)
