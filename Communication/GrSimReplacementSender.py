@@ -20,19 +20,21 @@ class GrSimReplacementSender:
     def set_ball_position(self, position: tuple, speed=(0, 0)):
 
         packet = grSim_Packet()
-        packet.replacement.ball.x = position[0]
-        packet.replacement.ball.y = position[1]
+        # GrSim use meter not millimeters
+        packet.replacement.ball.x = position[0] / 1000
+        packet.replacement.ball.y = position[1] / 1000
         packet.replacement.ball.vx = speed[0]
         packet.replacement.ball.vy = speed[1]
-        print(packet)
+
         self.client.send(packet.SerializeToString())
 
-    def set_robot_positions(self, positions_wrapper: tuple):
+    def set_robot_positions(self, teams_formation):
+
         packet = grSim_Packet()
-        for position in positions_wrapper:
-            packet.replacement.robots.add(x=position[0], y=position[1], dir=position[2], id=position[3],
-                                          yellowteam=position[4])
-        print(packet)
+        for x, y, direction, id, yellow_team in teams_formation:
+            # GrSim use meter not millimeters
+            packet.replacement.robots.add(x=x/1000, y=y/1000, dir=direction, id=id, yellowteam=yellow_team)
+
         self.client.send(packet.SerializeToString())
 
 

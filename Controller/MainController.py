@@ -78,7 +78,7 @@ class MainController(QWidget):
         self.init_signals()
 
         # Positions enregistrées des robots
-        self.positions_wrapper = ()
+        self.teams_formation = []
 
     def init_main_window(self):
         # Initialisation de la fenêtre
@@ -100,12 +100,12 @@ class MainController(QWidget):
         buttons_widget = QWidget()
         buttons_layout = QHBoxLayout(field_widget)
 
-        self.but_save_robot_positions = QPushButton("Save robot positions")
-        self.but_save_robot_positions.clicked.connect(self.save_robot_positions)
-        self.but_restore_robot_positions = QPushButton("Restore robot positions")
-        self.but_restore_robot_positions.clicked.connect(self.restore_robot_position)
-        buttons_layout.addWidget(self.but_save_robot_positions)
-        buttons_layout.addWidget(self.but_restore_robot_positions)
+        self.but_save_teams_formation = QPushButton("Save teams formation")
+        self.but_save_teams_formation.clicked.connect(self.save_teams_formation)
+        self.but_restore_teams_formation = QPushButton("Restore teams formation")
+        self.but_restore_teams_formation.clicked.connect(self.restore_teams_formation)
+        buttons_layout.addWidget(self.but_save_teams_formation)
+        buttons_layout.addWidget(self.but_restore_teams_formation)
         buttons_layout.setContentsMargins(0, 0, 0, 0)
         buttons_widget.setLayout(buttons_layout)
 
@@ -452,10 +452,8 @@ class MainController(QWidget):
     def recorder_skip_to(self, value):
         self.model_recorder.skip_to(value)
 
-    def save_robot_positions(self):
-        print("saving robot positions")
-        self.positions_wrapper = self.view_field_screen.get_robot_positions_wrapper()
+    def save_teams_formation(self):
+        self.teams_formation = self.view_field_screen.get_teams_formation()
 
-    def restore_robot_position(self):
-        print("restoring robot positions")
-        self.grsim_sender.set_robot_positions(self.positions_wrapper)
+    def restore_teams_formation(self):
+        self.grsim_sender.set_robot_positions(self.teams_formation)

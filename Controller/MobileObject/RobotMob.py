@@ -21,6 +21,9 @@ class RobotMob(BaseMobileObject):
         self._display_vector = False
         self._radius = 180 / 2
 
+    def get_id(self):
+        return self._bot_id
+
     def get_radius(self):
         return self._radius * QtToolBox.field_ctrl.ratio_field_mobs
 

@@ -365,8 +365,7 @@ class FieldView(QWidget):
             x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
 
             if event.buttons() == Qt.RightButton:
-                # GrSim use meter not millimeters
-                self.controller.grsim_sender.set_ball_position((x/1000, y/1000))
+                self.controller.grsim_sender.set_ball_position((x, y))
                 # If we are playing with tactics we handle double left click
             elif event.buttons() == Qt.LeftButton \
                     and self.controller.view_controller.isVisible() \
@@ -417,21 +416,16 @@ class FieldView(QWidget):
         self.draw_mobs(painter)
         painter.end()
 
-    def get_robot_positions_wrapper(self):
-        positions_wrapper = []
+    def get_teams_formation(self):
+        teams_formation = []
 
-        for i, mob in enumerate(self.graph_mobs['robots_yellow']):
-            if mob.isVisible():
-                position = mob.get_position_on_screen()
-                x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(position[0], position[1])
-                # GrSim use meter not millimeters
-                positions_wrapper.append((x / 1000, y / 1000, position[2], i, True))
+        def wrap_visible_mob(teams_formation, mobs, is_team_yellow):
+            for mob in mobs:
+                if mob.isVisible():
+                    x, y, theta = mob.get_position_in_real()
+                    teams_formation.append((x, y, theta, mob.get_id(), is_team_yellow))
 
-        for i, mob in enumerate(self.graph_mobs['robots_blue']):
-            if mob.isVisible():
-                position = mob.get_position_on_screen()
-                x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(position[0], position[1])
-                # GrSim use meter not millimeters
-                positions_wrapper.append((x / 1000, y / 1000, position[2], i, False))
+        wrap_visible_mob(teams_formation, self.graph_mobs['robots_yellow'], is_team_yellow=True)
+        wrap_visible_mob(teams_formation, self.graph_mobs['robots_blue'], is_team_yellow=False)
 
-        return tuple(positions_wrapper)
+        return teams_formation
