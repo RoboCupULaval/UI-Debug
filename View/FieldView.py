@@ -4,7 +4,7 @@ from time import time
 
 from PyQt5.QtCore import Qt, QMutex, QTimer, QEvent
 from PyQt5.QtGui import QIcon, QPainter
-from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton
 
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
@@ -17,7 +17,7 @@ class FieldView(QWidget):
     """
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
-    frame_rate = 30
+    FRAME_RATE = 30
     vanishing_delay = 0.0
 
     def __init__(self, controller, debug=False):
@@ -67,10 +67,11 @@ class FieldView(QWidget):
     def init_view_event(self):
         """ Initialise les boucles de rafraîchissement des dessins """
         self.timer_screen_update.timeout.connect(self.emit_painting_signal)
-        self.timer_screen_update.start((1 / self.frame_rate) * 1000)
+        self.timer_screen_update.start((1 / self.FRAME_RATE) * 1000)
 
     def init_window(self):
         """ Initialisation de la fenêtre du widget qui affiche le terrain"""
+
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setMouseTracking(True)
         self.installEventFilter(self)
@@ -101,7 +102,6 @@ class FieldView(QWidget):
 
     def emit_painting_signal(self):
         """ Émet un signal pour bloquer les ressources et afficher les éléments """
-        #self._emit_signal.emit()
         self.update()
 
     def timeout_handler(self):
@@ -278,8 +278,9 @@ class FieldView(QWidget):
             mob.deselect()
 
     def select_robot(self, bot_id, team_color):
-        for i, mob in enumerate(self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']):
-            if i == bot_id:
+        mobs = self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']
+        for mob in mobs:
+            if mob.get_id() == bot_id:
                 mob.select()
             else:
                 mob.deselect()
@@ -321,18 +322,18 @@ class FieldView(QWidget):
     def get_nearest_mob_from_position(self, x, y):
         """ Requête pour obtenir la distance, le numéro et le dessin du robot le plus près d'une position """
         nearest = []
-        for id, mob in enumerate(self.graph_mobs['robots_yellow']):
+        for mob in self.graph_mobs['robots_yellow']:
             team_color = 'yellow'
             mob_x, mob_y, _ = mob.get_position_on_screen()
             distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
-            mob_ordered = distance, id, team_color, mob
+            mob_ordered = distance, mob.get_id(), team_color, mob
             nearest.append(mob_ordered)
 
-        for id, mob in enumerate(self.graph_mobs['robots_blue']):
+        for mob in self.graph_mobs['robots_blue']:
             team_color = 'blue'
             mob_x, mob_y, _ = mob.get_position_on_screen()
             distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
-            mob_ordered = distance, id, team_color, mob
+            mob_ordered = distance, mob.get_id(), team_color, mob
             nearest.append(mob_ordered)
         return min(nearest)
 
