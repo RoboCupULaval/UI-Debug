@@ -26,11 +26,11 @@ class FieldLineDrawing(BaseDrawingObject):
 
             # Dessine tous les arcs
             for name, arc in QtToolBox.field_ctrl.field_arcs.items():
-                print(name, str(arc))
-                self.drawArc(painter, arc)
+                #print(name, arc.thickness)
+                self.drawArc(painter, arc.center, arc.radius, arc.start_angle, arc.end_angle)
             for name, line in QtToolBox.field_ctrl.field_lines.items():
-                print(name, str(line))
-                self.drawLine(painter, line)
+                #print(name, line.thickness)
+                self.drawLine(painter, line.p1, line.p2)
 
             # Dessine left goal
             painter.setPen(QtToolBox.create_pen(color=BLUE_COLOR,
