@@ -2,9 +2,35 @@
 
 from math import cos, sin, atan2, sqrt, pi
 
+from Communication import messages_robocup_ssl_geometry_pb2
+from Communication.messages_robocup_ssl_geometry_pb2 import SSL_GeometryFieldSize
+
 __author__ = 'RoboCupULaval'
 
-
+"""
+RightFieldRightPenaltyArc center:(4490.0, 250.0), radius:995.0, start_angle:90.00000250447816, end_angle:180.00000500895632
+CenterCircle center:(0.0, 0.0), radius:495.0, start_angle:0.0, end_angle:360.00001001791264
+LeftFieldRightPenaltyArc center:(-4490.0, -250.0), radius:995.0, start_angle:270.00000068324533, end_angle:360.00001001791264
+RightFieldLeftPenaltyArc center:(4490.0, -250.0), radius:995.0, start_angle:180.00000500895632, end_angle:270.00000068324533
+LeftFieldLeftPenaltyArc center:(-4490.0, 250.0), radius:995.0, start_angle:0.0, end_angle:90.00000250447816
+BottomTouchLine p1:(-4495.0, -2995.0), p2:(4495.0, -2995.0)
+LeftPenaltyStretch p1:(-3495.0, -250.0), p2:(-3495.0, 250.0)
+RightGoalLine p1:(4490.0, -2995.0), p2:(4490.0, 2995.0)
+RightGoalBottomLine p1:(4490.0, -500.0), p2:(4690.0, -500.0)
+LeftGoalLine p1:(-4490.0, -2995.0), p2:(-4490.0, 2995.0)
+RightPenaltyStretch p1:(3495.0, -250.0), p2:(3495.0, 250.0)
+LeftGoalTopLine p1:(-4490.0, 500.0), p2:(-4690.0, 500.0)
+LeftGoalBottomLine p1:(-4490.0, -500.0), p2:(-4690.0, -500.0)
+LeftGoalDepthLine p1:(-4685.0, -500.0), p2:(-4685.0, 500.0)
+RightGoalDepthLine p1:(4685.0, -500.0), p2:(4685.0, 500.0)
+RightGoalTopLine p1:(4490.0, 500.0), p2:(4690.0, 500.0)
+TopTouchLine p1:(-4495.0, 2995.0), p2:(4495.0, 2995.0)
+HalfwayLine p1:(0.0, -2995.0), p2:(0.0, 2995.0)
+CenterLine p1:(-4490.0, 0.0), p2:(4490.0, 0.0)
+LeftGoalDepthLine (-4685.0, -500.0)
+LeftGoalTopLine (-4490.0, 500.0)
+LeftGoalBottomLine (-4490.0, -500.0)
+"""
 class FieldCircularArc:
     def __init__(self, protobuf_arc):
         self.center = (protobuf_arc.center.x,
@@ -13,12 +39,20 @@ class FieldCircularArc:
         self.start_angle = protobuf_arc.a1 * 180 /pi # Counter clockwise order
         self.end_angle  = protobuf_arc.a2 * 180 / pi
         self.thickness   = protobuf_arc.thickness
+
+    def __str__(self):
+        return "center:{}, radius:{}, start_angle:{}, end_angle:{}".format(self.center,
+                                                                             self.radius,
+                                                                             self.start_angle,
+                                                                             self.end_angle)
 class FieldLineSegment:
     def __init__(self, protobuf_line):
         self.p1 = (protobuf_line.p1.x, protobuf_line.p1.y)
         self.p2 = (protobuf_line.p2.x, protobuf_line.p2.y)
         self.length = sqrt(protobuf_line.p1.x**2 + protobuf_line.p1.y**2)
         self.thickness = protobuf_line.thickness
+    def __str__(self):
+        return "p1:{}, p2:{}".format(self.p1, self.p2)
 
 class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
@@ -38,7 +72,7 @@ class FieldController(object):
 
         # Dimension du terrain
         self.marge = 250 # C'est quoi ca??
-        self._ratio_field_mobs = 1 # C'est quoi ca??
+        self._ratio_field_mobs = 1 # Ratio entre la grosseur d'un mob et la grosseur du field
         # TODO (pturgeon): Utiliser les dimensions de compétition en commentaires ci-dessous
         self._line_width = 10
         self._field_length = 9000
@@ -57,6 +91,8 @@ class FieldController(object):
 
         self.field_arcs = {}
         self.field_lines = {}
+        self.field_goal_left = {}
+        self.field_goal_right = {}
 
     @property
     def line_width(self):
@@ -201,7 +237,7 @@ class FieldController(object):
         self._camera_position = (0, 0)
         self.ratio_screen = 1 / 10
 
-    def set_field_size(self, field):
+    def set_field_size(self, field: SSL_GeometryFieldSize):
         if len(field.field_lines) == 0:
             raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
 
@@ -211,8 +247,11 @@ class FieldController(object):
     def _set_field_size_new(self, field):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
-        self.field_goal_left = {name: line for name, line in self.field_lines.items() if name.startswith("LeftGoal")}
-        self.field_goal_right = {name: line for name, line in self.field_lines.items() if name.startswith("RightGoal")}
+        self.field_goal_left = \
+            {name: line for name, line in self.field_lines.items() if name.startswith("LeftGoal") and name != "LeftGoalLine"}
+        self.field_goal_right = \
+            {name: line for name, line in self.field_lines.items() if name.startswith("RightGoal") and name != "RightGoalLine"}
+
 
         self._field_length = field.field_length
         self._field_width = field.field_width

@@ -48,13 +48,6 @@ class FrameModel:
         else:
             return True
 
-    def _frame_has_been_processed(self, frame):
-        """ Vérifie si un frame a été traité ou non """
-        if frame is None:
-            return True
-        if len(self._data_queue_received) == 0 or not frame.detection.frame_number == self._current_frame.detection.frame_number:
-            return False
-        return True
 
     def _catching_frame(self):
         """ Récupère le dernier frame reçu, le met à jour et le sauvegarde """
