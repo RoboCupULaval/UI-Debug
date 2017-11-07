@@ -100,12 +100,12 @@ class MainController(QWidget):
         buttons_widget = QWidget()
         buttons_layout = QHBoxLayout(field_widget)
 
-        self.but_save_teams_formation = QPushButton("Save teams formation")
-        self.but_save_teams_formation.clicked.connect(self.save_teams_formation)
-        self.but_restore_teams_formation = QPushButton("Restore teams formation")
-        self.but_restore_teams_formation.clicked.connect(self.restore_teams_formation)
-        buttons_layout.addWidget(self.but_save_teams_formation)
-        buttons_layout.addWidget(self.but_restore_teams_formation)
+        self.btn_save_teams_formation = QPushButton("Save teams formation")
+        self.btn_save_teams_formation.clicked.connect(self.save_teams_formation)
+        self.btn_restore_teams_formation = QPushButton("Restore teams formation")
+        self.btn_restore_teams_formation.clicked.connect(self.restore_teams_formation)
+        buttons_layout.addWidget(self.btn_save_teams_formation)
+        buttons_layout.addWidget(self.btn_restore_teams_formation)
         buttons_layout.setContentsMargins(0, 0, 0, 0)
         buttons_widget.setLayout(buttons_layout)
 
