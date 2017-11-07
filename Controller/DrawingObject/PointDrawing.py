@@ -16,7 +16,7 @@ class PointDrawing(BaseDrawingObject):
             painter.setPen(QtToolBox.create_pen())
             painter.setBrush(QtToolBox.create_brush(color=self.data['color']))
             x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['point'])
-            radius = self.data['width']
+            radius = self.data['width'] * QtToolBox.field_ctrl.ratio_screen
             painter.drawEllipse(x - radius,
                                 y - radius,
                                 radius * 2,

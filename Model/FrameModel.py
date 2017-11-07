@@ -27,8 +27,10 @@ class FrameModel:
 
         # Initialisation des variables pour le frame catcher
         self._last_frame_caught_time = datetime.min
-        self._frame_catcher_update_rate = 1000.0        # Fréquence d'update en Hz
+        self._frame_catcher_update_rate = 100.0        # Fréquence d'update en Hz
         self._frame_catcher_timer = QTimer()
+
+        self._last_frame_with_ball_time = datetime.min
 
         # Contrôleur
         self._recorder_is_enable = False
@@ -48,13 +50,6 @@ class FrameModel:
         else:
             return True
 
-    def _frame_has_been_processed(self, frame):
-        """ Vérifie si un frame a été traité ou non """
-        if frame is None:
-            return True
-        if len(self._data_queue_received) == 0 or not frame.detection.frame_number == self._current_frame.detection.frame_number:
-            return False
-        return True
 
     def _catching_frame(self):
         """ Récupère le dernier frame reçu, le met à jour et le sauvegarde """
@@ -86,38 +81,36 @@ class FrameModel:
             self._data_queue_received.append(frame_pkg)
         self._current_frame = frame
         self._update_view_screen_ball()
-        #if frame.detection.camera_id == 1:
-        #    print(frame.detection.robots_yellow)
+
         self._update_view_screen_robot('blue')
         self._update_view_screen_robot('yellow')
 
     def _update_view_screen_ball(self):
         """ Mise à jour des données de la vue de la balle """
-        try:
-            x = self._current_frame.detection.balls[0].x
-            y = self._current_frame.detection.balls[0].y
-            self._controller.set_ball_pos_on_screen(x, y)
-        except Exception as e:
-            self._controller.hide_mob()
+        balls = self._current_frame.detection.balls
+        if len(balls) > 0:
+            self._last_frame_with_ball_time = datetime.now()
+            self._controller.set_ball_pos_on_screen(balls[0].x, balls[0].y)
+
+        # Only one frame out of 4 have the ball's geometry
+        if datetime.now() - self._last_frame_with_ball_time > timedelta(seconds=1):
+            self._controller.hide_ball()
 
     def _update_view_screen_robot(self, team_color):
         """ Mise à jour des données de la vue des robots"""
 
-        try:
-            if team_color == 'yellow':
-                detected_robots = self._current_frame.detection.robots_yellow
-            elif team_color == 'blue':
-                detected_robots = self._current_frame.detection.robots_blue
+        if team_color == 'yellow':
+            detected_robots = self._current_frame.detection.robots_yellow
+        elif team_color == 'blue':
+            detected_robots = self._current_frame.detection.robots_blue
 
-            for info_bot in detected_robots:
-                bot_id = info_bot.robot_id
-                x = info_bot.x
-                y = info_bot.y
-                theta = info_bot.orientation
-                self._controller.set_robot_pos_on_screen(bot_id, team_color, (x, y), theta)
+        for info_bot in detected_robots:
+            bot_id = info_bot.robot_id
+            x = info_bot.x
+            y = info_bot.y
+            theta = info_bot.orientation
+            self._controller.set_robot_pos_on_screen(bot_id, team_color, (x, y), theta)
 
-        except Exception as e:
-            pass
 
     def enable_recorder(self):
         """ Activer l'enregistreur sur le modèle de frame """

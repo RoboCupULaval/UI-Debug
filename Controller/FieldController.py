@@ -1,24 +1,34 @@
 # Under MIT License, see LICENSE.txt
 
-from math import cos, sin, atan2, sqrt
+from math import cos, sin, atan2, sqrt, pi
+
+from Communication import messages_robocup_ssl_geometry_pb2
+from Communication.messages_robocup_ssl_geometry_pb2 import SSL_GeometryFieldSize
 
 __author__ = 'RoboCupULaval'
-
 
 class FieldCircularArc:
     def __init__(self, protobuf_arc):
         self.center = (protobuf_arc.center.x,
                        protobuf_arc.center.y)
         self.radius      = protobuf_arc.radius
-        self.angle_start = protobuf_arc.a1 # Counter clockwise order
-        self.angle_end  = protobuf_arc.a2
+        self.start_angle = protobuf_arc.a1 * 180 /pi # Counter clockwise order
+        self.end_angle  = protobuf_arc.a2 * 180 / pi
         self.thickness   = protobuf_arc.thickness
+
+    def __str__(self):
+        return "center:{}, radius:{}, start_angle:{}, end_angle:{}".format(self.center,
+                                                                             self.radius,
+                                                                             self.start_angle,
+                                                                             self.end_angle)
 class FieldLineSegment:
     def __init__(self, protobuf_line):
         self.p1 = (protobuf_line.p1.x, protobuf_line.p1.y)
         self.p2 = (protobuf_line.p2.x, protobuf_line.p2.y)
         self.length = sqrt(protobuf_line.p1.x**2 + protobuf_line.p1.y**2)
         self.thickness = protobuf_line.thickness
+    def __str__(self):
+        return "p1:{}, p2:{}".format(self.p1, self.p2)
 
 class FieldController(object):
     """ La classe Field représente les informations relatives au terrain et ce qui s'y trouve """
@@ -37,23 +47,26 @@ class FieldController(object):
         self.is_y_axe_flipped = True
 
         # Dimension du terrain
-        self.marge = 250 # C'est quoi ca??
-        self._ratio_field_mobs = 1 # C'est quoi ca??
-        # TODO (pturgeon): Utiliser les dimensions de compétition en commentaires ci-dessous
+        self.marge = 250 # Marge au tour du terrain pour l'écran
+        self._ratio_field_mobs = 1 # Ratio entre la grosseur d'un mob et la grosseur du field
         self._line_width = 10
         self._field_length = 9000
         self._field_width = 6000
-        # self._boundary_width = 250
-        # self._referee_width = 425
+
         self._goal_width = 1000
         self._goal_depth = 200
-        # self._goal_wall_width = 20
+
         self._center_circle_radius = 500
         self._defense_radius = 1000
         self._defense_stretch = 500
-        # self._free_kick_from_defense_dist = 200
+
         self._penalty_spot_from_field_line_dist = 750 # Dist. d'un penality kick de la ligne du fond de terrain
         self._penalty_line_from_spot_dist = 400 # limite derrière le penality kick pour les autres robots
+
+        self.field_arcs = {}
+        self.field_lines = {}
+        self.field_goal_left = {}
+        self.field_goal_right = {}
 
     @property
     def line_width(self):
@@ -198,7 +211,7 @@ class FieldController(object):
         self._camera_position = (0, 0)
         self.ratio_screen = 1 / 10
 
-    def set_field_size(self, field):
+    def set_field_size(self, field: SSL_GeometryFieldSize):
         if len(field.field_lines) == 0:
             raise RuntimeError("Receiving legacy geometry message instead of the new geometry message. Update your grsim or check your vision port.")
 
@@ -208,10 +221,14 @@ class FieldController(object):
     def _set_field_size_new(self, field):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+        self.field_goal_left = \
+            {name: line for name, line in self.field_lines.items() if name.startswith("LeftGoal") and name != "LeftGoalLine"}
+        self.field_goal_right = \
+            {name: line for name, line in self.field_lines.items() if name.startswith("RightGoal") and name != "RightGoalLine"}
+
 
         self._field_length = field.field_length
         self._field_width = field.field_width
-        self._boundary_width = field.boundary_width
 
         self._goal_width = field.goal_width
         self._goal_depth = field.goal_depth

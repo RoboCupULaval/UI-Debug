@@ -19,7 +19,7 @@ class MultiplePointsDrawing(BaseDrawingObject):
             painter.setBrush(QtToolBox.create_brush(color=self.data['color']))
             for x, y in self.data['points']:
                 x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(x, y)
-                radius = self.data['width']
+                radius = self.data['width'] * QtToolBox.field_ctrl.ratio_screen * 10
                 painter.drawEllipse(x - radius,
                                     y - radius,
                                     radius * 2,
