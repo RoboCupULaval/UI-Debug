@@ -26,7 +26,7 @@ class GrSimReplacementSender:
         packet.replacement.ball.vx = speed[0]
         packet.replacement.ball.vy = speed[1]
 
-        self.client.send(packet.SerializeToString())
+        self.send_packet(packet)
 
     def set_robot_positions(self, teams_formation):
 
@@ -35,7 +35,13 @@ class GrSimReplacementSender:
             # GrSim use meter not millimeters
             packet.replacement.robots.add(x=x/1000, y=y/1000, dir=direction, id=id, yellowteam=yellow_team)
 
-        self.client.send(packet.SerializeToString())
+            self.send_packet(packet)
+            
+    def send_packet(self, packet):
+        try:
+            self.client.send(packet.SerializeToString())
+        except ConnectionRefusedError:
+            print("Trying to send message to grsim, connection refused")
 
 
 
