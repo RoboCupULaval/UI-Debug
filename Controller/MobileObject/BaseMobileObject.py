@@ -44,6 +44,9 @@ class BaseMobileObject(AbstractDrawingObject):
     def getRotate(self):
         return self._theta
 
+    def get_position_in_real(self):
+        return self._x, self._y, self._theta
+
     def get_position_on_screen(self):
         return QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y, self._theta)
 

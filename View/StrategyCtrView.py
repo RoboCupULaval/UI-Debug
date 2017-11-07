@@ -250,6 +250,7 @@ class StrategyCtrView(QWidget):
     def refresh_tactic(self, tactics):
         self.selectTactic.clear()
         if tactics is not None:
+            tactics.sort()
             for tactic in tactics:
                 self.selectTactic.addItem(tactic)
         else:
@@ -258,6 +259,7 @@ class StrategyCtrView(QWidget):
     def refresh_strat(self, strats):
         self.selectStrat.clear()
         if strats is not None:
+            strats.sort()
             for strat in strats:
                 self.selectStrat.addItem(strat)
         else:

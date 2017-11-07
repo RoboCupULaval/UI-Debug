@@ -1,14 +1,16 @@
 # Under MIT License, see LICENSE.txt
 
 from signal import signal, SIGINT
+from time import sleep
 
 import PyQt5
 from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
-                            QAction, QMessageBox
+                            QAction, QMessageBox, QPushButton
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
 
+from Communication.GrSimReplacementSender import GrSimReplacementSender
 from Model.FrameModel import FrameModel
 from Model.DataInModel import DataInModel
 from Model.DataOutModel import DataOutModel
@@ -49,6 +51,8 @@ class MainController(QWidget):
         self.network_vision = Vision(port=self.receiving_port)
         self.ai_server_is_serial = False
         self.udp_config = UDPConfig(port=self.receiving_port)
+        self.grsim_sender = GrSimReplacementSender()
+
 
         # Création des Modèles
         self.model_frame = FrameModel(self)
@@ -73,6 +77,9 @@ class MainController(QWidget):
         self.init_menubar()
         self.init_signals()
 
+        # Positions enregistrées des robots
+        self.teams_formation = []
+
     def init_main_window(self):
         # Initialisation de la fenêtre
         self.setWindowTitle('RoboCup ULaval | GUI Debug')
@@ -85,7 +92,28 @@ class MainController(QWidget):
 
         sub_layout.setContentsMargins(0, 0, 0, 0)
         sub_layout.addWidget(self.view_robot_state)
-        sub_layout.addWidget(self.view_field_screen)
+
+        # Ajout des boutons pour sauvegarder et restaurer la position des robots
+        field_widget = QWidget()
+        field_layout = QVBoxLayout()
+
+        buttons_widget = QWidget()
+        buttons_layout = QHBoxLayout(field_widget)
+
+        self.btn_save_teams_formation = QPushButton("Save teams formation")
+        self.btn_save_teams_formation.clicked.connect(self.save_teams_formation)
+        self.btn_restore_teams_formation = QPushButton("Restore teams formation")
+        self.btn_restore_teams_formation.clicked.connect(self.restore_teams_formation)
+        buttons_layout.addWidget(self.btn_save_teams_formation)
+        buttons_layout.addWidget(self.btn_restore_teams_formation)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_widget.setLayout(buttons_layout)
+
+        field_layout.addWidget(self.view_field_screen)
+        field_layout.addWidget(buttons_widget)
+        field_widget.setLayout(field_layout)
+
+        sub_layout.addWidget(field_widget)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
         QSplitter.setSizes(sub_layout, [200, 500, 100, 100])
@@ -424,3 +452,8 @@ class MainController(QWidget):
     def recorder_skip_to(self, value):
         self.model_recorder.skip_to(value)
 
+    def save_teams_formation(self):
+        self.teams_formation = self.view_field_screen.get_teams_formation()
+
+    def restore_teams_formation(self):
+        self.grsim_sender.set_robot_positions(self.teams_formation)
