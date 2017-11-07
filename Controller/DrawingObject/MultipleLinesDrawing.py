@@ -17,7 +17,7 @@ class MultipleLinesDrawing(BaseDrawingObject):
         if self.isVisible():
             painter.setPen(QtToolBox.create_pen(color=self.data['color'],
                                                 style=self.data['style'],
-                                                width=self.data['width']))
+                                                width=self.data['width'] * QtToolBox.field_ctrl.ratio_screen))
             painter.setBrush(QtToolBox.create_brush(is_visible=False))
             x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.data['points'][0])
             for sec_point in self.data['points'][1:]:

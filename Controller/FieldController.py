@@ -7,30 +7,6 @@ from Communication.messages_robocup_ssl_geometry_pb2 import SSL_GeometryFieldSiz
 
 __author__ = 'RoboCupULaval'
 
-"""
-RightFieldRightPenaltyArc center:(4490.0, 250.0), radius:995.0, start_angle:90.00000250447816, end_angle:180.00000500895632
-CenterCircle center:(0.0, 0.0), radius:495.0, start_angle:0.0, end_angle:360.00001001791264
-LeftFieldRightPenaltyArc center:(-4490.0, -250.0), radius:995.0, start_angle:270.00000068324533, end_angle:360.00001001791264
-RightFieldLeftPenaltyArc center:(4490.0, -250.0), radius:995.0, start_angle:180.00000500895632, end_angle:270.00000068324533
-LeftFieldLeftPenaltyArc center:(-4490.0, 250.0), radius:995.0, start_angle:0.0, end_angle:90.00000250447816
-BottomTouchLine p1:(-4495.0, -2995.0), p2:(4495.0, -2995.0)
-LeftPenaltyStretch p1:(-3495.0, -250.0), p2:(-3495.0, 250.0)
-RightGoalLine p1:(4490.0, -2995.0), p2:(4490.0, 2995.0)
-RightGoalBottomLine p1:(4490.0, -500.0), p2:(4690.0, -500.0)
-LeftGoalLine p1:(-4490.0, -2995.0), p2:(-4490.0, 2995.0)
-RightPenaltyStretch p1:(3495.0, -250.0), p2:(3495.0, 250.0)
-LeftGoalTopLine p1:(-4490.0, 500.0), p2:(-4690.0, 500.0)
-LeftGoalBottomLine p1:(-4490.0, -500.0), p2:(-4690.0, -500.0)
-LeftGoalDepthLine p1:(-4685.0, -500.0), p2:(-4685.0, 500.0)
-RightGoalDepthLine p1:(4685.0, -500.0), p2:(4685.0, 500.0)
-RightGoalTopLine p1:(4490.0, 500.0), p2:(4690.0, 500.0)
-TopTouchLine p1:(-4495.0, 2995.0), p2:(4495.0, 2995.0)
-HalfwayLine p1:(0.0, -2995.0), p2:(0.0, 2995.0)
-CenterLine p1:(-4490.0, 0.0), p2:(4490.0, 0.0)
-LeftGoalDepthLine (-4685.0, -500.0)
-LeftGoalTopLine (-4490.0, 500.0)
-LeftGoalBottomLine (-4490.0, -500.0)
-"""
 class FieldCircularArc:
     def __init__(self, protobuf_arc):
         self.center = (protobuf_arc.center.x,
@@ -71,21 +47,19 @@ class FieldController(object):
         self.is_y_axe_flipped = True
 
         # Dimension du terrain
-        self.marge = 250 # C'est quoi ca??
+        self.marge = 250 # Marge au tour du terrain pour l'écran
         self._ratio_field_mobs = 1 # Ratio entre la grosseur d'un mob et la grosseur du field
-        # TODO (pturgeon): Utiliser les dimensions de compétition en commentaires ci-dessous
         self._line_width = 10
         self._field_length = 9000
         self._field_width = 6000
-        # self._boundary_width = 250
-        # self._referee_width = 425
+
         self._goal_width = 1000
         self._goal_depth = 200
-        # self._goal_wall_width = 20
+
         self._center_circle_radius = 500
         self._defense_radius = 1000
         self._defense_stretch = 500
-        # self._free_kick_from_defense_dist = 200
+
         self._penalty_spot_from_field_line_dist = 750 # Dist. d'un penality kick de la ligne du fond de terrain
         self._penalty_line_from_spot_dist = 400 # limite derrière le penality kick pour les autres robots
 
@@ -255,7 +229,6 @@ class FieldController(object):
 
         self._field_length = field.field_length
         self._field_width = field.field_width
-        self._boundary_width = field.boundary_width
 
         self._goal_width = field.goal_width
         self._goal_depth = field.goal_depth
