@@ -16,7 +16,7 @@ class CircleDrawing(BaseDrawingObject):
             data = self.data
             painter.setPen(QtToolBox.create_pen(color=data['color'],
                                                 style=data['style'],
-                                                width=2))
+                                                width=2 * QtToolBox.field_ctrl.ratio_screen))
             painter.setBrush(QtToolBox.create_brush(color=data['color']))
             x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*data['center'])
             radius = data['radius'] * QtToolBox.field_ctrl.ratio_screen

@@ -242,7 +242,6 @@ class MainController(QWidget):
 
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
-        loggerAction.trigger()
         toolMenu.addAction(loggerAction)
 
     def init_signals(self):
@@ -286,17 +285,18 @@ class MainController(QWidget):
         """ Modifie la position et l'orientation d'un robot sur le terrain """
         self.view_field_screen.set_bot_pos(bot_id, team_color, pst[0], pst[1], theta)
 
-    def set_field_size(self, frame_field_size):
+    def set_field_size(self, frame_geometry_field):
         """ Modifie la dimension du terrain provenant des frames de vision"""
-        QtToolBox.field_ctrl.set_field_size(frame_field_size)
+        QtToolBox.field_ctrl.set_field_size(frame_geometry_field)
+
+    def hide_ball(self):
+        if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
+            self.view_field_screen.hide_ball()
 
     def hide_mob(self, bot_id=None, team_color=None):
         """ Cache l'objet mobile si l'information n'est pas update """
         if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
-            if bot_id is None:
-                self.view_field_screen.hide_ball()
-            else:
-                self.view_field_screen.hide_bot(bot_id, team_color)
+            self.view_field_screen.hide_bot(bot_id, team_color)
 
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """
