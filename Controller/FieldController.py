@@ -47,7 +47,7 @@ class FieldController(object):
         self.is_y_axe_flipped = True
 
         # Dimension du terrain
-        self.marge = 250 # Marge au tour du terrain pour l'écran
+        self.margin = 250 # Marge au tour du terrain pour l'écran
         self._ratio_field_mobs = 1 # Ratio entre la grosseur d'un mob et la grosseur du field
         self._line_width = 10
         self._field_length = 9000
@@ -126,14 +126,14 @@ class FieldController(object):
         if self.is_y_axe_flipped:
             y *= -1
             rot_y *= -1
-        x = (x + self.field_length / 2 + self.marge) * self.ratio_screen + self._camera_position[0]
-        y = (y + self.field_width / 2 + self.marge) * self.ratio_screen + self._camera_position[1]
+        x = (x + self.field_length / 2 + self.margin) * self.ratio_screen + self._camera_position[0]
+        y = (y + self.field_width / 2 + self.margin) * self.ratio_screen + self._camera_position[1]
         return x, y, atan2(rot_y, rot_x)
 
     def convert_screen_to_real_pst(self, x, y):
         """ Convertir les coordonnées du terrain en coordonnées réelles """
-        x_2 = (x - self._camera_position[0]) / self.ratio_screen - self.field_length / 2 - self.marge
-        y_2 = (y - self._camera_position[1]) / self.ratio_screen - self.field_width / 2 - self.marge
+        x_2 = (x - self._camera_position[0]) / self.ratio_screen - self.field_length / 2 - self.margin
+        y_2 = (y - self._camera_position[1]) / self.ratio_screen - self.field_width / 2 - self.margin
         if self.is_x_axe_flipped:
             x_2 *= -1
         if self.is_y_axe_flipped:
@@ -150,8 +150,8 @@ class FieldController(object):
 
     def get_top_left_to_screen(self):
         """ Donne la position à l'écran du terrain en haut à gauche """
-        x = self.marge * self.ratio_screen + self._camera_position[0]
-        y = self.marge * self.ratio_screen + self._camera_position[1]
+        x = self.margin * self.ratio_screen + self._camera_position[0]
+        y = self.margin * self.ratio_screen + self._camera_position[1]
         return x, y
 
     def get_size_to_screen(self):
@@ -218,7 +218,7 @@ class FieldController(object):
         self._set_field_size_new(field)
 
 
-    def _set_field_size_new(self, field):
+    def _set_field_size_new(self, field: SSL_GeometryFieldSize):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
         self.field_goal_left = \

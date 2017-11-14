@@ -2,14 +2,10 @@
 
 from PyQt5 import QtCore
 
+from Controller.DrawingObject import Color
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
 
-__author__ = 'RoboCupULaval'
-
-# Should probably have a class for color
-BLUE_COLOR = (0, 0, 255)
-YELLOW_COLOR = (255, 255, 0)
 
 class FieldLineDrawing(BaseDrawingObject):
     def __init__(self):
@@ -17,28 +13,26 @@ class FieldLineDrawing(BaseDrawingObject):
 
     def draw(self, painter):
         if self.isVisible():
-            # Dessine les lignes
             painter.setBrush(QtToolBox.create_brush(is_visible=False))
 
-            painter.setPen(QtToolBox.create_pen(color=(255, 255, 255),
+            painter.setPen(QtToolBox.create_pen(color=Color.WHITE,
                                                 style='SolidLine',
                                                 width=QtToolBox.field_ctrl.line_width * QtToolBox.field_ctrl.ratio_screen))
 
-            # Dessine tous les arcs
             for name, arc in QtToolBox.field_ctrl.field_arcs.items():
                 self.drawArc(painter, arc)
             for name, line in QtToolBox.field_ctrl.field_lines.items():
                 self.drawLine(painter, line)
 
             # Dessine left goal
-            painter.setPen(QtToolBox.create_pen(color=BLUE_COLOR,
+            painter.setPen(QtToolBox.create_pen(color=Color.BLUE,
                                                 style='SolidLine',
                                                 width=50 * QtToolBox.field_ctrl.ratio_screen))
             for name, line in QtToolBox.field_ctrl.field_goal_left.items():
                 self.drawLine(painter, line)
 
             # Dessine right goal
-            painter.setPen(QtToolBox.create_pen(color=YELLOW_COLOR,
+            painter.setPen(QtToolBox.create_pen(color=Color.YELLOW,
                                                 style='SolidLine',
                                                 width=50 * QtToolBox.field_ctrl.ratio_screen))
             for name, line in QtToolBox.field_ctrl.field_goal_right.items():

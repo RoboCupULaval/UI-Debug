@@ -262,14 +262,13 @@ class MainController(QWidget):
         QtToolBox.field_ctrl.set_field_size(frame_geometry_field)
 
     def hide_ball(self):
-        self.hide_mob(None)
+        if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
+            self.view_field_screen.hide_ball()
+
     def hide_mob(self, bot_id=None, team_color=None):
         """ Cache l'objet mobile si l'information n'est pas update """
         if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
-            if bot_id is None:
-                self.view_field_screen.hide_ball()
-            else:
-                self.view_field_screen.hide_bot(bot_id, team_color)
+            self.view_field_screen.hide_bot(bot_id, team_color)
 
     def update_target_on_screen(self):
         """ Interruption pour mettre à jour les données de la cible """

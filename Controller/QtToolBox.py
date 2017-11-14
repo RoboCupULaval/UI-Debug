@@ -3,6 +3,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 
+from Controller.DrawingObject import Color
 from Controller.FieldController import FieldController
 
 __author__ = 'RoboCupULaval'
@@ -33,7 +34,7 @@ class QtToolBox:
         return font
 
     @staticmethod
-    def create_pen(color=(0, 0, 0), style='SolidLine', width=1, is_hide=False):
+    def create_pen(color=Color.BLACK, style='SolidLine', width=1, is_hide=False):
         """ Génère un pinceau avec les paramètres entrants """
         qt_pen = QtGui.QPen()
         if not is_hide:
@@ -45,7 +46,7 @@ class QtToolBox:
         return qt_pen
 
     @staticmethod
-    def create_brush(color=(0, 0, 0), is_visible=True):
+    def create_brush(color=Color.BLACK, is_visible=True):
         """ Génère un brosse avec les paramètres entrants """
         if is_visible:
             return QtGui.QBrush(QtGui.QColor(*color))
