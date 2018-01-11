@@ -67,7 +67,9 @@ class TimeListState:
     def append(self, state):
         """ Ajoute un paquet de données """
         self._logger.debug('SET: append => {}'.format(state))
-        self._state.append(Node(state, parent=self._state[-1]))
+        self._state[0].state.update()
+        self._state[0] = Node(state)
+        #self._state.append(Node(state, parent=self._state[-1]))
 
     def copy(self):
         """ Récupère une copie intégrale du TimeListState pour éviter la corruption de la liste originale """
