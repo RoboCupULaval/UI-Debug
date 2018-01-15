@@ -30,7 +30,8 @@ class FrameModel:
         self._frame_catcher_update_rate = 100.0        # Fréquence d'update en Hz
         self._frame_catcher_timer = QTimer()
 
-        self._last_frame_with_ball_time = datetime.min
+        self._ball_last_detected_time = datetime.min
+        self._robots_last_detected_time = {'blue': {}, 'yellow': {}}
 
         # Contrôleur
         self._recorder_is_enable = False
@@ -89,11 +90,11 @@ class FrameModel:
         """ Mise à jour des données de la vue de la balle """
         balls = self._current_frame.detection.balls
         if len(balls) > 0:
-            self._last_frame_with_ball_time = datetime.now()
+            self._ball_last_detected_time = datetime.now()
             self._controller.set_ball_pos_on_screen(balls[0].x, balls[0].y)
 
         # Only one frame out of 4 have the ball's geometry
-        if datetime.now() - self._last_frame_with_ball_time > timedelta(seconds=1):
+        if datetime.now() - self._ball_last_detected_time > timedelta(seconds=1):
             self._controller.hide_ball()
 
     def _update_view_screen_robot(self, team_color):
@@ -110,6 +111,11 @@ class FrameModel:
             y = info_bot.y
             theta = info_bot.orientation
             self._controller.set_robot_pos_on_screen(bot_id, team_color, (x, y), theta)
+            self._robots_last_detected_time[team_color][bot_id] = datetime.now()
+
+        for id, last_detection_time in self._robots_last_detected_time[team_color].items():
+            if datetime.now() - last_detection_time > timedelta(seconds=1):
+                self._controller.hide_mob(id, team_color)
 
 
     def enable_recorder(self):
