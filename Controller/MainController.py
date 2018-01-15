@@ -198,11 +198,6 @@ class MainController(QWidget):
 
         botMenu = viewMenu.addMenu('Robot')
 
-        vanishAction = QAction('Afficher Vanishing', self, checkable=True)
-        vanishAction.triggered.connect(self.view_field_screen.toggle_vanish_option)
-        vanishAction.trigger()
-        botMenu.addAction(vanishAction)
-
         vectorAction = QAction('Afficher Vecteur vitesse des robots', self, checkable=True)
         vectorAction.triggered.connect(self.view_field_screen.toggle_vector_option)
         botMenu.addAction(vectorAction)
@@ -290,12 +285,12 @@ class MainController(QWidget):
         QtToolBox.field_ctrl.set_field_size(frame_geometry_field)
 
     def hide_ball(self):
-        if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
+        if self.view_field_screen.isVisible():
             self.view_field_screen.hide_ball()
 
     def hide_mob(self, bot_id=None, team_color=None):
         """ Cache l'objet mobile si l'information n'est pas update """
-        if self.view_field_screen.isVisible() and self.view_field_screen.option_vanishing:
+        if self.view_field_screen.isVisible():
             self.view_field_screen.hide_bot(bot_id, team_color)
 
     def update_target_on_screen(self):
