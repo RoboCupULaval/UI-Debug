@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QTreeWidget
 from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
                             QPushButton, QGroupBox, QHBoxLayout, QLabel
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
 
 __author__ = 'RoboCupULaval'
@@ -25,31 +25,6 @@ class StrategyCtrView(QWidget):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.play_info = None
-        # self.play_info = {'referee_info': 'Unknown',
-        #                   'referee_team_info': 'Unknown',
-        #                   'auto_play_info': 'Unknown',
-        #                   'referee': {'command': '',
-        #                               'stage': '',
-        #                               'stage_time_left': -597707000},
-        #                   'referee_team': {'ours': {'name': '',
-        #                                             'score': 0,
-        #                                             'red_cards': 0,
-        #                                             'yellow_cards': 0,
-        #                                             'yellow_card_times': [],
-        #                                             'timeouts': 0,
-        #                                             'timeout_time': 300000000,
-        #                                             'goalie': 0},
-        #                                    'theirs': {'name': '',
-        #                                               'score': 0,
-        #                                               'red_cards': 0,
-        #                                               'yellow_cards': 0,
-        #                                               'yellow_card_times': [],
-        #                                               'timeouts': 0,
-        #                                               'timeout_time': 300000000,
-        #                                               'goalie': 0}},
-        #                   'auto_play': {'selected_strategy': '',
-        #                                 'current_state': ''},
-        #                   'auto_flag': False}
 
         self.init_ui()
         self.hide()
@@ -77,6 +52,13 @@ class StrategyCtrView(QWidget):
         self.page_tactic = QWidget()
         self.main_layout.addWidget(self.page_controller)
         self._layout = self.main_layout
+
+        # Change background color to team's color
+        palette = QPalette()
+        bg_color = QColor("#3498db") if self.parent.team_color == "blue" else QColor("#f1c40f")
+        palette.setColor(self.backgroundRole(), bg_color)
+        self.setAutoFillBackground(True)
+        self.setPalette(palette)
 
         # Création du contenu des pages
         # + Page Team

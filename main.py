@@ -13,10 +13,8 @@ __author__ = 'RoboCupULaval'
 def argumentParser(argument):
     """ Argument parser """
     parser = argparse.ArgumentParser(description='option pour initialiser le UI-debug')
-    parser.add_argument('use_type', metavar='use_type', type=str, default='../StrategyIA/config/field/sim.cfg',
-                        help='use_type = sim: utilise les data de grsim dans le port 10024 (il faut set le port de '
-                             'grsim a 10024 pour que ca marche) use_type = real: utilise le port normal de la '
-                             'vision (10020)')
+    parser.add_argument('path_field_config', metavar='use_type', type=str, default='../StrategyIA/config/field/sim.cfg',
+                        help='Path to the field config file in the StratetyIA config/field folder.')
     parser.add_argument('team_color', metavar='team_color', type=str, default='blue',
                         help='team_color, set the color to use for the ports')
     args_ = parser.parse_args(argument)
@@ -38,7 +36,7 @@ if __name__ == '__main__':
     args = argumentParser(None)
     app = QApplication(sys.argv)
 
-    config = load_config(args.use_type)
+    config = load_config(args.path_field_config)
 
     # DO NOT TOUCH EVER THEY ARE HARDCODED BOTH IN THE IA AND IN UI-DEBUG
     if args.team_color == "blue":
@@ -48,6 +46,6 @@ if __name__ == '__main__':
         ui_cmd_sender_port = 16666   # DO NOT TOUCH
         ui_cmd_receiver_port = 17777 # DO NOT TOUCH
 
-    f = MainController(int(config["vision_port"]), int(config["referee_port"]), ui_cmd_sender_port, ui_cmd_receiver_port)
+    f = MainController(args.team_color, int(config["vision_port"]), int(config["referee_port"]), ui_cmd_sender_port, ui_cmd_receiver_port)
     f.show()
     sys.exit(app.exec())

@@ -73,6 +73,7 @@ class GameStateView(QWidget):
         self._logger.debug('INIT: Logger')
 
     def init_ui(self):
+
         self._logger.debug('INIT: UI')
         self.setLayout(self._layout)
         self._layout.setVerticalSpacing(0)
@@ -85,10 +86,10 @@ class GameStateView(QWidget):
         self.scrollArea.setGeometry(QRect(0, 0, 390, 190))
         self.scrollArea.setWidgetResizable(True)
 
+
         self.treeWidget = QTreeWidget()
         self.treeWidget.setHeaderLabels(["Robots", ""])
         self.treeWidget.setColumnCount(2)
-
 
         self.robots_state = {'yellow':{}, 'blue':{}}
         self.prev_robots_state = {}
