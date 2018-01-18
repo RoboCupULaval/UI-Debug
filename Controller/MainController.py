@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox, QPushButton
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot
 
 from Communication.GrSimReplacementSender import GrSimReplacementSender
 from Model.FrameModel import FrameModel
@@ -30,6 +30,8 @@ from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
 from Communication.UDPConfig import UDPConfig
 
+from Controller.DrawingObject import Color
+
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
 
@@ -38,8 +40,10 @@ __author__ = 'RoboCupULaval'
 
 class MainController(QWidget):
     # TODO: Dissocier Controller de la fenêtre principale
-    def __init__(self, vision_port, referee_port, ui_cmd_sender_port, ui_cmd_receiver_port):
+    def __init__(self, team_color, vision_port, referee_port, ui_cmd_sender_port, ui_cmd_receiver_port):
         super().__init__()
+
+        self.team_color = team_color
         #port = QtCore.QMetaType.type('QVector<int>')
         self.receiving_port = vision_port
         # Création des Contrôleurs
@@ -82,7 +86,7 @@ class MainController(QWidget):
 
     def init_main_window(self):
         # Initialisation de la fenêtre
-        self.setWindowTitle('RoboCup ULaval | GUI Debug')
+        self.setWindowTitle('RoboCup ULaval | GUI Debug | Team ' + self.team_color)
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
         self.resize(975, 550)
 
@@ -142,6 +146,8 @@ class MainController(QWidget):
     def init_menubar(self):
         # Titre des menus et dimension
         self.view_menu.setFixedHeight(30)
+
+
         fileMenu = self.view_menu.addMenu('Fichier')
         viewMenu = self.view_menu.addMenu('Affichage')
         toolMenu = self.view_menu.addMenu('Outil')
