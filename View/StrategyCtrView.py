@@ -23,6 +23,9 @@ __author__ = 'RoboCupULaval'
 
 class StrategyCtrView(QWidget):
 
+    NO_STRAT_LABEL = 'Aucune Stratégie disponible'
+    NO_TACTIC_LABEL = 'Aucune Tactique disponible'
+
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.parent = parent
@@ -101,7 +104,7 @@ class StrategyCtrView(QWidget):
         # + Page Strategy
         self.page_strat_vbox = QVBoxLayout()
         self.selectStrat = QComboBox()
-        self.selectStrat.addItem('Aucune Stratégie disponible')
+        self.selectStrat.addItem(self.NO_STRAT_LABEL)
 
         self.page_strat_but_quick1 = QPushButton('')
         self.page_strat_but_quick1.clicked.connect(self.send_quick_strat1)
@@ -150,7 +153,7 @@ class StrategyCtrView(QWidget):
 
         group_vbox.addWidget(QLabel('Tactique à appliquer :'))
         self.selectTactic = QComboBox()
-        self.selectTactic.addItem('Aucune Tactique disponible')
+        self.selectTactic.addItem(self.NO_TACTIC_LABEL)
         group_vbox.addWidget(self.selectTactic)
         self.argumentsLine = QLineEdit()
         group_vbox.addWidget(self.argumentsLine)
@@ -315,7 +318,7 @@ class StrategyCtrView(QWidget):
             for tactic in tactics:
                 self.selectTactic.addItem(tactic)
         else:
-            self.selectTactic.addItem('Aucune Tactique disponible')
+            self.selectTactic.addItem(self.NO_TACTIC_LABEL)
 
     def refresh_strat(self, strats):
         self.selectStrat.clear()
@@ -324,7 +327,7 @@ class StrategyCtrView(QWidget):
             for strat in strats:
                 self.selectStrat.addItem(strat)
         else:
-            self.selectStrat.addItem('Aucune Stratégie disponible')
+            self.selectStrat.addItem(self.NO_STRAT_LABEL)
 
     def send_quick_strat1(self):
         if len(self.strat_default) > 0:
@@ -344,19 +347,19 @@ class StrategyCtrView(QWidget):
 
     def send_strat(self):
         strat = str(self.selectStrat.currentText())
-        if not strat == 'Aucune Stratégie disponible':
+        if strat != self.NO_STRAT_LABEL:
             self.parent.model_dataout.send_strategy(strat, self.parent.get_team_color())
 
     def send_apply_tactic(self):
         tactic = str(self.selectTactic.currentText())
-        if not tactic == 'Aucune Tactique disponible':
+        if tactic != self.NO_TACTIC_LABEL:
             self.send_tactic(tactic)
 
     def send_tactic(self, tactic: str):
         id_bot = int(self.selectRobot.currentText())
-        args = str(self.argumentsLine.text()).split()
+        args_textbox = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
-        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), tactic=tactic, target=target, args=args)
+        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), tactic=tactic, target=target, args=args_textbox)
 
     def send_tactic_stop(self):
         id_bot = int(self.selectRobot.currentText())
