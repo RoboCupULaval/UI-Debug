@@ -229,7 +229,7 @@ class StrategyCtrView(QWidget):
             if key == QtCore.Qt.Key_Q:
                 self.send_quick_strat1()
             if key == QtCore.Qt.Key_W:
-                    self.send_quick_strat2()
+                self.send_quick_strat2()
             if key == QtCore.Qt.Key_S:
                 self.send_strat_stop()
         elif page_id == 2: # Tactic
