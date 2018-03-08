@@ -363,14 +363,14 @@ class StrategyCtrView(QWidget):
 
     def send_tactic_stop(self):
         id_bot = int(self.selectRobot.currentText())
-        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'tStop', args=None)
+        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_tactic_stop_all(self):
         for id_bot in range(12):  # TODO (pturgeon): Changer pour constante globable (ou liste?)
-            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'tStop', args=None)
+            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strategy('pStop', self.parent.get_team_color())
+        self.parent.model_dataout.send_strategy('DoNothing', self.parent.get_team_color())
 
     def toggle_show_hide(self):
         if self.isVisible():
