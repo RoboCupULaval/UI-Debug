@@ -137,6 +137,7 @@ class DataInModel(Thread):
                 package = self._udp_receiver.waiting_for_last_data()
                 self._extract_and_distribute_data(package)
             except AttributeError as e:
+
                 self._logger.warn(type(e).__name__ + str(e))
             except TypeError:
                 pass
@@ -168,8 +169,8 @@ class DataInModel(Thread):
     def _distrib_BaseDataDraw(self, data):
         """ Traite le paquet de type générique DataDraw """
         self._logger.debug('DISTRIB: BaseDataDraw')
-        self._data_draw['notset'].append(data)
-        self.show_draw(self._data_draw['notset'][-1])
+        #self._data_draw['notset'].append(data)
+        self.show_draw(data)
 
     def _distrib_StratGeneral(self, data):
         """ Traite le paquet spécifique StratGeneral """
