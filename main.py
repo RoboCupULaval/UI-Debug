@@ -24,7 +24,7 @@ def load_config(path):
     config_parser = ConfigParser(allow_no_value=False)
     try:
         print("Loading", path, " port configuration file.")
-        config_parser.read_file(open(path))
+        config_parser   .read_file(open(path))
     except FileNotFoundError:
         raise RuntimeError("Impossible de lire le fichier de configuration.")
     except ParsingError:
