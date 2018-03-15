@@ -5,7 +5,7 @@ from math import atan2
 from math import sin
 from math import pi
 
-from Controller.DrawingObject import Color
+from Controller.DrawingObject.Color import CLEAR_YELLOW, SKY_BLUE, RED, BLACK
 from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 from Controller.QtToolBox import QtToolBox
 
@@ -42,16 +42,16 @@ class RobotMob(BaseMobileObject):
         if self.isVisible():
             x, y, theta = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y, self._theta)
             if self._team_color == 'yellow':
-                painter.setBrush(QtToolBox.create_brush(color=Color.CLEAR_YELLOW))
+                painter.setBrush(QtToolBox.create_brush(color=CLEAR_YELLOW))
             else:
-                painter.setBrush(QtToolBox.create_brush(color=Color.SKY_BLUE))
+                painter.setBrush(QtToolBox.create_brush(color=SKY_BLUE))
 
             if self._display_select:
-                painter.setPen(QtToolBox.create_pen(color=Color.RED,
+                painter.setPen(QtToolBox.create_pen(color=RED,
                                                     style='SolidLine',
                                                     width=2))
             else:
-                painter.setPen(QtToolBox.create_pen(color=Color.BLACK,
+                painter.setPen(QtToolBox.create_pen(color=BLACK,
                                                     style='SolidLine',
                                                     width=1))
 
@@ -64,7 +64,7 @@ class RobotMob(BaseMobileObject):
             if self.speed_vector_isVisible():
                 v_x, v_y = self._speed_vector
                 x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x + v_x * 180, self._y + v_y * 180)
-                painter.setPen(QtToolBox.create_pen(color=Color.RED,
+                painter.setPen(QtToolBox.create_pen(color=RED,
                                                     width=3))
                 painter.drawLine(x, y, x2, y2)
                 if (v_x ** 2 + v_y ** 2) > 0.05:
