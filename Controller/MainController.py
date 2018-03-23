@@ -462,4 +462,5 @@ class MainController(QWidget):
         self.teams_formation = self.view_field_screen.get_teams_formation()
 
     def restore_teams_formation(self):
-        self.grsim_sender.set_robot_positions(self.teams_formation)
+        self.grsim_sender.set_robots_position(self.teams_formation)
+

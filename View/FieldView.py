@@ -4,7 +4,7 @@ from time import time
 
 from PyQt5.QtCore import Qt, QMutex, QTimer, QEvent
 from PyQt5.QtGui import QIcon, QPainter
-from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton, QApplication
 
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
@@ -63,6 +63,9 @@ class FieldView(QWidget):
         self.init_tool_bar()
         self._init_logger()
         self.show()
+
+        # Selected mob
+        self.selected_mob = None
 
     def init_view_event(self):
         """ Initialise les boucles de rafraîchissement des dessins """
@@ -282,6 +285,7 @@ class FieldView(QWidget):
         for mob in mobs:
             if mob.get_id() == bot_id:
                 mob.select()
+                self.selected_mob = mob
             else:
                 mob.deselect()
 
@@ -366,8 +370,14 @@ class FieldView(QWidget):
             x, y = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
 
             if event.buttons() == Qt.RightButton:
-                self.controller.grsim_sender.set_ball_position((x, y))
-                # If we are playing with tactics we handle double left click
+                if QApplication.keyboardModifiers() == Qt.ControlModifier and self.selected_mob is not None:
+                    direction = self.selected_mob.get_position_in_real()[2]
+                    team_color_is_yellow = "yellow" == self.controller.get_team_color()
+                    self.controller.grsim_sender.set_robot_position(x, y, direction, self.selected_mob.get_id(),
+                                                                    team_color_is_yellow)
+                else:
+                    self.controller.grsim_sender.set_ball_position((x, y))
+            # If we are playing with tactics we handle double left click
             elif event.buttons() == Qt.LeftButton \
                     and self.controller.view_controller.isVisible() \
                     and self.controller.view_controller.page_tactic.isVisible():

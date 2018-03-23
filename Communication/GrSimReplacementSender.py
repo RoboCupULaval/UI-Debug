@@ -28,14 +28,20 @@ class GrSimReplacementSender:
 
         self.send_packet(packet)
 
-    def set_robot_positions(self, teams_formation):
-
+    def set_robots_position(self, teams_formation):
         packet = grSim_Packet()
-        for x, y, direction, id, yellow_team in teams_formation:
+        for x, y, direction, robot_id, yellow_team in teams_formation:
             # GrSim use meter not millimeters
-            packet.replacement.robots.add(x=x/1000, y=y/1000, dir=direction, id=id, yellowteam=yellow_team)
+            packet.replacement.robots.add(x=x/1000, y=y/1000, dir=direction, id=robot_id, yellowteam=yellow_team)
 
             self.send_packet(packet)
+
+    def set_robot_position(self, x, y, direction, robot_id, yellow_team):
+        packet = grSim_Packet()
+        # GrSim use meter not millimeters
+        packet.replacement.robots.add(x=x / 1000, y=y / 1000, dir=direction, id=robot_id, yellowteam=yellow_team)
+
+        self.send_packet(packet)
             
     def send_packet(self, packet):
         try:
