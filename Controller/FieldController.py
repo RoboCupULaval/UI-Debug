@@ -190,13 +190,13 @@ class FieldController(object):
 
     def zoom(self):
         """ Zoom la caméra de +10% """
-        if not self._lock_camera and self.ratio_screen < 1:
-            self.ratio_screen *= 1
+        if not self._lock_camera:
+            self.ratio_screen *= 1.10
 
     def dezoom(self):
         """ Dézoom la caméra de -10% """
-        if not self._lock_camera and self.ratio_screen > 0.1:
-            self.ratio_screen *= 1
+        if not self._lock_camera:
+            self.ratio_screen *= 0.90
 
     def toggle_lock_camera(self):
         """ Débloque/Bloque le mouvement et le zoom de la caméra """
