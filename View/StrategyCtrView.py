@@ -1,10 +1,12 @@
 # Under MIT License, see LICENSE.txt
+from collections import OrderedDict
+
 from PyQt5 import QtCore, Qt
 
 from PyQt5.QtCore import QRect
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import QTime
-from PyQt5.QtWidgets import QAbstractSpinBox
+from PyQt5.QtWidgets import QAbstractSpinBox, QCheckBox
 from PyQt5.QtWidgets import QDateTimeEdit
 from PyQt5.QtWidgets import QFormLayout
 from PyQt5.QtWidgets import QLineEdit
@@ -41,6 +43,8 @@ class StrategyCtrView(QWidget):
         self.update_timer.timeout.connect(self.update_combobox)
         self.update_timer.start(500)
 
+        self.strategies = {}
+        self.roles = {}
         self.tactic_default = []
 
     def init_loop(self):
@@ -105,6 +109,19 @@ class StrategyCtrView(QWidget):
         self.page_strat_vbox = QVBoxLayout()
         self.selectStrat = QComboBox()
         self.selectStrat.addItem(self.NO_STRAT_LABEL)
+        self.selectStrat.currentIndexChanged.connect(self.strategy_selected)
+        self.page_strat_use_role = QCheckBox("Forcé les rôles")
+        self.page_strat_use_role.stateChanged.connect(self.toggle_strat_use_role)
+
+        # Roles
+        self.page_strat_form_roles = QFormLayout()
+
+        qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
+        strat_combox = QVBoxLayout()
+        strat_combox.addLayout(self.page_strat_form_roles)
+        strat_combox.addWidget(self.page_strat_use_role)
+        strat_combox.addWidget(self.selectStrat)
+        qgroup.setLayout(strat_combox)
 
         self.page_strat_but_quick1 = QPushButton('')
         self.page_strat_but_quick1.clicked.connect(self.send_quick_strat1)
@@ -121,10 +138,6 @@ class StrategyCtrView(QWidget):
         self.page_strat_but_cancel.setStyleSheet('QPushButton {color:red;}')
         self.page_strat_but_cancel.clicked.connect(self.send_strat_stop)
 
-        qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
-        strat_combox = QVBoxLayout()
-        strat_combox.addWidget(self.selectStrat)
-        qgroup.setLayout(strat_combox)
 
         but_quick_group = QHBoxLayout()
         but_quick_group.addWidget(self.page_strat_but_quick1)
@@ -257,6 +270,7 @@ class StrategyCtrView(QWidget):
                         break
 
             if data['strategy'] is not None:
+                self.strategies = data['strategy']
                 strats = self.get_strat_list()
                 for strat in data['strategy']:
                     if not strat in strats:
@@ -323,11 +337,42 @@ class StrategyCtrView(QWidget):
     def refresh_strat(self, strats):
         self.selectStrat.clear()
         if strats is not None:
-            strats.sort()
+            strats = OrderedDict(sorted(strats.items()))
             for strat in strats:
                 self.selectStrat.addItem(strat)
         else:
             self.selectStrat.addItem(self.NO_STRAT_LABEL)
+
+    def toggle_strat_use_role(self):
+        print(self.page_strat_use_role.isChecked())
+        # enable/disable all the roles
+
+    def strategy_selected(self):
+        name = str(self.selectStrat.currentText())
+        if name != '':
+            required_roles = self.strategies[name]
+
+            # Remove role widget
+            for i in range(0, self.page_strat_form_roles.rowCount()):
+                self.page_strat_form_roles.removeRow(i)
+
+            # delete unused role
+            for prev_role in list(self.roles.keys()):
+                if prev_role not in required_roles:
+                    del self.roles[prev_role]
+
+            # Add new one
+            for r in required_roles:
+                if r not in self.roles:
+                    selectRobot = QComboBox()
+                    [selectRobot.addItem(str(x)) for x in range(12)]
+
+                    self.roles[r] = selectRobot
+
+                self.page_strat_form_roles.addRow(r, self.roles[r])
+                self.roles[r].setEnabled(self.page_strat_use_role.isChecked())
+
+
 
     def send_quick_strat1(self):
         if len(self.strat_default) > 0:

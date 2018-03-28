@@ -20,9 +20,10 @@ class StratGeneralAcc(BaseDataAccessor):
     def _check_optional_data(self):
         keys = self.data.keys()
         if 'strategy' in keys:
-            assert isinstance(self.data['strategy'], list)
-            for value in self.data['strategy']:
-                assert isinstance(value, str)
+            assert isinstance(self.data['strategy'], dict)
+            for key, value in self.data['strategy'].items():
+                assert isinstance(key, str)
+                assert isinstance(value, list)
         else:
             self.data['strategy'] = None
 
@@ -33,17 +34,10 @@ class StratGeneralAcc(BaseDataAccessor):
         else:
             self.data['tactic'] = None
 
-        if 'action' in keys:
-            assert isinstance(self.data['action'], list)
-            for value in self.data['action']:
-                assert isinstance(value, str)
-        else:
-            self.data['action'] = None
-
     @staticmethod
     def get_default_data_dict():
-        return dict(zip(['strategy', 'tactic', 'action'],
-                        ['None', 'None', 'None']))
+        return dict(zip(['strategy', 'tactic'],
+                        ['None', 'None']))
 
     @staticmethod
     def get_type():
