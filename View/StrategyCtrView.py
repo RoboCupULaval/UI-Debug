@@ -130,7 +130,7 @@ class StrategyCtrView(QWidget):
         self.page_strat_but_quick2.clicked.connect(self.send_quick_strat1)
         self.page_strat_but_quick2.setVisible(False)
         self.page_strat_but_apply = QPushButton('Appliquer')
-        self.page_strat_but_apply.clicked.connect(self.send_strat)
+        self.page_strat_but_apply.clicked.connect(self.send_selected_strat)
         self.page_strat_but_cancel = QPushButton("STOP (S)")
         but_cancel_font = QFont()
         but_cancel_font.setBold(True)
@@ -344,8 +344,8 @@ class StrategyCtrView(QWidget):
             self.selectStrat.addItem(self.NO_STRAT_LABEL)
 
     def toggle_strat_use_role(self):
-        print(self.page_strat_use_role.isChecked())
-        # enable/disable all the roles
+        for combo_box in self.roles.values():
+            combo_box.setEnabled(self.page_strat_use_role.isChecked())
 
     def strategy_selected(self):
         name = str(self.selectStrat.currentText())
@@ -372,15 +372,16 @@ class StrategyCtrView(QWidget):
                 self.page_strat_form_roles.addRow(r, self.roles[r])
                 self.roles[r].setEnabled(self.page_strat_use_role.isChecked())
 
-
+    def _send_strategy(self, strategy_name, role=None):
+        self.parent.model_dataout.send_strategy(strategy_name, self.parent.get_team_color(), role)
 
     def send_quick_strat1(self):
         if len(self.strat_default) > 0:
-            self.parent.model_dataout.send_strategy(self.strat_default[0], self.parent.get_team_color())
+            self._send_strategy(self.strat_default[0])
 
     def send_quick_strat2(self):
         if len(self.strat_default) > 1:
-            self.parent.model_dataout.send_strategy(self.strat_default[1], self.parent.get_team_color())
+            self._send_strategy(self.strat_default[1])
 
     def send_quick_tactic1(self):
         if len(self.tactic_default) > 0:
@@ -390,10 +391,14 @@ class StrategyCtrView(QWidget):
         if len(self.tactic_default) > 1:
             self.send_tactic(self.tactic_default[1])
 
-    def send_strat(self):
-        strat = str(self.selectStrat.currentText())
-        if strat != self.NO_STRAT_LABEL:
-            self.parent.model_dataout.send_strategy(strat, self.parent.get_team_color())
+    def send_selected_strat(self):
+        strat_name = str(self.selectStrat.currentText())
+        if self.page_strat_use_role.isChecked():
+            role = {r: int(box.currentText()) for r, box in self.roles.items()}
+        else:
+            role = None
+        if strat_name != self.NO_STRAT_LABEL:
+            self._send_strategy(strat_name, role)
 
     def send_apply_tactic(self):
         tactic = str(self.selectTactic.currentText())
