@@ -36,8 +36,8 @@ class RobotStrategicStateAcc(BaseDataAccessor):
                 for state in self.data[team][id]:
                     assert isinstance(state, str), \
                         "data[{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state)
-                    assert state in {'target', 'action', 'tactic'}, \
-                        "data[{}][{}]: {} devrait avoir la valeur suivante ('target' | 'action' | 'tactic')".format(team, id, state)
+                    assert state in {'tactic', 'state', 'role'}, \
+                        "data[{}][{}]: {} devrait avoir la valeur suivante ('tactic' | 'state' | 'role')".format(team, id, state)
                     if state == 'target':
                         assert self._point_is_valid(self.data[team][id][state]), \
                             "data[{}][{}][{}]: {} n'est pas un point valide".format(team, id, state, self.data[team][id][state])

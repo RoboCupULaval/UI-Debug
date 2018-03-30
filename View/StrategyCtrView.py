@@ -353,7 +353,8 @@ class StrategyCtrView(QWidget):
             required_roles = self.strategies[name]
 
             # Remove role widget
-            for i in range(0, self.page_strat_form_roles.rowCount()):
+            nb_widget = self.page_strat_form_roles.rowCount()
+            for i in reversed(range(0, nb_widget)):
                 self.page_strat_form_roles.removeRow(i)
 
             # delete unused role
@@ -362,14 +363,13 @@ class StrategyCtrView(QWidget):
                     del self.roles[prev_role]
 
             # Add new one
-            for r in required_roles:
-                if r not in self.roles:
-                    selectRobot = QComboBox()
-                    [selectRobot.addItem(str(x)) for x in range(12)]
+            for i, r in enumerate(required_roles):
+                select_robot = QComboBox()
+                [select_robot.addItem(str(x)) for x in range(12)]
 
-                    self.roles[r] = selectRobot
+                self.page_strat_form_roles.insertRow(i, r, select_robot)
 
-                self.page_strat_form_roles.addRow(r, self.roles[r])
+                self.roles[r] = select_robot
                 self.roles[r].setEnabled(self.page_strat_use_role.isChecked())
 
     def _send_strategy(self, strategy_name, role=None):
@@ -420,7 +420,7 @@ class StrategyCtrView(QWidget):
             self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strategy('DoNothing', self.parent.get_team_color())
+        self._send_strategy('DoNothing')
 
     def toggle_show_hide(self):
         if self.isVisible():
