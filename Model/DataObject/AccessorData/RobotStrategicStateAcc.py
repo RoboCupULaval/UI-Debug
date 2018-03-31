@@ -28,22 +28,22 @@ class RobotStrategicStateAcc(BaseDataAccessor):
     @catch_format_error
     def _check_optional_data(self):
         for team in self.data.keys():
-            for id in self.data[team].keys():
-                assert isinstance(id, int), \
-                    "data[{}][{}]: {} n'a pas le format attendu (int)".format(team, id, type(id))
-                assert 0 <= id <= 11, \
-                    "data[{}][{}]: {} doit être compris entre 0 et 11".format(team, id, id)
-                for state in self.data[team][id]:
+            for idx in self.data[team].keys():
+                assert isinstance(idx, int), \
+                    "data[{}][{}]: {} n'a pas le format attendu (int)".format(team, idx, type(idx))
+                assert 0 <= idx <= 11, \
+                    "data[{}][{}]: {} doit être compris entre 0 et 11".format(team, idx, idx)
+                for state in self.data[team][idx]:
                     assert isinstance(state, str), \
-                        "data[{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state)
+                        "data[{}][{}]: {} n'a pas le format attendu (str)".format(team, idx, state)
                     assert state in {'tactic', 'state', 'role'}, \
-                        "data[{}][{}]: {} devrait avoir la valeur suivante ('tactic' | 'state' | 'role')".format(team, id, state)
+                        "data[{}][{}]: {} devrait avoir la valeur suivante ('tactic' | 'state' | 'role')".format(team, idx, state)
                     if state == 'target':
-                        assert self._point_is_valid(self.data[team][id][state]), \
-                            "data[{}][{}][{}]: {} n'est pas un point valide".format(team, id, state, self.data[team][id][state])
+                        assert self._point_is_valid(self.data[team][idx][state]), \
+                            "data[{}][{}][{}]: {} n'est pas un point valide".format(team, idx, state, self.data[team][idx][state])
                     else:
-                        assert isinstance(self.data[team][id][state], str), \
-                            "data[{}][{}][{}]: {} n'a pas le format attendu (str)".format(team, id, state, type(self.data[team][id][state]))
+                        assert isinstance(self.data[team][idx][state], str), \
+                            "data[{}][{}][{}]: {} n'a pas le format attendu (str)".format(team, idx, state, type(self.data[team][idx][state]))
 
     @staticmethod
     def get_default_data_dict():

@@ -65,11 +65,8 @@ class StrategyCtrView(QWidget):
         self._layout = self.main_layout
 
         # Change background color to team's color
-        palette = QPalette()
         bg_color = QColor("#3498db") if self.parent.team_color == "blue" else QColor("#f1c40f")
-        palette.setColor(self.backgroundRole(), bg_color)
-        self.setAutoFillBackground(True)
-        self.setPalette(palette)
+        self._reset_background_color_to(bg_color)
 
         # Création du contenu des pages
         # + Page Team
@@ -127,7 +124,7 @@ class StrategyCtrView(QWidget):
         self.page_strat_but_quick1.clicked.connect(self.send_quick_strat1)
         self.page_strat_but_quick1.setVisible(False)
         self.page_strat_but_quick2 = QPushButton('')
-        self.page_strat_but_quick2.clicked.connect(self.send_quick_strat1)
+        self.page_strat_but_quick2.clicked.connect(self.send_quick_strat2)
         self.page_strat_but_quick2.setVisible(False)
         self.page_strat_but_apply = QPushButton('Appliquer')
         self.page_strat_but_apply.clicked.connect(self.send_selected_strat)
@@ -256,7 +253,11 @@ class StrategyCtrView(QWidget):
             if key == QtCore.Qt.Key_S:
                 self.send_tactic_stop()
 
-
+    def _reset_background_color_to(self, bg_color):
+        palette = QPalette()
+        palette.setColor(self.backgroundRole(), bg_color)
+        self.setAutoFillBackground(True)
+        self.setPalette(palette)
 
     def update_combobox(self):
         if self.parent.model_datain._data_STA_config is not None:
@@ -393,12 +394,22 @@ class StrategyCtrView(QWidget):
 
     def send_selected_strat(self):
         strat_name = str(self.selectStrat.currentText())
+
         if self.page_strat_use_role.isChecked():
-            role = {r: int(box.currentText()) for r, box in self.roles.items()}
+            roles = {r: int(box.currentText()) for r, box in self.roles.items()}
+            # In case we have twice the same id, change background color
+            if len(set(roles.values())) != len(roles):
+                bg_color = QColor("#FF0000")
+                self._reset_background_color_to(bg_color)
+                return
+            else:
+                bg_color = QColor("#3498db") if self.parent.team_color == "blue" else QColor("#f1c40f")
+                self._reset_background_color_to(bg_color)
         else:
-            role = None
+            roles = None
+
         if strat_name != self.NO_STRAT_LABEL:
-            self._send_strategy(strat_name, role)
+            self._send_strategy(strat_name, roles)
 
     def send_apply_tactic(self):
         tactic = str(self.selectTactic.currentText())

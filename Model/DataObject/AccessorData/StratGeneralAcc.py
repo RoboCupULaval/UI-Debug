@@ -36,8 +36,7 @@ class StratGeneralAcc(BaseDataAccessor):
 
     @staticmethod
     def get_default_data_dict():
-        return dict(zip(['strategy', 'tactic'],
-                        ['None', 'None']))
+        return dict.fromkeys(('strategy', 'tactic'), None)
 
     @staticmethod
     def get_type():
