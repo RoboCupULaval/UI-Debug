@@ -283,8 +283,8 @@ class FieldView(QWidget):
     def select_robot(self, bot_id, team_color):
         mobs = self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']
         map(lambda m: m.deselect(), mobs)
-        mob = next(mob for mob in mobs if mob.id == bot_id)
-        mob.select()
+        self.selected_mob = next(mob for mob in mobs if mob.id == bot_id)
+        self.selected_mob.select()
 
     def toggle_vanish_option(self):
         """ Active/Désactive l'option pour afficher le vanishing sur les objets mobiles """
