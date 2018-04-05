@@ -219,7 +219,7 @@ class FieldView(QWidget):
 
     def set_ball_pos(self, x, y):
         """ Modifie la position de la balle sur la fenêtre du terrain """
-        if not self.graph_mobs['ball'].getX() == x and not self.graph_mobs['ball'].getY() == y:
+        if not self.graph_mobs['ball'].x == x and not self.graph_mobs['ball'].y == y:
             self.graph_mobs['ball'].setPos(x, y)
         self.graph_mobs['ball'].show()
 
@@ -282,12 +282,9 @@ class FieldView(QWidget):
 
     def select_robot(self, bot_id, team_color):
         mobs = self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']
-        for mob in mobs:
-            if mob.get_id() == bot_id:
-                mob.select()
-                self.selected_mob = mob
-            else:
-                mob.deselect()
+        map(lambda m: m.deselect(), mobs)
+        mob = next(mob for mob in mobs if mob.get_id() == bot_id)
+        mob.select()
 
     def toggle_vanish_option(self):
         """ Active/Désactive l'option pour afficher le vanishing sur les objets mobiles """
@@ -330,14 +327,14 @@ class FieldView(QWidget):
             team_color = 'yellow'
             mob_x, mob_y, _ = mob.get_position_on_screen()
             distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
-            mob_ordered = distance, mob.get_id(), team_color, mob
+            mob_ordered = distance, mob.id, team_color, mob
             nearest.append(mob_ordered)
 
         for mob in self.graph_mobs['robots_blue']:
             team_color = 'blue'
             mob_x, mob_y, _ = mob.get_position_on_screen()
             distance = ((x - mob_x) ** 2 + (y - mob_y) ** 2) ** 0.5
-            mob_ordered = distance, mob.get_id(), team_color, mob
+            mob_ordered = distance, mob.id, team_color, mob
             nearest.append(mob_ordered)
         return min(nearest)
 
@@ -359,7 +356,7 @@ class FieldView(QWidget):
         """ Gère l'événement du clic simple de la souris """
         if self.controller.get_tactic_controller_is_visible():
             distance, robot_id, team_color, mob = self.get_nearest_mob_from_position(event.pos().x(), event.pos().y())
-            if distance < mob.get_radius() * QtToolBox.field_ctrl.ratio_screen and team_color == self.controller.get_team_color():
+            if distance < mob.radius * QtToolBox.field_ctrl.ratio_screen and team_color == self.controller.get_team_color():
                 self.select_robot(robot_id, team_color)
                 self.controller.force_tactic_controller_select_robot(robot_id, team_color)
 
@@ -371,12 +368,12 @@ class FieldView(QWidget):
 
             if event.buttons() == Qt.RightButton:
                 if QApplication.keyboardModifiers() == Qt.ControlModifier and self.selected_mob is not None:
-                    direction = self.selected_mob.get_position_in_real()[2]
+                    direction = self.selected_mob.position[2]
                     team_color_is_yellow = "yellow" == self.controller.get_team_color()
-                    self.controller.grsim_sender.set_robot_position(x, y, direction, self.selected_mob.get_id(),
-                                                                    team_color_is_yellow)
+                    self.controller.grsim_sender.send_robot_position(x, y, direction, self.selected_mob.id,
+                                                                     team_color_is_yellow)
                 else:
-                    self.controller.grsim_sender.set_ball_position((x, y))
+                    self.controller.grsim_sender.send_ball_position((x, y))
             # If we are playing with tactics we handle double left click
             elif event.buttons() == Qt.LeftButton \
                     and self.controller.view_controller.isVisible() \
@@ -433,8 +430,8 @@ class FieldView(QWidget):
         def wrap_visible_mob(teams_formation, mobs, is_team_yellow):
             for mob in mobs:
                 if mob.isVisible():
-                    x, y, theta = mob.get_position_in_real()
-                    teams_formation.append((x, y, theta, mob.get_id(), is_team_yellow))
+                    x, y, theta = mob.position
+                    teams_formation.append((x, y, theta, mob.id, is_team_yellow))
 
         wrap_visible_mob(teams_formation, self.graph_mobs['robots_yellow'], is_team_yellow=True)
         wrap_visible_mob(teams_formation, self.graph_mobs['robots_blue'], is_team_yellow=False)

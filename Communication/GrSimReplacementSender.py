@@ -17,7 +17,7 @@ class GrSimReplacementSender:
     def __init__(self, host="127.0.0.1", port=20011):
         self.client = udp_socket(host, port)
 
-    def set_ball_position(self, position: tuple, speed=(0, 0)):
+    def send_ball_position(self, position: tuple, speed=(0, 0)):
 
         packet = grSim_Packet()
         # GrSim use meter not millimeters
@@ -28,7 +28,7 @@ class GrSimReplacementSender:
 
         self.send_packet(packet)
 
-    def set_robots_position(self, teams_formation):
+    def send_robots_position(self, teams_formation):
         packet = grSim_Packet()
         for x, y, direction, robot_id, yellow_team in teams_formation:
             # GrSim use meter not millimeters
@@ -36,7 +36,7 @@ class GrSimReplacementSender:
 
             self.send_packet(packet)
 
-    def set_robot_position(self, x, y, direction, robot_id, yellow_team):
+    def send_robot_position(self, x, y, direction, robot_id, yellow_team):
         packet = grSim_Packet()
         # GrSim use meter not millimeters
         packet.replacement.robots.add(x=x / 1000, y=y / 1000, dir=direction, id=robot_id, yellowteam=yellow_team)
