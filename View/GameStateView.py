@@ -134,17 +134,17 @@ class GameStateView(QWidget):
                 self._active_team = self._ctrl.get_team_color()
 
             robots_state = self._ctrl.waiting_for_robot_strategic_state()
-            #print(robots_state)
             self._logger.debug('RUN: Received robot strategic state')
             if robots_state is not None:
-                for team_color, robots_state_team in robots_state.items():
-                    for id, robot_state in robots_state_team.items():
-                        if id not in self.robots_state[team_color]:
-                            self.robots_state[team_color][id] = robot_state
-                            self.robots_state[team_color][id]["battery_lvl"] = 10
-                        else:
-                            for key, value in robot_state.items():
-                                self.robots_state[team_color][id][key] = value
+                self.robots_state = robots_state
+                # for team_color, robots_state_team in robots_state.items():
+                #     for id, robot_state in robots_state_team.items():
+                #         if id not in self.robots_state[team_color]:
+                #             self.robots_state[team_color][id] = robot_state
+                #             # self.robots_state[team_color][id]["battery_lvl"] = 10
+                #         else:
+                #             for key, value in robot_state.items():
+                #                 self.robots_state[team_color][id][key] = value
 
     def update_robot_state(self):
         self._logger.debug('RUN: Thread RobotState')
@@ -174,38 +174,38 @@ class GameStateView(QWidget):
 
             subSubItem = QTreeWidgetItem(subItem)
             subSubItem.setText(0, "State")
-            state = QPushButton()
-            state.setStyleSheet('QPushButton {color:red;border-radius: 3px;}')
-            state.setText("OFF") # TODO (pturgeon):
-            state.setMaximumHeight(15)
-            state.setMaximumWidth(75)
-            self.treeWidget.setItemWidget(subSubItem, 1, state)
+            # state = QPushButton()
+            # state.setStyleSheet('QPushButton {color:red;border-radius: 3px;}')
+            # state.setText("OFF") # TODO (pturgeon):
+            # state.setMaximumHeight(15)
+            # state.setMaximumWidth(75)
+            # self.treeWidget.setItemWidget(subSubItem, 1, state)
+            #
+            # subSubItem = QTreeWidgetItem(subItem)
+            # subSubItem.setText(0, "Visible")
+            # subSubItem.setText(1, "True")  # TODO (pturgeon):
+            #
+            # subSubItem = QTreeWidgetItem(subItem)
+            # subSubItem.setText(0, "Batt Level")
+            # pbar = QProgressBar(self)
+            # pbar.setValue(robot_state['battery_lvl'])
+            # pbar.setRange(0, 100)
+            # pbar.setStyleSheet('QProgressBar:horizontal { border: 1px solid gray; border-radius: 3px; background: white; '
+            #                    'padding: 1px; text-align: right; margin-right: 37px; } QProgressBar::chunk:horizontal '
+            #                    '{ background: red ;margin-right: 2px; /* space */ width: 10px; }')
+            # pbar.setMaximumHeight(13)
+            # pbar.setMaximumWidth(75)
+            # self.treeWidget.setItemWidget(subSubItem, 1, pbar)
 
             subSubItem = QTreeWidgetItem(subItem)
-            subSubItem.setText(0, "Visible")
-            subSubItem.setText(1, "True")  # TODO (pturgeon):
-
-            subSubItem = QTreeWidgetItem(subItem)
-            subSubItem.setText(0, "Batt Level")
-            pbar = QProgressBar(self)
-            pbar.setValue(robot_state['battery_lvl'])
-            pbar.setRange(0, 100)
-            pbar.setStyleSheet('QProgressBar:horizontal { border: 1px solid gray; border-radius: 3px; background: white; '
-                               'padding: 1px; text-align: right; margin-right: 37px; } QProgressBar::chunk:horizontal '
-                               '{ background: red ;margin-right: 2px; /* space */ width: 10px; }')
-            pbar.setMaximumHeight(13)
-            pbar.setMaximumWidth(75)
-            self.treeWidget.setItemWidget(subSubItem, 1, pbar)
-
+            subSubItem.setText(0,"Role")
+            subSubItem.setText(1, str(robot_state['role']))
             subSubItem = QTreeWidgetItem(subItem)
             subSubItem.setText(0,"Tactic")
             subSubItem.setText(1, robot_state['tactic'])
             subSubItem = QTreeWidgetItem(subItem)
-            subSubItem.setText(0,"Action")
-            subSubItem.setText(1, robot_state['action'])
-            subSubItem = QTreeWidgetItem(subItem)
-            subSubItem.setText(0,"Target")
-            subSubItem.setText(1, str(robot_state['target']))
+            subSubItem.setText(0,"State")
+            subSubItem.setText(1, robot_state['state'])
             subItem.setExpanded(True)
 
     def redraw_callback(self):
