@@ -283,7 +283,7 @@ class FieldView(QWidget):
     def select_robot(self, bot_id, team_color):
         mobs = self.graph_mobs['robots_yellow'] if team_color == 'yellow' else self.graph_mobs['robots_blue']
         map(lambda m: m.deselect(), mobs)
-        mob = next(mob for mob in mobs if mob.get_id() == bot_id)
+        mob = next(mob for mob in mobs if mob.id == bot_id)
         mob.select()
 
     def toggle_vanish_option(self):
