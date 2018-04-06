@@ -431,7 +431,7 @@ class MainController(QWidget):
         return self.model_datain.waiting_for_game_state_event()
 
     def get_team_color(self):
-        return self.model_datain.get_team_color()
+        return self.team_color
 
     # === RECORDER METHODS ===
     def recorder_is_playing(self):

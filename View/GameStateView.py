@@ -163,8 +163,7 @@ class GameStateView(QWidget):
                 #         progressBar.setValue(robot_state[self._active_team][id]['battery_lvl'])
 
     def _populate_robot_state(self):
-
-        robots_state = self.robots_state.copy()[self._active_team]
+        robots_state = self.robots_state.copy()[self._ctrl.get_team_color()]
 
         self.treeWidget.clear()
         robots_state_sorted = collections.OrderedDict(sorted(robots_state.items()))
