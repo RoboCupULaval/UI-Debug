@@ -1,6 +1,7 @@
 # Under MIT License, see LICENSE.txt
-from Controller.DrawingObject import Color
+
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
+from Controller.DrawingObject.color import Color
 from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'

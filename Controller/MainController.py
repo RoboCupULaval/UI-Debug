@@ -30,7 +30,7 @@ from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
 from Communication.UDPConfig import UDPConfig
 
-from Controller.DrawingObject import Color
+from Controller.DrawingObject.color import Color
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
@@ -431,7 +431,7 @@ class MainController(QWidget):
         return self.model_datain.waiting_for_game_state_event()
 
     def get_team_color(self):
-        return self.model_datain.get_team_color()
+        return self.team_color
 
     # === RECORDER METHODS ===
     def recorder_is_playing(self):

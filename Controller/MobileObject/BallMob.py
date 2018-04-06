@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
-from Controller.DrawingObject import Color
+
+from Controller.DrawingObject.color import Color
 from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 from Controller.QtToolBox import QtToolBox
 
