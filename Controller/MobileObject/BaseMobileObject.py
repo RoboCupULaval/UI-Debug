@@ -35,16 +35,19 @@ class BaseMobileObject(AbstractDrawingObject):
     def setRotation(self, theta):
         self._theta = theta
 
-    def getX(self):
+    @property
+    def x(self):
         return self._x
 
-    def getY(self):
+    @property
+    def y(self):
         return self._y
 
     def getRotate(self):
         return self._theta
 
-    def get_position_in_real(self):
+    @property
+    def position(self):
         return self._x, self._y, self._theta
 
     def get_position_on_screen(self):
