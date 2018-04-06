@@ -30,7 +30,7 @@ from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
 from Communication.UDPConfig import UDPConfig
 
-from Controller.DrawingObject import Color
+from Controller.DrawingObject.color import Color
 
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
