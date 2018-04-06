@@ -1,5 +1,6 @@
 # Under MIT License, see LICENSE.txt
-from Controller.DrawingObject import Color
+
+from Controller.DrawingObject.Color import ORANGE, BLACK
 from Controller.MobileObject.BaseMobileObject import BaseMobileObject
 from Controller.QtToolBox import QtToolBox
 
@@ -16,8 +17,8 @@ class BallMob(BaseMobileObject):
 
     def draw(self, painter):
         if self.isVisible():
-            painter.setBrush(QtToolBox.create_brush(color=Color.ORANGE))
-            painter.setPen(QtToolBox.create_pen(color=Color.BLACK,
+            painter.setBrush(QtToolBox.create_brush(color=ORANGE))
+            painter.setPen(QtToolBox.create_pen(color=BLACK,
                                                 style='SolidLine',
                                                 width=1))
             x, y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self._x, self._y)
