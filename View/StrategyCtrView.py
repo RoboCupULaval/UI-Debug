@@ -1,8 +1,12 @@
 # Under MIT License, see LICENSE.txt
+from collections import OrderedDict
+
+from PyQt5 import QtCore, Qt
+
 from PyQt5.QtCore import QRect
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import QTime
-from PyQt5.QtWidgets import QAbstractSpinBox
+from PyQt5.QtWidgets import QAbstractSpinBox, QCheckBox
 from PyQt5.QtWidgets import QDateTimeEdit
 from PyQt5.QtWidgets import QFormLayout
 from PyQt5.QtWidgets import QLineEdit
@@ -13,7 +17,7 @@ from PyQt5.QtWidgets import QTreeWidget
 from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
                             QPushButton, QGroupBox, QHBoxLayout, QLabel
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
 
 __author__ = 'RoboCupULaval'
@@ -21,35 +25,13 @@ __author__ = 'RoboCupULaval'
 
 class StrategyCtrView(QWidget):
 
+    NO_STRAT_LABEL = 'Aucune Stratégie disponible'
+    NO_TACTIC_LABEL = 'Aucune Tactique disponible'
+
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.play_info = None
-        # self.play_info = {'referee_info': 'Unknown',
-        #                   'referee_team_info': 'Unknown',
-        #                   'auto_play_info': 'Unknown',
-        #                   'referee': {'command': '',
-        #                               'stage': '',
-        #                               'stage_time_left': -597707000},
-        #                   'referee_team': {'ours': {'name': '',
-        #                                             'score': 0,
-        #                                             'red_cards': 0,
-        #                                             'yellow_cards': 0,
-        #                                             'yellow_card_times': [],
-        #                                             'timeouts': 0,
-        #                                             'timeout_time': 300000000,
-        #                                             'goalie': 0},
-        #                                    'theirs': {'name': '',
-        #                                               'score': 0,
-        #                                               'red_cards': 0,
-        #                                               'yellow_cards': 0,
-        #                                               'yellow_card_times': [],
-        #                                               'timeouts': 0,
-        #                                               'timeout_time': 300000000,
-        #                                               'goalie': 0}},
-        #                   'auto_play': {'selected_strategy': '',
-        #                                 'current_state': ''},
-        #                   'auto_flag': False}
 
         self.init_ui()
         self.hide()
@@ -60,6 +42,10 @@ class StrategyCtrView(QWidget):
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_combobox)
         self.update_timer.start(500)
+
+        self.strategies = {}
+        self.roles = {}
+        self.tactic_default = []
 
     def init_loop(self):
         self._play_info_loop.run = self.update_play_info
@@ -77,6 +63,10 @@ class StrategyCtrView(QWidget):
         self.page_tactic = QWidget()
         self.main_layout.addWidget(self.page_controller)
         self._layout = self.main_layout
+
+        # Change background color to team's color
+        bg_color = QColor("#3498db") if self.parent.team_color == "blue" else QColor("#f1c40f")
+        self._reset_background_color_to(bg_color)
 
         # Création du contenu des pages
         # + Page Team
@@ -115,26 +105,45 @@ class StrategyCtrView(QWidget):
         # + Page Strategy
         self.page_strat_vbox = QVBoxLayout()
         self.selectStrat = QComboBox()
-        self.selectStrat.addItem('Aucune Stratégie disponible')
+        self.selectStrat.addItem(self.NO_STRAT_LABEL)
+        self.selectStrat.currentIndexChanged.connect(self.strategy_selected)
+        self.page_strat_use_role = QCheckBox("Forcé les rôles")
+        self.page_strat_use_role.stateChanged.connect(self.toggle_strat_use_role)
 
+        # Roles
+        self.page_strat_form_roles = QFormLayout()
+
+        qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
+        strat_combox = QVBoxLayout()
+        strat_combox.addLayout(self.page_strat_form_roles)
+        strat_combox.addWidget(self.page_strat_use_role)
+        strat_combox.addWidget(self.selectStrat)
+        qgroup.setLayout(strat_combox)
+
+        self.page_strat_but_quick1 = QPushButton('')
+        self.page_strat_but_quick1.clicked.connect(self.send_quick_strat1)
+        self.page_strat_but_quick1.setVisible(False)
+        self.page_strat_but_quick2 = QPushButton('')
+        self.page_strat_but_quick2.clicked.connect(self.send_quick_strat2)
+        self.page_strat_but_quick2.setVisible(False)
         self.page_strat_but_apply = QPushButton('Appliquer')
-        self.page_strat_but_apply.clicked.connect(self.send_strat)
-        self.page_strat_but_cancel = QPushButton("STOP")
+        self.page_strat_but_apply.clicked.connect(self.send_selected_strat)
+        self.page_strat_but_cancel = QPushButton("STOP (S)")
         but_cancel_font = QFont()
         but_cancel_font.setBold(True)
         self.page_strat_but_cancel.setFont(but_cancel_font)
         self.page_strat_but_cancel.setStyleSheet('QPushButton {color:red;}')
         self.page_strat_but_cancel.clicked.connect(self.send_strat_stop)
 
-        qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
-        strat_combox = QVBoxLayout()
-        strat_combox.addWidget(self.selectStrat)
-        qgroup.setLayout(strat_combox)
 
+        but_quick_group = QHBoxLayout()
+        but_quick_group.addWidget(self.page_strat_but_quick1)
+        but_quick_group.addWidget(self.page_strat_but_quick2)
         but_group = QHBoxLayout()
         but_group.addWidget(self.page_strat_but_apply)
         but_group.addWidget(self.page_strat_but_cancel)
         self.page_strat_vbox.addWidget(qgroup)
+        self.page_strat_vbox.addLayout(but_quick_group)
         self.page_strat_vbox.addLayout(but_group)
 
         self.page_strategy.setLayout(self.page_strat_vbox)
@@ -154,17 +163,27 @@ class StrategyCtrView(QWidget):
 
         group_vbox.addWidget(QLabel('Tactique à appliquer :'))
         self.selectTactic = QComboBox()
-        self.selectTactic.addItem('Aucune Tactique disponible')
+        self.selectTactic.addItem(self.NO_TACTIC_LABEL)
         group_vbox.addWidget(self.selectTactic)
         self.argumentsLine = QLineEdit()
         group_vbox.addWidget(self.argumentsLine)
 
+        but_group_quick = QHBoxLayout()
+        self.page_tactic_but_quick1 = QPushButton('')
+        self.page_tactic_but_quick1.clicked.connect(self.send_quick_tactic1)
+        self.page_tactic_but_quick1.setVisible(False)
+        but_group_quick.addWidget(self.page_tactic_but_quick1)
+        self.page_tactic_but_quick2 = QPushButton('')
+        self.page_tactic_but_quick2.clicked.connect(self.send_quick_tactic2)
+        self.page_tactic_but_quick2.setVisible(False)
+        but_group_quick.addWidget(self.page_tactic_but_quick2)
+
         but_group_tact = QHBoxLayout()
         tact_apply_but = QPushButton('Appliquer')
-        tact_apply_but.clicked.connect(self.send_tactic)
+        tact_apply_but.clicked.connect(self.send_apply_tactic)
         but_group_tact.addWidget(tact_apply_but)
 
-        tact_stop_but = QPushButton('STOP')
+        tact_stop_but = QPushButton('STOP (S)')
         tact_stop_but.setFont(but_cancel_font)
         tact_stop_but.setStyleSheet('QPushButton {color:red;}')
         tact_stop_but.clicked.connect(self.send_tactic_stop)
@@ -176,6 +195,7 @@ class StrategyCtrView(QWidget):
         tact_stop_all_but.clicked.connect(self.send_tactic_stop_all)
 
         self.page_tact_vbox.addWidget(group_bot_select)
+        self.page_tact_vbox.addLayout(but_group_quick)
         self.page_tact_vbox.addLayout(but_group_tact)
         self.page_tact_vbox.addWidget(tact_stop_all_but)
 
@@ -214,6 +234,31 @@ class StrategyCtrView(QWidget):
         self.parent.deselect_all_robots()
         super().hideEvent(event)
 
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        page_id = self.page_controller.currentIndex()
+        if page_id == 1: # Strategy
+            if key == QtCore.Qt.Key_Q:
+                self.send_quick_strat1()
+            if key == QtCore.Qt.Key_W:
+                self.send_quick_strat2()
+            if key == QtCore.Qt.Key_S:
+                self.send_strat_stop()
+        elif page_id == 2: # Tactic
+            if key == QtCore.Qt.Key_Q:
+                self.send_quick_tactic1()
+            if key == QtCore.Qt.Key_W:
+                self.send_quick_tactic2()
+            if key == QtCore.Qt.Key_S:
+                self.send_tactic_stop()
+
+    def _reset_background_color_to(self, bg_color):
+        palette = QPalette()
+        palette.setColor(self.backgroundRole(), bg_color)
+        self.setAutoFillBackground(True)
+        self.setPalette(palette)
+
     def update_combobox(self):
         if self.parent.model_datain._data_STA_config is not None:
             data = self.parent.model_datain._data_STA_config.data
@@ -226,11 +271,19 @@ class StrategyCtrView(QWidget):
                         break
 
             if data['strategy'] is not None:
+                self.strategies = data['strategy']
                 strats = self.get_strat_list()
                 for strat in data['strategy']:
                     if not strat in strats:
                         self.refresh_strat(data['strategy'])
                         break
+
+            if data['tactic_default'] is not None:
+                self.refresh_tactic_default(data['tactic_default'])
+
+            if data['strategy_default'] is not None:
+                self.refresh_strat_default(data['strategy_default'])
+
         self._populate_play_info()
 
     def get_strat_list(self):
@@ -247,6 +300,32 @@ class StrategyCtrView(QWidget):
                 tactics.append(self.selectTactic.itemText(i))
         return tactics
 
+    def refresh_tactic_default(self, new_default):
+        self.refresh_default(self.page_tactic_but_quick1,
+                             self.page_tactic_but_quick2,
+                             new_default)
+        self.tactic_default = new_default
+
+    def refresh_strat_default(self, new_default):
+        self.refresh_default(self.page_strat_but_quick1,
+                             self.page_strat_but_quick2,
+                             new_default)
+        self.strat_default = new_default
+
+    def refresh_default(self, but1, but2, new_default):
+        if len(new_default) > 0:
+            but1.setVisible(True)
+            but1.setText(new_default[0] + " (Q)")
+        else:
+            but1.setVisible(False)
+
+        if len(new_default) > 1:
+            but2.setVisible(True)
+            but2.setText(new_default[1] + " (W)")
+        else:
+            but2.setVisible(False)
+
+
     def refresh_tactic(self, tactics):
         self.selectTactic.clear()
         if tactics is not None:
@@ -254,40 +333,105 @@ class StrategyCtrView(QWidget):
             for tactic in tactics:
                 self.selectTactic.addItem(tactic)
         else:
-            self.selectTactic.addItem('Aucune Tactique disponible')
+            self.selectTactic.addItem(self.NO_TACTIC_LABEL)
 
     def refresh_strat(self, strats):
         self.selectStrat.clear()
         if strats is not None:
-            strats.sort()
+            strats = OrderedDict(sorted(strats.items()))
             for strat in strats:
                 self.selectStrat.addItem(strat)
         else:
-            self.selectStrat.addItem('Aucune Stratégie disponible')
+            self.selectStrat.addItem(self.NO_STRAT_LABEL)
 
-    def send_strat(self):
-        strat = str(self.selectStrat.currentText())
-        if not strat == 'Aucune Stratégie disponible':
-            self.parent.model_dataout.send_strategy(strat, self.parent.get_team_color())
+    def toggle_strat_use_role(self):
+        for combo_box in self.roles.values():
+            combo_box.setEnabled(self.page_strat_use_role.isChecked())
 
-    def send_tactic(self):
-        id_bot = int(self.selectRobot.currentText())
+    def strategy_selected(self):
+        name = str(self.selectStrat.currentText())
+        if name != '':
+            required_roles = self.strategies[name]
+
+            # Remove role widget
+            nb_widget = self.page_strat_form_roles.rowCount()
+            for i in reversed(range(0, nb_widget)):
+                self.page_strat_form_roles.removeRow(i)
+
+            # delete unused role
+            for prev_role in list(self.roles.keys()):
+                if prev_role not in required_roles:
+                    del self.roles[prev_role]
+
+            # Add new one
+            for i, r in enumerate(required_roles):
+                select_robot = QComboBox()
+                [select_robot.addItem(str(x)) for x in range(12)]
+
+                self.page_strat_form_roles.insertRow(i, r, select_robot)
+
+                self.roles[r] = select_robot
+                self.roles[r].setEnabled(self.page_strat_use_role.isChecked())
+
+    def _send_strategy(self, strategy_name, role=None):
+        self.parent.model_dataout.send_strategy(strategy_name, self.parent.get_team_color(), role)
+
+    def send_quick_strat1(self):
+        if len(self.strat_default) > 0:
+            self._send_strategy(self.strat_default[0])
+
+    def send_quick_strat2(self):
+        if len(self.strat_default) > 1:
+            self._send_strategy(self.strat_default[1])
+
+    def send_quick_tactic1(self):
+        if len(self.tactic_default) > 0:
+            self.send_tactic(self.tactic_default[0])
+
+    def send_quick_tactic2(self):
+        if len(self.tactic_default) > 1:
+            self.send_tactic(self.tactic_default[1])
+
+    def send_selected_strat(self):
+        strat_name = str(self.selectStrat.currentText())
+
+        if self.page_strat_use_role.isChecked():
+            roles = {r: int(box.currentText()) for r, box in self.roles.items()}
+            # In case we have twice the same id, change background color
+            if len(set(roles.values())) != len(roles):
+                bg_color = QColor("#FF0000")
+                self._reset_background_color_to(bg_color)
+                return
+            else:
+                bg_color = QColor("#3498db") if self.parent.team_color == "blue" else QColor("#f1c40f")
+                self._reset_background_color_to(bg_color)
+        else:
+            roles = None
+
+        if strat_name != self.NO_STRAT_LABEL:
+            self._send_strategy(strat_name, roles)
+
+    def send_apply_tactic(self):
         tactic = str(self.selectTactic.currentText())
-        args = str(self.argumentsLine.text()).split()
+        if tactic != self.NO_TACTIC_LABEL:
+            self.send_tactic(tactic)
+
+    def send_tactic(self, tactic: str):
+        id_bot = int(self.selectRobot.currentText())
+        args_textbox = str(self.argumentsLine.text()).split()
         target = self.parent.model_dataout.target
-        if not tactic == 'Aucune Tactique disponible':
-            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), tactic=tactic, target=target, args=args)
+        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), tactic=tactic, target=target, args=args_textbox)
 
     def send_tactic_stop(self):
         id_bot = int(self.selectRobot.currentText())
-        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'tStop', args=None)
+        self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_tactic_stop_all(self):
         for id_bot in range(12):  # TODO (pturgeon): Changer pour constante globable (ou liste?)
-            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'tStop', args=None)
+            self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_strat_stop(self):
-        self.parent.model_dataout.send_strategy('pStop', self.parent.get_team_color())
+        self._send_strategy('DoNothing')
 
     def toggle_show_hide(self):
         if self.isVisible():
@@ -301,7 +445,8 @@ class StrategyCtrView(QWidget):
 
     def send_stop_auto(self):
         self.parent.model_dataout.send_auto_play(False)
-        
+
+    # noinspection PyPackageRequirements
     def _populate_play_info(self):
         self.treeWidget.clear()
 

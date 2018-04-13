@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QSplitter
 from PyQt5.QtWidgets import QWidget, QMenuBar, QHBoxLayout, QVBoxLayout, \
                             QAction, QMessageBox, QPushButton
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSignal, Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot
 
 from Communication.GrSimReplacementSender import GrSimReplacementSender
 from Model.FrameModel import FrameModel
@@ -30,6 +30,8 @@ from Communication.UDPServer import UDPServer
 from Communication.vision import Vision
 from Communication.UDPConfig import UDPConfig
 
+from Controller.DrawingObject.color import Color
+
 from .DrawingObjectFactory import DrawingObjectFactory
 from .QtToolBox import QtToolBox
 
@@ -38,8 +40,10 @@ __author__ = 'RoboCupULaval'
 
 class MainController(QWidget):
     # TODO: Dissocier Controller de la fenêtre principale
-    def __init__(self, vision_port, referee_port, ui_cmd_sender_port, ui_cmd_receiver_port):
+    def __init__(self, team_color, vision_port, referee_port, ui_cmd_sender_port, ui_cmd_receiver_port):
         super().__init__()
+
+        self.team_color = team_color
         #port = QtCore.QMetaType.type('QVector<int>')
         self.receiving_port = vision_port
         # Création des Contrôleurs
@@ -82,7 +86,7 @@ class MainController(QWidget):
 
     def init_main_window(self):
         # Initialisation de la fenêtre
-        self.setWindowTitle('RoboCup ULaval | GUI Debug')
+        self.setWindowTitle('RoboCup ULaval | GUI Debug | Team ' + self.team_color)
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
         self.resize(975, 550)
 
@@ -142,6 +146,8 @@ class MainController(QWidget):
     def init_menubar(self):
         # Titre des menus et dimension
         self.view_menu.setFixedHeight(30)
+
+
         fileMenu = self.view_menu.addMenu('Fichier')
         viewMenu = self.view_menu.addMenu('Affichage')
         toolMenu = self.view_menu.addMenu('Outil')
@@ -420,7 +426,7 @@ class MainController(QWidget):
         return self.model_datain.waiting_for_game_state_event()
 
     def get_team_color(self):
-        return self.model_datain.get_team_color()
+        return self.team_color
 
     # === RECORDER METHODS ===
     def recorder_is_playing(self):
@@ -451,4 +457,5 @@ class MainController(QWidget):
         self.teams_formation = self.view_field_screen.get_teams_formation()
 
     def restore_teams_formation(self):
-        self.grsim_sender.set_robot_positions(self.teams_formation)
+        self.grsim_sender.send_robots_position(self.teams_formation)
+

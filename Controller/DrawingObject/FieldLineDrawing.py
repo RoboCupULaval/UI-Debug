@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore
 
-from Controller.DrawingObject import Color
+from Controller.DrawingObject.color import Color
 from Controller.DrawingObject.BaseDrawingObject import BaseDrawingObject
 from Controller.QtToolBox import QtToolBox
 

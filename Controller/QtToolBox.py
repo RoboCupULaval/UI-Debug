@@ -3,7 +3,7 @@
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 
-from Controller.DrawingObject import Color
+from Controller.DrawingObject.color import Color
 from Controller.FieldController import FieldController
 
 __author__ = 'RoboCupULaval'

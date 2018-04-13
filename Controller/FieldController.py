@@ -233,8 +233,13 @@ class FieldController(object):
         self._goal_width = field.goal_width
         self._goal_depth = field.goal_depth
 
+        if "RightFieldLeftPenaltyArc" not in self.field_arcs:
+            # This is a new type of field for Robocup 2018, it does not have a circular goal zone
+            self._defense_radius = self.field_lines["LeftFieldLeftPenaltyStretch"].length
+        else:
+            self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
+
         self._center_circle_radius = self.field_arcs['CenterCircle'].radius
-        self._defense_radius = self.field_arcs['RightFieldLeftPenaltyArc'].radius
         self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length/2
 
 

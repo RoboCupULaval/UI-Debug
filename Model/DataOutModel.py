@@ -44,8 +44,8 @@ class DataOutModel:
                                        args=args)
         self._udp_sender.send_message(pkg.get_binary())
 
-    def send_strategy(self, strat, team):
-        pkg = SendingStrategy().set_data(strategy=strat, team=team)
+    def send_strategy(self, strat, team, roles):
+        pkg = SendingStrategy().set_data(strategy=strat, team=team, roles=roles)
         self._udp_sender.send_message(pkg.get_binary())
 
     def send_auto_play(self, status):
