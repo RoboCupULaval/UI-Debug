@@ -31,11 +31,6 @@ class MainWindow(QMainWindow):
         #exitAction.triggered.connect(self.closeEvent)
         fileMenu.addAction(exitAction)
 
-        # => Menu Vue
-        vanishAction = QAction('Afficher Vanishing', self, checkable=True)
-        #vanishAction.triggered.connect(self.view_screen.change_vanish_option)
-        viewMenu.addAction(vanishAction)
-
         nuumbAction = QAction('Afficher Numéro des robots', self, checkable=True)
         #nuumbAction.triggered.connect(self.view_screen.show_number_option)
         viewMenu.addAction(nuumbAction)
