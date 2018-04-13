@@ -378,9 +378,11 @@ class FieldView(QWidget):
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
         if event.angleDelta().y() > 0:
-            QtToolBox.field_ctrl.zoom()
+            QtToolBox.field_ctrl.zoom(event.pos().x(),
+                                      event.pos().y())
         else:
-            QtToolBox.field_ctrl.dezoom()
+            QtToolBox.field_ctrl.dezoom(event.pos().x(),
+                                        event.pos().y())
 
     def frame_rate_event(self):
         """ Met à jour la fréquence de rafraîchissement de l'écran """
