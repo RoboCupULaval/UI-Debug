@@ -2,7 +2,6 @@
 
 from math import cos, sin, atan2, sqrt, pi
 
-from Communication import messages_robocup_ssl_geometry_pb2
 from Communication.messages_robocup_ssl_geometry_pb2 import SSL_GeometryFieldSize
 
 __author__ = 'RoboCupULaval'
@@ -188,15 +187,25 @@ class FieldController(object):
         self._camera_position[0] = max(self._camera_position[0], -max_width)
         self._camera_position[1] = max(self._camera_position[1], -max_height)
 
-    def zoom(self):
+    def zoom(self, x, y):
         """ Zoom la caméra de +10% """
-        if not self._lock_camera:
-            self.ratio_screen *= 1.10
+        SCALE_CHANGE = 0.1
+        if not self._lock_camera and self.ratio_screen < 0.6:
+            rx, ry = self.convert_screen_to_real_pst(x, y)
+            self.ratio_screen *= 1 + SCALE_CHANGE
+            sx, sy, _ = self.convert_real_to_scene_pst(rx, ry)
+            self._camera_position[0] -= sx - x
+            self._camera_position[1] -= sy - y
 
-    def dezoom(self):
+    def dezoom(self, x, y):
         """ Dézoom la caméra de -10% """
-        if not self._lock_camera:
-            self.ratio_screen *= 0.90
+        SCALE_CHANGE = 0.1
+        if not self._lock_camera and self.ratio_screen > 0.03:
+            rx, ry = self.convert_screen_to_real_pst(x, y)
+            self.ratio_screen /= 1 + SCALE_CHANGE
+            sx, sy, _ = self.convert_real_to_scene_pst(rx, ry)
+            self._camera_position[0] -= sx - x
+            self._camera_position[1] -= sy - y
 
     def toggle_lock_camera(self):
         """ Débloque/Bloque le mouvement et le zoom de la caméra """
