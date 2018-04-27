@@ -122,18 +122,11 @@ class PlotterView(QWidget):
         # Create new subplot for new unit and add data
         for datum in data:
             if datum["y_unit"] not in self.axes:
-                # This add a plot to an existing figure
-                n = len(self.figure.axes)
-                for i, ax in enumerate(self.figure.axes):
-                    ax.change_geometry(n + 1, 1, i + 1)
-
-                ax = self.figure.add_subplot(n + 1, 1, n + 1)
+                ax = self._append_plot()
                 ax.set_ylabel(datum["y_unit"])
                 self.axes[datum["y_unit"]] = {"axis": ax,
                                               "labels": {}}
             ax = self.axes[datum["y_unit"]]
-            ax["axis"].autoscale(True, 'y')
-            ax["axis"].autoscale(False, 'x')
 
             if datum["y_label"] not in ax["labels"]:
                 ax["labels"][datum["y_label"]] = ax["axis"].plot(datum["x"], datum["y"], label=datum["y_label"])[0]
@@ -163,7 +156,12 @@ class PlotterView(QWidget):
         for ax in self.axes.values():
             ax["axis"].set_xlim((min_x, now))
 
+    def _append_plot(self):
+        n = len(self.figure.axes)
+        for i, ax in enumerate(self.figure.axes):
+            ax.change_geometry(n + 1, 1, i + 1)
 
+        return self.figure.add_subplot(n + 1, 1, n + 1)
 
 
     def pauseEvent(self):
