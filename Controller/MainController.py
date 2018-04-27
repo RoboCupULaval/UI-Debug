@@ -18,6 +18,7 @@ from Model.RecorderModel import RecorderModel
 
 from View.FieldView import FieldView
 from View.FilterCtrlView import FilterCtrlView
+from View.PlotterView import PlotterView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
@@ -75,6 +76,7 @@ class MainController(QWidget):
         self.view_media = MediaControllerView(self)
         self.view_status = StatusBarView(self)
         self.view_robot_state = GameStateView(self)
+        self.view_plotter = PlotterView(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -128,6 +130,7 @@ class MainController(QWidget):
         top_layout.addWidget(sub_layout)
         top_layout.addWidget(self.view_media)
         top_layout.addWidget(self.view_logger)
+        top_layout.addWidget(self.view_plotter)
         top_layout.addWidget(self.view_status)
         top_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -244,6 +247,10 @@ class MainController(QWidget):
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
+
+        plotterAction = QAction('Plot', self,  checkable=True)
+        plotterAction.triggered.connect(self.view_plotter.show_hide)
+        toolMenu.addAction(plotterAction)
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)
