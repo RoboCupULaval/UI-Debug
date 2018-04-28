@@ -32,13 +32,16 @@ class PlotterView(QWidget):
         self.model_datain = None
         self.axes = {}
         self.time_at_start = time.time()
-        self.pause = False
+        self.pause = True
         self.init_ui()
 
         # Timer
         self._timer_update = QTimer()
         self._timer_update.timeout.connect(self.update_plotter)
         self._timer_update.start(100)
+
+        # Start hidden and paused
+        self.hide()
 
 
     def init_ui(self):
@@ -122,21 +125,6 @@ class PlotterView(QWidget):
 
     def fetch_latest_data(self):
         return self.model_datain.fetch_plot_data() if self.model_datain else []
-        # return [{"y_unit": "meters",
-        #          "y_label": "my random",
-        #          "x": [time.time()],
-        #          "y": [np.random.random()]
-        #          },
-        #          {"y_unit": "meters",
-        #          "y_label": "more random",
-        #          "x": [time.time()],
-        #          "y": [2 * np.random.random()]
-        #          },
-        #          {"y_unit": "radian",
-        #          "y_label": "my angle",
-        #          "x": [time.time()],
-        #          "y": [10000 * np.random.random()]
-        #          }]
 
     def set_model(self, model_datain):
         self.model_datain = model_datain

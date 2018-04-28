@@ -49,7 +49,6 @@ class LoggerView(QWidget):
 
 
     def init_ui(self):
-        self.setFixedHeight(150)
         self._widget_logger.setReadOnly(True)
         layout = QHBoxLayout()
 
