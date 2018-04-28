@@ -18,6 +18,7 @@ from Model.RecorderModel import RecorderModel
 
 from View.FieldView import FieldView
 from View.FilterCtrlView import FilterCtrlView
+from View.PlotterView import PlotterView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
 from View.MainWindow import MainWindow
@@ -75,6 +76,7 @@ class MainController(QWidget):
         self.view_media = MediaControllerView(self)
         self.view_status = StatusBarView(self)
         self.view_robot_state = GameStateView(self)
+        self.view_plotter = PlotterView(self)
 
         # Initialisation des UI
         self.init_main_window()
@@ -90,51 +92,54 @@ class MainController(QWidget):
         self.setWindowIcon(QIcon('Img/favicon.jpg'))
         self.resize(975, 550)
 
-        # Initialisation des Layouts
-        # => Field | Filter | StratController (Horizontal)
+        """
+        sub_layout (Horizontal, QSplitter)
+        ├── Robot State
+        ├── Field
+        ├── Drawing Filter
+        └── Strategy/tactic Controller
+        """
+
         sub_layout = QSplitter(self)
-
         sub_layout.setContentsMargins(0, 0, 0, 0)
+
+        field_widget = self.init_field_button_ui()
+
         sub_layout.addWidget(self.view_robot_state)
-
-        # Ajout des boutons pour sauvegarder et restaurer la position des robots
-        field_widget = QWidget()
-        field_layout = QVBoxLayout()
-
-        buttons_widget = QWidget()
-        buttons_layout = QHBoxLayout(field_widget)
-
-        self.btn_save_teams_formation = QPushButton("Save teams formation")
-        self.btn_save_teams_formation.clicked.connect(self.save_teams_formation)
-        self.btn_restore_teams_formation = QPushButton("Restore teams formation")
-        self.btn_restore_teams_formation.clicked.connect(self.restore_teams_formation)
-        buttons_layout.addWidget(self.btn_save_teams_formation)
-        buttons_layout.addWidget(self.btn_restore_teams_formation)
-        buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_widget.setLayout(buttons_layout)
-
-        field_layout.addWidget(self.view_field_screen)
-        field_layout.addWidget(buttons_widget)
-        field_widget.setLayout(field_layout)
-
         sub_layout.addWidget(field_widget)
         sub_layout.addWidget(self.view_filter)
         sub_layout.addWidget(self.view_controller)
         QSplitter.setSizes(sub_layout, [200, 500, 100, 100])
 
-        # => Menu | SubLayout | Media | Logger | Status (Vertical)
-        top_layout = QVBoxLayout()
-        top_layout.addWidget(self.view_menu)
-        top_layout.addWidget(sub_layout)
-        top_layout.addWidget(self.view_media)
-        top_layout.addWidget(self.view_logger)
-        top_layout.addWidget(self.view_status)
-        top_layout.setContentsMargins(0, 0, 0, 0)
+        """ Qt Layout:
+        main
+        ├── menu
+        ├── ver_splitter
+        │     ├── sub_layout
+        │     ├── media
+        │     ├── logger
+        │     └── plotter
+        └── status
+        """
+        ver_splitter = QSplitter(Qt.Vertical, self)
+        ver_splitter.setContentsMargins(0, 0, 0, 0)
 
-        self.setLayout(top_layout)
+        ver_splitter.addWidget(sub_layout)
+        ver_splitter.addWidget(self.view_media)
+        ver_splitter.addWidget(self.view_logger)
+        ver_splitter.addWidget(self.view_plotter)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.view_menu)
+        main_layout.addWidget(ver_splitter)
+        main_layout.addWidget(self.view_status)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.setLayout(main_layout)
 
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
+        self.view_plotter.set_model(self.model_datain)
         self.model_datain.setup_udp_server(self.network_data_in)
         self.model_dataout.setup_udp_server(self.network_data_in)
         self.model_frame.set_vision(self.network_vision)
@@ -225,16 +230,16 @@ class MainController(QWidget):
         filterAction.triggered.connect(self.view_filter.show_hide)
         toolMenu.addAction(filterAction)
 
-        StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True)
+        StrategyControllerAction = QAction('Contrôleur de Stratégie', self,  checkable=True, checked=False)
         StrategyControllerAction.triggered.connect(self.view_controller.toggle_show_hide)
         StrategyControllerAction.trigger()
         toolMenu.addAction(StrategyControllerAction)
 
         toolMenu.addSeparator()
 
-        mediaAction = QAction('Contrôleur Média', self, checkable=True)
-        mediaAction.triggered.connect(self.view_media.toggle_visibility)
-        toolMenu.addAction(mediaAction)
+        # mediaAction = QAction('Contrôleur Média', self, checkable=True)
+        # mediaAction.triggered.connect(self.view_media.toggle_visibility)
+        # toolMenu.addAction(mediaAction)
 
         robStateAction = QAction('État des robots', self, checkable=True)
         robStateAction.triggered.connect(self.view_robot_state.show_hide)
@@ -244,6 +249,32 @@ class MainController(QWidget):
         loggerAction = QAction('Loggeur', self,  checkable=True)
         loggerAction.triggered.connect(self.view_logger.show_hide)
         toolMenu.addAction(loggerAction)
+
+        plotterAction = QAction('Plot', self,  checkable=True)
+        plotterAction.triggered.connect(self.view_plotter.show_hide)
+        toolMenu.addAction(plotterAction)
+
+    def init_field_button_ui(self):
+        field_widget = QWidget()
+        field_layout = QVBoxLayout()
+
+        buttons_widget = QWidget()
+        buttons_layout = QHBoxLayout(field_widget)
+
+        self.btn_save_teams_formation = QPushButton("Save teams formation")
+        self.btn_save_teams_formation.clicked.connect(self.save_teams_formation)
+        self.btn_restore_teams_formation = QPushButton("Restore teams formation")
+        self.btn_restore_teams_formation.clicked.connect(self.restore_teams_formation)
+        buttons_layout.addWidget(self.btn_save_teams_formation)
+        buttons_layout.addWidget(self.btn_restore_teams_formation)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_widget.setLayout(buttons_layout)
+
+        field_layout.addWidget(self.view_field_screen)
+        field_layout.addWidget(buttons_widget)
+        field_widget.setLayout(field_layout)
+
+        return field_widget
 
     def init_signals(self):
         signal(SIGINT, self.signal_handle)

@@ -6,6 +6,7 @@ from time import time, sleep
 
 from threading import Thread, Event
 
+from Model.DataObject.AccessorData.PlotDataAcc import PlotDataAcc
 from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
 from Model.DataObject.AccessorData.TeamColorAcc import TeamColorAcc
 from Model.DataObject.AccessorData.PlayInfoAcc import PlayInfoAcc
@@ -50,11 +51,13 @@ class DataInModel(Thread):
         self._game_state = TimeListState('GameState', {'yellow': 'None', 'blue': 'None'})
         self._data_config = list()
         self._data_draw = dict()
-        self._distrib_sepcific_packet = dict()
+        self._distrib_specific_packet = dict()
         self._data_STA_config = None
         self._play_info = TimeListState('PlayInfo', {'referee_info': 'None',
                                                      'referee_team_info': 'None',
                                                      'auto_play_info': 'None'})
+
+        self._plot_data = []
 
         # Système interne
         self._datain_factory = DataFactory()
@@ -92,17 +95,18 @@ class DataInModel(Thread):
 
     def _init_distributor(self):
         """ Initialise la distribution des paquets en fonction du type de paquet """
-        self._distrib_sepcific_packet[VeryLargeDataAcc.__name__] = self._distrib_VeryLargeData
-        self._distrib_sepcific_packet[BaseDataDraw.__name__] = self._distrib_BaseDataDraw
-        self._distrib_sepcific_packet[StratGeneralAcc.__name__] = self._distrib_StratGeneral
-        self._distrib_sepcific_packet[BaseDataLog.__name__] = self._distrib_BaseDataLog
-        self._distrib_sepcific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
-        self._distrib_sepcific_packet[RobotStrategicStateAcc.__name__] = self._distrib_RobotStrategicState
-        self._distrib_sepcific_packet[GameStateAcc.__name__] = self._distrib_GameState
-        self._distrib_sepcific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
-        self._distrib_sepcific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
-        self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
-        self._distrib_sepcific_packet[PlayInfoAcc.__name__] = self._distrib_PlayInfo
+        self._distrib_specific_packet[VeryLargeDataAcc.__name__] = self._distrib_VeryLargeData
+        self._distrib_specific_packet[BaseDataDraw.__name__] = self._distrib_BaseDataDraw
+        self._distrib_specific_packet[StratGeneralAcc.__name__] = self._distrib_StratGeneral
+        self._distrib_specific_packet[BaseDataLog.__name__] = self._distrib_BaseDataLog
+        self._distrib_specific_packet[HandShakeAcc.__name__] = self._distrib_HandShake
+        self._distrib_specific_packet[RobotStrategicStateAcc.__name__] = self._distrib_RobotStrategicState
+        self._distrib_specific_packet[GameStateAcc.__name__] = self._distrib_GameState
+        self._distrib_specific_packet[FieldGeometryAcc.__name__] = self._distrib_FieldGeometry
+        self._distrib_specific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
+        self._distrib_specific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
+        self._distrib_specific_packet[PlayInfoAcc.__name__] = self._distrib_PlayInfo
+        self._distrib_specific_packet[PlotDataAcc.__name__] = self._distrib_PlotData
 
         self._logger.debug('INIT: Distributor')
 
@@ -211,6 +215,10 @@ class DataInModel(Thread):
         self._robot_state = data.data.copy()
         self._event_robot_state.set()
 
+    def _distrib_PlotData(self, data):
+        self._logger.debug('DISTRIB: RobotState')
+        self._plot_data.append(data.data.copy())
+
 
     # === PRIVATE METHODS ===
 
@@ -224,11 +232,11 @@ class DataInModel(Thread):
                 data = self._datain_factory.get_data_object(data_in)
                 try:
                     if isinstance(data, BaseDataDraw):
-                        self._distrib_sepcific_packet[BaseDataDraw.__name__](data)
+                        self._distrib_specific_packet[BaseDataDraw.__name__](data)
                     elif isinstance(data, BaseDataLog):
-                        self._distrib_sepcific_packet[BaseDataLog.__name__](data)
+                        self._distrib_specific_packet[BaseDataLog.__name__](data)
                     else:
-                        self._distrib_sepcific_packet[type(data).__name__](data)
+                        self._distrib_specific_packet[type(data).__name__](data)
                 except KeyError as e:
                     self._logger.warn(type(e).__name__, e)
 
@@ -317,6 +325,11 @@ class DataInModel(Thread):
         else:
             self._logger.warn('TRIGGER: GET LOG - No new log')
             return None
+
+    def fetch_plot_data(self):
+        data = self._plot_data.copy()
+        self._plot_data.clear()
+        return data
 
     def show_draw(self, draw):
         """ Afficher le dessin sur la fenêtre du terrain """
