@@ -114,26 +114,35 @@ class PlotterView(QWidget):
             self.update_graph_data(raw_data)
             self.update_graph_scale()
 
-            #self.points.set_data(self.x, self.y)
 
-            self.figure.canvas.draw()
 
     def update_graph_data(self, data):
         # Create new subplot for new unit and add data
         for datum in data:
-            if datum["y_unit"] not in self.axes:
+            y_unit, y_label = datum["y_unit"], datum["y_label"]
+            if y_unit not in self.axes:
                 ax = self._append_plot()
-                ax.set_ylabel(datum["y_unit"])
-                self.axes[datum["y_unit"]] = {"axis": ax,
-                                              "labels": {}}
-            ax = self.axes[datum["y_unit"]]
+                ax.set_ylabel(y_unit)
+                ax.legend(loc='upper right')
 
-            if datum["y_label"] not in ax["labels"]:
-                ax["labels"][datum["y_label"]] = ax["axis"].plot(datum["x"], datum["y"], label=datum["y_label"])[0]
+                self.axes[y_unit] = {"axis": ax,
+                                     "labels": {},
+                                     "background": self.figure.canvas.copy_from_bbox(ax.bbox)}
+                self.canvas.draw()
+
+            ax = self.axes[y_unit]
+
+            if y_label not in ax["labels"]:
+                ax["labels"][y_label] = ax["axis"].plot(datum["x"], datum["y"], label=y_label)[0]
             else:
-                pts = ax["labels"][datum["y_label"]]
+                pts = ax["labels"][y_label]
                 pts.set_data(list(pts.get_xdata()) + datum["x"],
-                             list(pts.get_ydata()) + (datum["y"]))
+                             list(pts.get_ydata()) + datum["y"])
+
+                # Fast redraw hack
+                self.figure.canvas.restore_region(ax["background"])
+                ax["axis"].draw_artist(pts)
+                self.figure.canvas.blit(ax["axis"].bbox)
 
     def update_graph_scale(self):
         for ax in self.axes.values():
@@ -144,7 +153,6 @@ class PlotterView(QWidget):
                 max_y = max(max_y, max(label.get_ydata()))
 
             ax["axis"].set_ylim((min_y, max_y))
-            ax["axis"].legend(loc='upper right')
 
         # update x axis
         seconds_to_keep = self.time_scale.itemData(self.time_scale.currentIndex())
@@ -181,6 +189,8 @@ class PlotterView(QWidget):
     def show_hide(self):
         if self.isVisible():
             self.hide()
+            self.pause = True
         else:
             self.show()
+            self.pause = False
         self._controller.resize_window()
