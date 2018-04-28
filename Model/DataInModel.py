@@ -6,6 +6,7 @@ from time import time, sleep
 
 from threading import Thread, Event
 
+from Model.DataObject.AccessorData.PlotDataAcc import PlotDataAcc
 from Model.DataObject.AccessorData.RobotStateAcc import RobotStateAcc
 from Model.DataObject.AccessorData.TeamColorAcc import TeamColorAcc
 from Model.DataObject.AccessorData.PlayInfoAcc import PlayInfoAcc
@@ -56,6 +57,8 @@ class DataInModel(Thread):
                                                      'referee_team_info': 'None',
                                                      'auto_play_info': 'None'})
 
+        self._plot_data = []
+
         # Système interne
         self._datain_factory = DataFactory()
         self._start_time = time()
@@ -103,6 +106,7 @@ class DataInModel(Thread):
         self._distrib_sepcific_packet[TeamColorAcc.__name__] = self._distrib_TeamColor
         self._distrib_sepcific_packet[RobotStateAcc.__name__] = self._distrib_RobotState
         self._distrib_sepcific_packet[PlayInfoAcc.__name__] = self._distrib_PlayInfo
+        self._distrib_sepcific_packet[PlotDataAcc.__name__] = self._distrib_PlotData
 
         self._logger.debug('INIT: Distributor')
 
@@ -211,6 +215,10 @@ class DataInModel(Thread):
         self._robot_state = data.data.copy()
         self._event_robot_state.set()
 
+    def _distrib_PlotData(self, data):
+        self._logger.debug('DISTRIB: RobotState')
+        self._plot_data.append(data.data.copy())
+
 
     # === PRIVATE METHODS ===
 
@@ -317,6 +325,11 @@ class DataInModel(Thread):
         else:
             self._logger.warn('TRIGGER: GET LOG - No new log')
             return None
+
+    def fetch_plot_data(self):
+        data = self._plot_data.copy()
+        self._plot_data.clear()
+        return data
 
     def show_draw(self, draw):
         """ Afficher le dessin sur la fenêtre du terrain """

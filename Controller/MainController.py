@@ -138,6 +138,7 @@ class MainController(QWidget):
 
         # Initialisation des modèles aux vues
         self.view_logger.set_model(self.model_datain)
+        self.view_plotter.set_model(self.model_datain)
         self.model_datain.setup_udp_server(self.network_data_in)
         self.model_dataout.setup_udp_server(self.network_data_in)
         self.model_frame.set_vision(self.network_vision)
