@@ -44,7 +44,8 @@ class StrategyCtrView(QWidget):
         self.update_timer.start(500)
 
         self.strategies = {}
-        self.roles = {}
+        self.required_roles = {}
+        self.optional_roles = {}
         self.tactic_default = []
 
     def init_loop(self):
@@ -107,18 +108,29 @@ class StrategyCtrView(QWidget):
         self.selectStrat = QComboBox()
         self.selectStrat.addItem(self.NO_STRAT_LABEL)
         self.selectStrat.currentIndexChanged.connect(self.strategy_selected)
-        self.page_strat_use_role = QCheckBox("Forcé les rôles")
+        self.page_strat_use_role = QCheckBox("Forcer les rôles")
         self.page_strat_use_role.stateChanged.connect(self.toggle_strat_use_role)
 
-        # Roles
-        self.page_strat_form_roles = QFormLayout()
+        # QGroupBox Required Roles
+        self.page_strat_form_required_roles = QFormLayout()
+        qgroup_required_roles = QGroupBox('Sélectionnez les rôles obligatoires', self.page_strategy)
+        required_roles_combox = QVBoxLayout()
+        required_roles_combox.addLayout(self.page_strat_form_required_roles)
+        qgroup_required_roles.setLayout(required_roles_combox)
 
-        qgroup = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
+        # QGroupBox Optional Roles
+        self.page_strat_form_optional_roles = QFormLayout()
+        qgroup_optional_roles = QGroupBox('Sélectionnez les rôles optionnels', self.page_strategy)
+        optional_roles_combox = QVBoxLayout()
+        optional_roles_combox.addLayout(self.page_strat_form_optional_roles)
+        qgroup_optional_roles.setLayout(optional_roles_combox)
+
+        # QGroupBox Strategy
+        qgroup_strategy = QGroupBox('Sélectionnez votre stratégie', self.page_strategy)
         strat_combox = QVBoxLayout()
-        strat_combox.addLayout(self.page_strat_form_roles)
         strat_combox.addWidget(self.page_strat_use_role)
         strat_combox.addWidget(self.selectStrat)
-        qgroup.setLayout(strat_combox)
+        qgroup_strategy.setLayout(strat_combox)
 
         self.page_strat_but_quick1 = QPushButton('')
         self.page_strat_but_quick1.clicked.connect(self.send_quick_strat1)
@@ -142,7 +154,9 @@ class StrategyCtrView(QWidget):
         but_group = QHBoxLayout()
         but_group.addWidget(self.page_strat_but_apply)
         but_group.addWidget(self.page_strat_but_cancel)
-        self.page_strat_vbox.addWidget(qgroup)
+        self.page_strat_vbox.addWidget(qgroup_required_roles)
+        self.page_strat_vbox.addWidget(qgroup_optional_roles)
+        self.page_strat_vbox.addWidget(qgroup_strategy)
         self.page_strat_vbox.addLayout(but_quick_group)
         self.page_strat_vbox.addLayout(but_group)
 
@@ -345,33 +359,58 @@ class StrategyCtrView(QWidget):
             self.selectStrat.addItem(self.NO_STRAT_LABEL)
 
     def toggle_strat_use_role(self):
-        for combo_box in self.roles.values():
+        for combo_box in (*self.required_roles.values(), *self.optional_roles.values()):
             combo_box.setEnabled(self.page_strat_use_role.isChecked())
 
     def strategy_selected(self):
         name = str(self.selectStrat.currentText())
         if name != '':
-            required_roles = self.strategies[name]
+            # ====== Required Roles ======
+            required_roles = self.strategies[name]["required_roles"]
 
             # Remove role widget
-            nb_widget = self.page_strat_form_roles.rowCount()
-            for i in reversed(range(0, nb_widget)):
-                self.page_strat_form_roles.removeRow(i)
+            nb_widget_required_roles = self.page_strat_form_required_roles.rowCount()
+            for i in reversed(range(0, nb_widget_required_roles)):
+                self.page_strat_form_required_roles.removeRow(i)
 
             # delete unused role
-            for prev_role in list(self.roles.keys()):
+            for prev_role in list(self.required_roles.keys()):
                 if prev_role not in required_roles:
-                    del self.roles[prev_role]
+                    del self.required_roles[prev_role]
 
             # Add new one
             for i, r in enumerate(required_roles):
                 select_robot = QComboBox()
                 [select_robot.addItem(str(x)) for x in range(12)]
 
-                self.page_strat_form_roles.insertRow(i, r, select_robot)
+                self.page_strat_form_required_roles.insertRow(i, r, select_robot)
 
-                self.roles[r] = select_robot
-                self.roles[r].setEnabled(self.page_strat_use_role.isChecked())
+                self.required_roles[r] = select_robot
+                self.required_roles[r].setEnabled(self.page_strat_use_role.isChecked())
+
+            # ====== Optional Roles ======
+            optional_roles = self.strategies[name]["optional_roles"]
+
+            # Remove role widget
+            nb_widget_optional_roles = self.page_strat_form_optional_roles.rowCount()
+            for i in reversed(range(0, nb_widget_optional_roles)):
+                self.page_strat_form_optional_roles.removeRow(i)
+
+            # delete unused role
+            for prev_role in list(self.optional_roles.keys()):
+                if prev_role not in optional_roles:
+                    del self.optional_roles[prev_role]
+
+            # Add new one
+            for i, r in enumerate(optional_roles):
+                select_robot = QComboBox()
+                select_robot.addItem("")
+                [select_robot.addItem(str(x)) for x in range(12)]
+
+                self.page_strat_form_optional_roles.insertRow(i, r, select_robot)
+
+                self.optional_roles[r] = select_robot
+                self.optional_roles[r].setEnabled(self.page_strat_use_role.isChecked())
 
     def _send_strategy(self, strategy_name, role=None):
         self.parent.model_dataout.send_strategy(strategy_name, self.parent.get_team_color(), role)
@@ -396,7 +435,8 @@ class StrategyCtrView(QWidget):
         strat_name = str(self.selectStrat.currentText())
 
         if self.page_strat_use_role.isChecked():
-            roles = {r: int(box.currentText()) for r, box in self.roles.items()}
+            roles = {r: int(box.currentText()) for r, box in dict(**self.required_roles, **self.optional_roles).items() if box.currentText() != ''}
+            print(roles)
             # In case we have twice the same id, change background color
             if len(set(roles.values())) != len(roles):
                 bg_color = QColor("#FF0000")
