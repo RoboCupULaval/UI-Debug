@@ -21,9 +21,14 @@ class StratGeneralAcc(BaseDataAccessor):
         keys = self.data.keys()
         if 'strategy' in keys:
             assert isinstance(self.data['strategy'], dict)
-            for key, value in self.data['strategy'].items():
-                assert isinstance(key, str)
-                assert isinstance(value, list)
+            for strategy_name, strategy_roles_dict in self.data['strategy'].items():
+                assert isinstance(strategy_name, str)
+                assert isinstance(strategy_roles_dict, dict)
+                for role_type, roles in strategy_roles_dict.items():
+                    assert role_type in ("required_roles", "optional_roles")
+                    assert isinstance(roles, list)
+                    for role in roles:
+                        assert isinstance(role, str)
         else:
             self.data['strategy'] = None
 
@@ -41,5 +46,3 @@ class StratGeneralAcc(BaseDataAccessor):
     @staticmethod
     def get_type():
         return 1001
-
-
