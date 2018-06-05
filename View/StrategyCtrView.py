@@ -436,7 +436,6 @@ class StrategyCtrView(QWidget):
 
         if self.page_strat_use_role.isChecked():
             roles = {r: int(box.currentText()) for r, box in dict(**self.required_roles, **self.optional_roles).items() if box.currentText() != ''}
-            print(roles)
             # In case we have twice the same id, change background color
             if len(set(roles.values())) != len(roles):
                 bg_color = QColor("#FF0000")
