@@ -43,6 +43,7 @@ class FieldController(object):
         # Paramètre caméra
         self._camera_position = [0, 0]
         self._camera_speed = 50
+        self.scroll_slowing_factor = 15
         self._cursor_last_pst = None
         self._lock_camera = False
 
@@ -194,23 +195,21 @@ class FieldController(object):
         self._camera_position[1] = max(self._camera_position[1], -max_height)
 
     def zoom(self, x, y, scroll_delta_y):
-        """ Zoom la caméra de +10% """
+        """ Zoom la caméra de +10% (+/- un facteur de ralentissement)"""
         SCALE_CHANGE = 0.1
-        SLOWING_FACTOR = 15
         if not self._lock_camera and self.ratio_screen < 0.6:
             rx, ry = self.convert_screen_to_real_pst(x, y)
-            self.ratio_screen *= 1 + SCALE_CHANGE * scroll_delta_y / SLOWING_FACTOR
+            self.ratio_screen *= 1 + SCALE_CHANGE * scroll_delta_y / self.scroll_slowing_factor
             sx, sy, _ = self.convert_real_to_scene_pst(rx, ry)
             self._camera_position[0] -= sx - x
             self._camera_position[1] -= sy - y
 
     def dezoom(self, x, y, scroll_delta_y):
-        """ Dézoom la caméra de -10% """
+        """ Dézoom la caméra de -10% (+/- un facteur de ralentissement)"""
         SCALE_CHANGE = 0.1
-        SLOWING_FACTOR = 15
         if not self._lock_camera and self.ratio_screen > 0.03:
             rx, ry = self.convert_screen_to_real_pst(x, y)
-            self.ratio_screen /= 1 + SCALE_CHANGE * -scroll_delta_y / SLOWING_FACTOR
+            self.ratio_screen /= 1 + SCALE_CHANGE * -scroll_delta_y / self.scroll_slowing_factor
             sx, sy, _ = self.convert_real_to_scene_pst(rx, ry)
             self._camera_position[0] -= sx - x
             self._camera_position[1] -= sy - y

@@ -17,8 +17,10 @@ from PyQt5.QtWidgets import QTreeWidget
 from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QComboBox, \
                             QPushButton, QGroupBox, QHBoxLayout, QLabel
-from PyQt5.QtGui import QFont, QPalette, QColor
+from PyQt5.QtGui import QFont, QPalette, QColor, QCursor
 from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
+
+from Controller.QtToolBox import QtToolBox
 
 __author__ = 'RoboCupULaval'
 
@@ -250,6 +252,12 @@ class StrategyCtrView(QWidget):
 
     def keyPressEvent(self, event):
         key = event.key()
+
+        pos = self.parent.view_field_screen.mapFromGlobal(QCursor.pos())
+        if key == QtCore.Qt.Key_Plus:
+            QtToolBox.field_ctrl.zoom(pos.x(), pos.y(), QtToolBox.field_ctrl.scroll_slowing_factor)
+        elif key == QtCore.Qt.Key_Minus:
+            QtToolBox.field_ctrl.dezoom(pos.x(), pos.y(), -QtToolBox.field_ctrl.scroll_slowing_factor)
 
         page_id = self.page_controller.currentIndex()
         if page_id == 1: # Strategy
