@@ -20,6 +20,7 @@ def argumentParser(argument):
     args_ = parser.parse_args(argument)
     return args_
 
+
 def load_config(path):
     config_parser = ConfigParser(allow_no_value=False)
     try:

@@ -20,6 +20,7 @@ from Model.DataObject.DrawingData.BaseDataDraw import BaseDataDraw
 from Model.DataObject.LoggingData.BaseDataLog import BaseDataLog
 from Model.DataObject.AccessorData.HandShakeAcc import HandShakeAcc
 
+
 from .TimeListState.TimeListState import TimeListState
 
 __author__ = 'RoboCupULaval'
@@ -43,7 +44,7 @@ class DataInModel(Thread):
         self._data_logging = list()
         self._robot_state = None
         self._robot_strategic_state = TimeListState('RobotState', dict(zip(['yellow', 'blue'],
-                                                                           [dict(zip(list(range(12)),
+                                                                           [dict(zip(list(range(16)),
                                                                            [dict(zip(['tactic', 'action', 'target'],
                                                                                     ['None', 'None', 'None'])) for _ in range(12)]
                                                                            )) for _ in range(2)])))
@@ -88,8 +89,8 @@ class DataInModel(Thread):
     def _initialization(self):
         """ Initialise la structure de données du DataInModel et des threads """
         self._data_draw['notset'] = list()
-        self._data_draw['robots_yellow'] = [list() for _ in range(12)]
-        self._data_draw['robots_blue'] = [list() for _ in range(12)]
+        self._data_draw['robots_yellow'] = [list() for _ in range(16)]
+        self._data_draw['robots_blue'] = [list() for _ in range(16)]
         self._logger.debug('INIT: object')
 
 

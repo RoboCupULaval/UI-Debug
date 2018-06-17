@@ -23,6 +23,9 @@ from PyQt5.QtCore import QTimer, pyqtSlot, pyqtSignal
 __author__ = 'RoboCupULaval'
 
 
+MAX_NUMBER_ROBOTS = 16
+
+
 class StrategyCtrView(QWidget):
 
     NO_STRAT_LABEL = 'Aucune Stratégie disponible'
@@ -171,7 +174,7 @@ class StrategyCtrView(QWidget):
 
         group_vbox.addWidget(QLabel('ID du robot :'))
         self.selectRobot = QComboBox()
-        [self.selectRobot.addItem(str(x)) for x in range(12)]
+        [self.selectRobot.addItem(str(x)) for x in range(MAX_NUMBER_ROBOTS)]
         self.selectRobot.currentIndexChanged.connect(self.handle_selection_robot_event_id)
         group_vbox.addWidget(self.selectRobot)
 
@@ -381,7 +384,7 @@ class StrategyCtrView(QWidget):
             # Add new one
             for i, r in enumerate(required_roles):
                 select_robot = QComboBox()
-                [select_robot.addItem(str(x)) for x in range(12)]
+                [select_robot.addItem(str(x)) for x in range(MAX_NUMBER_ROBOTS)]
 
                 self.page_strat_form_required_roles.insertRow(i, r, select_robot)
 
@@ -405,7 +408,7 @@ class StrategyCtrView(QWidget):
             for i, r in enumerate(optional_roles):
                 select_robot = QComboBox()
                 select_robot.addItem("")
-                [select_robot.addItem(str(x)) for x in range(12)]
+                [select_robot.addItem(str(x)) for x in range(MAX_NUMBER_ROBOTS)]
 
                 self.page_strat_form_optional_roles.insertRow(i, r, select_robot)
 
@@ -466,7 +469,7 @@ class StrategyCtrView(QWidget):
         self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_tactic_stop_all(self):
-        for id_bot in range(12):  # TODO (pturgeon): Changer pour constante globable (ou liste?)
+        for id_bot in range(MAX_NUMBER_ROBOTS):  # TODO (pturgeon): Changer pour constante globable (ou liste?)
             self.parent.model_dataout.send_tactic(id_bot, self.parent.get_team_color(), 'Stop', args=None)
 
     def send_strat_stop(self):
