@@ -74,6 +74,10 @@ class FieldController(object):
         self.field_goal_left = {}
         self.field_goal_right = {}
 
+        self.prev_field = None
+
+        self.need_redraw = True
+
     @property
     def line_width(self):
         return self._line_width
@@ -166,6 +170,8 @@ class FieldController(object):
 
     def drag_camera(self, x, y):
         """ Déplacement de la caméra """
+
+        self.need_redraw = True
         if not self._lock_camera:
             if self._cursor_last_pst is None:
                 self._cursor_last_pst = x, y
@@ -196,7 +202,9 @@ class FieldController(object):
 
     def zoom(self, x, y, scroll_delta_y):
         """ Zoom la caméra de +10% (+/- un facteur de ralentissement)"""
-        SCALE_CHANGE = 0.1
+        SCALE_CHANGE = 0.05
+
+        self.need_redraw = True
         if not self._lock_camera and self.ratio_screen < 0.6:
             rx, ry = self.convert_screen_to_real_pst(x, y)
             self.ratio_screen *= 1 + SCALE_CHANGE * scroll_delta_y / self.scroll_slowing_factor
@@ -206,7 +214,9 @@ class FieldController(object):
 
     def dezoom(self, x, y, scroll_delta_y):
         """ Dézoom la caméra de -10% (+/- un facteur de ralentissement)"""
-        SCALE_CHANGE = 0.1
+        SCALE_CHANGE = 0.05
+
+        self.need_redraw = True
         if not self._lock_camera and self.ratio_screen > 0.03:
             rx, ry = self.convert_screen_to_real_pst(x, y)
             self.ratio_screen /= 1 + SCALE_CHANGE * -scroll_delta_y / self.scroll_slowing_factor
@@ -237,6 +247,10 @@ class FieldController(object):
     def _set_field_size_new(self, field: SSL_GeometryFieldSize):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+
+        if self.prev_field != field:
+            self.need_redraw = True  # Only redraw when receiving new geometry message
+
         self.field_goal_left = \
             {name: line for name, line in self.field_lines.items() if
              name.startswith("LeftGoal") and name != "LeftGoalLine"}
@@ -258,6 +272,8 @@ class FieldController(object):
 
         self._center_circle_radius = self.field_arcs['CenterCircle'].radius
         self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length / 2
+
+        self.prev_field = field
 
     def _convert_field_circular_arc(self, field_arcs):
         return {arc.name: FieldCircularArc(arc) for arc in field_arcs}
