@@ -18,7 +18,6 @@ class FieldLineDrawing(BaseDrawingObject):
     def draw(self, painter):
         if self.isVisible() and QtToolBox.field_ctrl.need_redraw:
             QtToolBox.field_ctrl.need_redraw = False
-            print("Cache invalid")
             # Grass drawing
             self.field_painter.setPen(QtToolBox.create_pen(is_hide=True))
             self.field_painter.setBrush(QtToolBox.create_brush(color=Color.DARK_GREEN_FIELD))
