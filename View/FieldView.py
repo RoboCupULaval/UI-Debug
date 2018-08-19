@@ -144,10 +144,6 @@ class FieldView(QWidget):
                 for effect in list_effect:
                     effect.draw(painter)
 
-    def draw_field_ground(self, painter):
-        """ Dessine le sol du terrain """
-        self.graph_draw['field-ground'].draw(painter)
-
     def draw_mobs(self, painter):
         """ Dessine les objets mobiles """
         self.graph_mobs['ball'].draw(painter)
@@ -183,8 +179,6 @@ class FieldView(QWidget):
         max_robots_in_team = 12   # TODO : Variable globale?
 
         # Élément graphique pour les dessins
-        self.graph_draw['field-ground'] = self.controller.get_drawing_object('field-ground')()
-        self.graph_draw['field-ground'].show()
         self.graph_draw['field-lines'] = self.controller.get_drawing_object('field-lines')()
         self.graph_draw['field-lines'].show()
         self.graph_draw['frame-rate'] = self.controller.get_drawing_object('frame-rate')()
@@ -400,11 +394,10 @@ class FieldView(QWidget):
         painter = QPainter()
         painter.begin(self)
         painter.setBackground(QtToolBox.create_brush())
-        self.draw_field_ground(painter)
+        self.draw_field_lines(painter)
         self.draw_map(painter)
         self.draw_multiple_points(painter)
         self.draw_effects(painter)
-        self.draw_field_lines(painter)
         self.draw_mobs(painter)
         painter.end()
 

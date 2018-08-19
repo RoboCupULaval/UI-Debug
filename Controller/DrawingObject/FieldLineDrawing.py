@@ -12,7 +12,7 @@ class FieldLineDrawing(BaseDrawingObject):
     def __init__(self):
         BaseDrawingObject.__init__(self)
 
-        self.field_cache = QPixmap(3000, 3000)
+        self.field_cache = QPixmap(1000, 1000)
         self.field_painter = QPainter(self.field_cache)
 
     def draw(self, painter):
