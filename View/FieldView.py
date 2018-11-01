@@ -3,12 +3,15 @@ import logging
 from time import time
 
 from PyQt5.QtCore import Qt, QMutex, QTimer, QEvent
-from PyQt5.QtGui import QIcon, QPainter
-from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton, QApplication
+from PyQt5.QtGui import QIcon, QPainter, QPen, QColor
+from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QApplication
 
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
 from Controller.QtToolBox import QtToolBox
+
+import colorsys
+from math import cos, sin, atan, pi
 
 __author__ = 'RoboCupULaval'
 
@@ -18,6 +21,12 @@ class FieldView(QWidget):
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
     FRAME_RATE = 30
+
+    # Ball Slingshot
+    MAX_SLINGSHOT_POWER = 8
+    MIN_POWER_FOR_SHADED_ARROW = 3
+    MAX_POWER_FOR_SHADED_ARROW = 7
+    SLINGSHOT_DISTANCE_TO_POWER_FACTOR = 1./250
 
     def __init__(self, controller, debug=False):
         super().__init__(controller)
@@ -63,6 +72,15 @@ class FieldView(QWidget):
 
         # Selected mob
         self.selected_mob = None
+
+        # Ball slingshot
+        self.slingshot_mode = False
+        self.slingshot_power = 0
+        self.slingshot_power_lock = False
+        self.slingshot_destination = None
+
+        # IMPORTANT FOR KEY[PRESS-RELEASE] EVENTS
+        self.setFocusPolicy(Qt.ClickFocus)
 
     def init_view_event(self):
         """ Initialise les boucles de rafraîchissement des dessins """
@@ -332,6 +350,26 @@ class FieldView(QWidget):
             self._cursor_position = event.pos().x(), event.pos().y()
         return super().eventFilter(source, event)
 
+    def keyPressEvent(self, event):
+        if self.graph_mobs['ball'].isVisible():
+            if event.key() == Qt.Key_Control:
+                self.slingshot_mode = True
+                self.slingshot_destination = QtToolBox.field_ctrl.convert_screen_to_real_pst(self._cursor_position[0],
+                                                                                             self._cursor_position[1])
+                self.setCursor(Qt.PointingHandCursor)
+            elif event.key() == Qt.Key_Shift and self.slingshot_mode:
+                self.slingshot_power_lock = True
+                self.slingshot_power = self.compute_slingshot_power()
+
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.slingshot_mode = False
+            self.slingshot_power_lock = False
+            self.slingshot_destination = None
+            self.setCursor(Qt.OpenHandCursor)
+        elif event.key() == Qt.Key_Shift:
+            self.slingshot_power_lock = False
+
     def mousePressEvent(self, event):
         """ Gère l'événement du clic simple de la souris """
         if self.controller.get_tactic_controller_is_visible():
@@ -361,19 +399,30 @@ class FieldView(QWidget):
                 self.controller.model_dataout.target = (x, y)
                 self.graph_mobs['target'].setPos(x, y)
 
-
     def mouseReleaseEvent(self, event):
         """ Gère l'événement de relâchement de la touche de la souris """
+        if QApplication.keyboardModifiers() == Qt.ControlModifier or QApplication.keyboardModifiers() == (Qt.ControlModifier | Qt.ShiftModifier):
+            if self.graph_mobs['ball'].isVisible() and self.slingshot_mode:
+                self.slingshot_destination = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+                self.controller.grsim_sender.send_ball_position((self.graph_mobs['ball'].x, self.graph_mobs['ball'].y),
+                                                                ((self.slingshot_destination[0] - self.graph_mobs['ball'].x) / 250,
+                                                                 (self.slingshot_destination[1] - self.graph_mobs['ball'].y) / 250))
+            self.slingshot_mode = False
+            self.slingshot_destination = None
         if not QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
-        """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
         if event.buttons() == Qt.LeftButton:
+            """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
             if not QtToolBox.field_ctrl.camera_is_locked():
                 self.setCursor(Qt.ClosedHandCursor)
             QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
+        elif self.slingshot_mode:
+            """ Gère l'événement du mouvement de la souris lors du mode slingshot """
+            self.slingshot_destination = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(),
+                                                                                         event.pos().y())
 
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
@@ -406,8 +455,68 @@ class FieldView(QWidget):
         self.draw_multiple_points(painter)
         self.draw_effects(painter)
         self.draw_field_lines(painter)
+        if self.slingshot_mode:
+            self.draw_sling_shot(painter)
         self.draw_mobs(painter)
         painter.end()
+
+    def draw_sling_shot(self, painter):
+        slingshot_power = self.slingshot_power if self.slingshot_power_lock else self.compute_slingshot_power()
+        slingshot_distance = slingshot_power / self.SLINGSHOT_DISTANCE_TO_POWER_FACTOR
+
+        v_x = (self.slingshot_destination[0] - self.graph_mobs['ball'].x)
+        v_y = (self.slingshot_destination[1] - self.graph_mobs['ball'].y)
+
+        # Compute theta
+        theta = FieldView.angle(v_x, v_y)
+
+        clamped_power = min(max(slingshot_power, self.MIN_POWER_FOR_SHADED_ARROW), self.MAX_POWER_FOR_SHADED_ARROW)
+        hue = (self.MAX_POWER_FOR_SHADED_ARROW - clamped_power) / (3.0 * (self.MAX_POWER_FOR_SHADED_ARROW - self.MIN_POWER_FOR_SHADED_ARROW))
+        color = colorsys.hsv_to_rgb(hue, 1, 255)
+
+        # Guide line
+        painter.setPen(QPen(Qt.black, 2, Qt.DashLine))
+        x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x, self.graph_mobs['ball'].y)
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.slingshot_destination)
+        painter.drawLine(x1, y1, x2, y2)
+
+        # Power line
+        painter.setPen(QPen(QColor(*color), 4, Qt.SolidLine))
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x + slingshot_distance * cos(theta),
+                                                                   self.graph_mobs['ball'].y + slingshot_distance * sin(theta))
+        painter.drawLine(x1, y1, x2, y2)
+
+    def compute_slingshot_speed(self):
+        slingshot_power = self.slingshot_power if self.slingshot_power_lock else self.compute_slingshot_power()
+        slingshot_distance = slingshot_power / self.SLINGSHOT_DISTANCE_TO_POWER_FACTOR
+
+        x_ball_to_target = (self.slingshot_destination[0] - self.graph_mobs['ball'].x)
+        y_ball_to_target = (self.slingshot_destination[1] - self.graph_mobs['ball'].y)
+
+        # Compute theta
+        theta = FieldView.angle(x_ball_to_target, y_ball_to_target)
+
+        v_x, v_y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(
+            self.graph_mobs['ball'].x + slingshot_distance * cos(theta),
+            self.graph_mobs['ball'].y + slingshot_distance * sin(theta))
+        return v_x, v_y
+
+    def compute_slingshot_power(self):
+        v_x = (self.slingshot_destination[0] - self.graph_mobs['ball'].x)
+        v_y = (self.slingshot_destination[1] - self.graph_mobs['ball'].y)
+        return min(((v_x ** 2 + v_y ** 2) ** 0.5) * self.SLINGSHOT_DISTANCE_TO_POWER_FACTOR, self.MAX_SLINGSHOT_POWER)
+
+    @staticmethod
+    def angle(x, y):
+        if x == 0:
+            theta = pi / 2 if y > 0 else -pi / 2
+        else:
+            theta = atan(y / x)
+            if x < 0:
+                theta += pi
+            elif y < 0:
+                theta += 2 * pi
+        return theta
 
     def get_teams_formation(self):
         teams_formation = []
