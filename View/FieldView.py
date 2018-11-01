@@ -23,10 +23,10 @@ class FieldView(QWidget):
     FRAME_RATE = 30
 
     # Ball Slingshot
-    MAX_SLINGSHOT_POWER = 8
-    MIN_POWER_FOR_SHADED_ARROW = 3
-    MAX_POWER_FOR_SHADED_ARROW = 7
-    SLINGSHOT_DISTANCE_TO_POWER_FACTOR = 1./250
+    MAX_SLINGSHOT_DISTANCE = 2000
+    MIN_SLINGSHOT_DISTANCE_GREEN = 500
+    MAX_SLINGSHOT_DISTANCE_RED = 1500
+    SLINGSHOT_DISTANCE_TO_SPEED_FACTOR = 1. / 150
 
     def __init__(self, controller, debug=False):
         super().__init__(controller)
@@ -75,9 +75,9 @@ class FieldView(QWidget):
 
         # Ball slingshot
         self.slingshot_mode = False
-        self.slingshot_power = 0
-        self.slingshot_power_lock = False
-        self.slingshot_destination = None
+        self.slingshot_distance = 0
+        self.slingshot_distance_lock = False
+        self.slingshot_target = None
 
         # IMPORTANT FOR KEY[PRESS-RELEASE] EVENTS
         self.setFocusPolicy(Qt.ClickFocus)
@@ -354,21 +354,21 @@ class FieldView(QWidget):
         if self.graph_mobs['ball'].isVisible():
             if event.key() == Qt.Key_Control:
                 self.slingshot_mode = True
-                self.slingshot_destination = QtToolBox.field_ctrl.convert_screen_to_real_pst(self._cursor_position[0],
-                                                                                             self._cursor_position[1])
+                self.slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(self._cursor_position[0],
+                                                                                        self._cursor_position[1])
                 self.setCursor(Qt.PointingHandCursor)
             elif event.key() == Qt.Key_Shift and self.slingshot_mode:
-                self.slingshot_power_lock = True
-                self.slingshot_power = self.compute_slingshot_power()
+                self.slingshot_distance_lock = True
+                self.slingshot_distance = self.compute_slingshot_distance()
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_Control:
             self.slingshot_mode = False
-            self.slingshot_power_lock = False
-            self.slingshot_destination = None
+            self.slingshot_distance_lock = False
+            self.slingshot_target = None
             self.setCursor(Qt.OpenHandCursor)
         elif event.key() == Qt.Key_Shift:
-            self.slingshot_power_lock = False
+            self.slingshot_distance_lock = False
 
     def mousePressEvent(self, event):
         """ Gère l'événement du clic simple de la souris """
@@ -403,26 +403,23 @@ class FieldView(QWidget):
         """ Gère l'événement de relâchement de la touche de la souris """
         if QApplication.keyboardModifiers() == Qt.ControlModifier or QApplication.keyboardModifiers() == (Qt.ControlModifier | Qt.ShiftModifier):
             if self.graph_mobs['ball'].isVisible() and self.slingshot_mode:
-                self.slingshot_destination = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+                self.slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
                 self.controller.grsim_sender.send_ball_position((self.graph_mobs['ball'].x, self.graph_mobs['ball'].y),
-                                                                ((self.slingshot_destination[0] - self.graph_mobs['ball'].x) / 250,
-                                                                 (self.slingshot_destination[1] - self.graph_mobs['ball'].y) / 250))
+                                                                self.compute_slingshot_speed_vector())
             self.slingshot_mode = False
-            self.slingshot_destination = None
+            self.slingshot_target = None
         if not QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
+        """ Gère l'événement du mouvement de la souris, avec une touche enfoncée et dans le mode slingshot """
         if event.buttons() == Qt.LeftButton:
-            """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
             if not QtToolBox.field_ctrl.camera_is_locked():
                 self.setCursor(Qt.ClosedHandCursor)
             QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
         elif self.slingshot_mode:
-            """ Gère l'événement du mouvement de la souris lors du mode slingshot """
-            self.slingshot_destination = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(),
-                                                                                         event.pos().y())
+            self.slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
 
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
@@ -461,62 +458,47 @@ class FieldView(QWidget):
         painter.end()
 
     def draw_sling_shot(self, painter):
-        slingshot_power = self.slingshot_power if self.slingshot_power_lock else self.compute_slingshot_power()
-        slingshot_distance = slingshot_power / self.SLINGSHOT_DISTANCE_TO_POWER_FACTOR
-
-        v_x = (self.slingshot_destination[0] - self.graph_mobs['ball'].x)
-        v_y = (self.slingshot_destination[1] - self.graph_mobs['ball'].y)
-
-        # Compute theta
-        theta = FieldView.angle(v_x, v_y)
-
-        clamped_power = min(max(slingshot_power, self.MIN_POWER_FOR_SHADED_ARROW), self.MAX_POWER_FOR_SHADED_ARROW)
-        hue = (self.MAX_POWER_FOR_SHADED_ARROW - clamped_power) / (3.0 * (self.MAX_POWER_FOR_SHADED_ARROW - self.MIN_POWER_FOR_SHADED_ARROW))
-        color = colorsys.hsv_to_rgb(hue, 1, 255)
-
         # Guide line
         painter.setPen(QPen(Qt.black, 2, Qt.DashLine))
         x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x, self.graph_mobs['ball'].y)
-        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.slingshot_destination)
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*self.slingshot_target)
         painter.drawLine(x1, y1, x2, y2)
 
-        # Power line
+        d_x, d_y = self.compute_slingshot_vector()
+        print("dx:{}  dy:{}".format(d_x, d_y))
+
+        slingshot_distance = (d_x ** 2 + d_y ** 2) ** 0.5
+        clamped_distance = min(max(slingshot_distance, self.MIN_SLINGSHOT_DISTANCE_GREEN), self.MAX_SLINGSHOT_DISTANCE_RED)
+        hue = (self.MAX_SLINGSHOT_DISTANCE_RED - clamped_distance) / (3.0 * (self.MAX_SLINGSHOT_DISTANCE_RED - self.MIN_SLINGSHOT_DISTANCE_GREEN))
+        color = colorsys.hsv_to_rgb(hue, 1, 255)
+
+        # Speed line
         painter.setPen(QPen(QColor(*color), 4, Qt.SolidLine))
-        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x + slingshot_distance * cos(theta),
-                                                                   self.graph_mobs['ball'].y + slingshot_distance * sin(theta))
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x + d_x, self.graph_mobs['ball'].y + d_y)
         painter.drawLine(x1, y1, x2, y2)
 
-    def compute_slingshot_speed(self):
-        slingshot_power = self.slingshot_power if self.slingshot_power_lock else self.compute_slingshot_power()
-        slingshot_distance = slingshot_power / self.SLINGSHOT_DISTANCE_TO_POWER_FACTOR
-
-        x_ball_to_target = (self.slingshot_destination[0] - self.graph_mobs['ball'].x)
-        y_ball_to_target = (self.slingshot_destination[1] - self.graph_mobs['ball'].y)
-
-        # Compute theta
-        theta = FieldView.angle(x_ball_to_target, y_ball_to_target)
-
-        v_x, v_y, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(
-            self.graph_mobs['ball'].x + slingshot_distance * cos(theta),
-            self.graph_mobs['ball'].y + slingshot_distance * sin(theta))
-        return v_x, v_y
-
-    def compute_slingshot_power(self):
-        v_x = (self.slingshot_destination[0] - self.graph_mobs['ball'].x)
-        v_y = (self.slingshot_destination[1] - self.graph_mobs['ball'].y)
-        return min(((v_x ** 2 + v_y ** 2) ** 0.5) * self.SLINGSHOT_DISTANCE_TO_POWER_FACTOR, self.MAX_SLINGSHOT_POWER)
-
-    @staticmethod
-    def angle(x, y):
-        if x == 0:
-            theta = pi / 2 if y > 0 else -pi / 2
+    def compute_slingshot_vector(self):
+        d_x = (self.slingshot_target[0] - self.graph_mobs['ball'].x)
+        d_y = (self.slingshot_target[1] - self.graph_mobs['ball'].y)
+        slingshot_distance = (d_x ** 2 + d_y ** 2) ** 0.5
+        if self.slingshot_distance_lock and self.slingshot_distance < self.MAX_SLINGSHOT_DISTANCE:
+            slingshot_vector = (d_x * (self.slingshot_distance / slingshot_distance),
+                                d_y * (self.slingshot_distance / slingshot_distance))
+        elif slingshot_distance < self.MAX_SLINGSHOT_DISTANCE:
+            slingshot_vector = (d_x, d_y)
         else:
-            theta = atan(y / x)
-            if x < 0:
-                theta += pi
-            elif y < 0:
-                theta += 2 * pi
-        return theta
+            slingshot_vector = (d_x * (self.MAX_SLINGSHOT_DISTANCE / slingshot_distance),
+                                d_y * (self.MAX_SLINGSHOT_DISTANCE / slingshot_distance))
+        return slingshot_vector
+
+    def compute_slingshot_speed_vector(self):
+        d_x, d_y = self.compute_slingshot_vector()
+        return d_x * self.SLINGSHOT_DISTANCE_TO_SPEED_FACTOR, d_y * self.SLINGSHOT_DISTANCE_TO_SPEED_FACTOR
+
+    def compute_slingshot_distance(self):
+        d_x = (self.slingshot_target[0] - self.graph_mobs['ball'].x)
+        d_y = (self.slingshot_target[1] - self.graph_mobs['ball'].y)
+        return (d_x ** 2 + d_y ** 2) ** 0.5
 
     def get_teams_formation(self):
         teams_formation = []
