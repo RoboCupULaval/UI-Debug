@@ -3,12 +3,16 @@ import logging
 from time import time
 
 from PyQt5.QtCore import Qt, QMutex, QTimer, QEvent
-from PyQt5.QtGui import QIcon, QPainter
-from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton, QApplication
+from PyQt5.QtGui import QIcon, QPainter, QPen, QColor
+from PyQt5.QtWidgets import QWidget, QToolBar, QAction, QSizePolicy, QApplication
 
 from Controller.DrawingObject.InfluenceMapDrawing import InfluenceMapDrawing
 from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
 from Controller.QtToolBox import QtToolBox
+
+import colorsys
+from math import cos, sin, atan2, pi
+from Util.position import Position
 
 __author__ = 'RoboCupULaval'
 
@@ -18,6 +22,14 @@ class FieldView(QWidget):
     FieldView est un QWidget qui représente la vue du terrain et des éléments qui y sont associés.
     """
     FRAME_RATE = 30
+
+    # Ball Slingshot
+    MAX_SLINGSHOT_DISTANCE = 2000
+    SLINGSHOT_COLOR_SCALE_DISTANCE_START = 500     # Green ->
+    SLINGSHOT_COLOR_SCALE_DISTANCE_END = 1500      # -> Red
+    SLINGSHOT_DISTANCE_TO_SPEED_FACTOR = 1. / 150  # Max speed = MAX_SLINGSHOT_DISTANCE * SLINGSHOT_DISTANCE_TO_SPEED_FACTOR
+    SLINGSHOT_ARROWHEAD_LENGTH = 15
+    SLINGSHOT_ARROWHEAD_ANGLE = pi / 4
 
     def __init__(self, controller, debug=False):
         super().__init__(controller)
@@ -63,6 +75,15 @@ class FieldView(QWidget):
 
         # Selected mob
         self.selected_mob = None
+
+        # Ball slingshot
+        self.slingshot_mode = False
+        self.slingshot_distance = 0
+        self.slingshot_distance_lock = False
+        self.slingshot_target = None
+
+        # Important for key[Press, Release] events
+        self.setFocusPolicy(Qt.ClickFocus)
 
     def init_view_event(self):
         """ Initialise les boucles de rafraîchissement des dessins """
@@ -332,6 +353,28 @@ class FieldView(QWidget):
             self._cursor_position = event.pos().x(), event.pos().y()
         return super().eventFilter(source, event)
 
+    def keyPressEvent(self, event):
+        if self.graph_mobs['ball'].isVisible():
+            if event.key() == Qt.Key_Control:
+                self.slingshot_mode = True
+                slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(self._cursor_position[0],
+                                                                                   self._cursor_position[1])
+                self.slingshot_target = Position(slingshot_target[0], slingshot_target[1])
+                self.setCursor(Qt.PointingHandCursor)
+            elif event.key() == Qt.Key_Shift and self.slingshot_mode:
+                self.slingshot_distance = self.compute_slingshot_target_distance()
+                if self.slingshot_distance > 0:
+                    self.slingshot_distance_lock = True
+
+    def keyReleaseEvent(self, event):
+        if self.slingshot_mode:
+            if event.key() == Qt.Key_Control:
+                self.slingshot_mode = False
+                self.slingshot_distance_lock = False
+                self.setCursor(Qt.OpenHandCursor)
+            elif event.key() == Qt.Key_Shift:
+                self.slingshot_distance_lock = False
+
     def mousePressEvent(self, event):
         """ Gère l'événement du clic simple de la souris """
         if self.controller.get_tactic_controller_is_visible():
@@ -361,19 +404,26 @@ class FieldView(QWidget):
                 self.controller.model_dataout.target = (x, y)
                 self.graph_mobs['target'].setPos(x, y)
 
-
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, _):
         """ Gère l'événement de relâchement de la touche de la souris """
+        if self.slingshot_mode:
+            self.controller.grsim_sender.send_ball_position((self.graph_mobs['ball'].x, self.graph_mobs['ball'].y),
+                                                            self.compute_slingshot_speed_vector())
+            self.slingshot_mode = False
+            self.slingshot_distance_lock = False
         if not QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
 
     def mouseMoveEvent(self, event):
-        """ Gère l'événement du mouvement de la souris avec une touche enfoncée """
+        """ Gère l'événement du mouvement de la souris, avec une touche enfoncée et dans le mode slingshot """
         if event.buttons() == Qt.LeftButton:
             if not QtToolBox.field_ctrl.camera_is_locked():
                 self.setCursor(Qt.ClosedHandCursor)
             QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
+        elif self.slingshot_mode:
+            slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+            self.slingshot_target = Position(slingshot_target[0], slingshot_target[1])
 
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
@@ -406,8 +456,55 @@ class FieldView(QWidget):
         self.draw_multiple_points(painter)
         self.draw_effects(painter)
         self.draw_field_lines(painter)
+        if self.slingshot_mode:
+            self.draw_slingshot(painter)
         self.draw_mobs(painter)
         painter.end()
+
+    def draw_slingshot(self, painter):
+        # Guide line
+        painter.setPen(QPen(Qt.black, 2, Qt.DashLine))
+        x1, y1, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x, self.graph_mobs['ball'].y)
+        x2, y2 = self._cursor_position
+        painter.drawLine(x1, y1, x2, y2)
+
+        # Slingshot Vector
+        slingshot_vector = self.compute_slingshot_vector()
+        clamped_distance = min(max(slingshot_vector.norm, self.SLINGSHOT_COLOR_SCALE_DISTANCE_START), self.SLINGSHOT_COLOR_SCALE_DISTANCE_END)
+        hue = (self.SLINGSHOT_COLOR_SCALE_DISTANCE_END - clamped_distance) / (3.0 * (self.SLINGSHOT_COLOR_SCALE_DISTANCE_END - self.SLINGSHOT_COLOR_SCALE_DISTANCE_START))
+        color = colorsys.hsv_to_rgb(hue, 1, 255)  # hue : Green = 1/3, Red = 0
+        painter.setPen(QPen(QColor(*color), 3, Qt.SolidLine))
+
+        ball_position = Position(*self.graph_mobs['ball'].position[:2])
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*(ball_position + slingshot_vector).to_tuple())
+        painter.drawLine(x1, y1, x2, y2)
+
+        # Arrowhead
+        theta = atan2(y2 - y1, x2 - x1)
+        painter.drawLine(x2, y2,
+                         x2 + self.SLINGSHOT_ARROWHEAD_LENGTH * cos(theta + pi - self.SLINGSHOT_ARROWHEAD_ANGLE / 2),
+                         y2 + self.SLINGSHOT_ARROWHEAD_LENGTH * sin(theta + pi - self.SLINGSHOT_ARROWHEAD_ANGLE / 2))
+        painter.drawLine(x2, y2,
+                         x2 + self.SLINGSHOT_ARROWHEAD_LENGTH * cos(theta + pi + self.SLINGSHOT_ARROWHEAD_ANGLE / 2),
+                         y2 + self.SLINGSHOT_ARROWHEAD_LENGTH * sin(theta + pi + self.SLINGSHOT_ARROWHEAD_ANGLE / 2))
+
+    def compute_slingshot_vector(self):
+        ball_to_target = self.slingshot_target - Position(*self.graph_mobs['ball'].position[:2])
+        if ball_to_target.norm == 0:
+            slingshot_vector = Position(0, 0)
+        elif self.slingshot_distance_lock and self.slingshot_distance < self.MAX_SLINGSHOT_DISTANCE:
+            slingshot_vector = ball_to_target * self.slingshot_distance / ball_to_target.norm
+        elif ball_to_target.norm < self.MAX_SLINGSHOT_DISTANCE:
+            slingshot_vector = ball_to_target
+        else:
+            slingshot_vector = ball_to_target * self.MAX_SLINGSHOT_DISTANCE / ball_to_target.norm
+        return slingshot_vector
+
+    def compute_slingshot_speed_vector(self):
+        return self.compute_slingshot_vector() * self.SLINGSHOT_DISTANCE_TO_SPEED_FACTOR
+
+    def compute_slingshot_target_distance(self):
+        return (self.slingshot_target - Position(*self.graph_mobs['ball'].position[:2])).norm
 
     def get_teams_formation(self):
         teams_formation = []
