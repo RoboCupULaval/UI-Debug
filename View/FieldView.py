@@ -11,7 +11,8 @@ from Controller.DrawingObject.MultiplePointsDrawing import MultiplePointsDrawing
 from Controller.QtToolBox import QtToolBox
 
 import colorsys
-from math import cos, sin, atan, pi
+from math import cos, sin, atan2, pi
+from Util.position import Position
 
 __author__ = 'RoboCupULaval'
 
@@ -356,8 +357,9 @@ class FieldView(QWidget):
         if self.graph_mobs['ball'].isVisible():
             if event.key() == Qt.Key_Control:
                 self.slingshot_mode = True
-                self.slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(self._cursor_position[0],
-                                                                                        self._cursor_position[1])
+                slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(self._cursor_position[0],
+                                                                                   self._cursor_position[1])
+                self.slingshot_target = Position(slingshot_target[0], slingshot_target[1])
                 self.setCursor(Qt.PointingHandCursor)
             elif event.key() == Qt.Key_Shift and self.slingshot_mode:
                 self.slingshot_distance = self.compute_slingshot_target_distance()
@@ -368,6 +370,7 @@ class FieldView(QWidget):
         if self.slingshot_mode:
             if event.key() == Qt.Key_Control:
                 self.slingshot_mode = False
+                self.slingshot_distance_lock = False
                 self.setCursor(Qt.OpenHandCursor)
             elif event.key() == Qt.Key_Shift:
                 self.slingshot_distance_lock = False
@@ -407,6 +410,7 @@ class FieldView(QWidget):
             self.controller.grsim_sender.send_ball_position((self.graph_mobs['ball'].x, self.graph_mobs['ball'].y),
                                                             self.compute_slingshot_speed_vector())
             self.slingshot_mode = False
+            self.slingshot_distance_lock = False
         if not QtToolBox.field_ctrl.camera_is_locked():
             self.setCursor(Qt.OpenHandCursor)
         QtToolBox.field_ctrl._cursor_last_pst = None
@@ -418,7 +422,8 @@ class FieldView(QWidget):
                 self.setCursor(Qt.ClosedHandCursor)
             QtToolBox.field_ctrl.drag_camera(event.pos().x(), event.pos().y())
         elif self.slingshot_mode:
-            self.slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+            slingshot_target = QtToolBox.field_ctrl.convert_screen_to_real_pst(event.pos().x(), event.pos().y())
+            self.slingshot_target = Position(slingshot_target[0], slingshot_target[1])
 
     def wheelEvent(self, event):
         """ Gère l'événement de la molette de la souris """
@@ -464,17 +469,18 @@ class FieldView(QWidget):
         painter.drawLine(x1, y1, x2, y2)
 
         # Slingshot Vector
-        d_x, d_y = self.compute_slingshot_vector()
-        slingshot_distance = (d_x ** 2 + d_y ** 2) ** 0.5
-        clamped_distance = min(max(slingshot_distance, self.SLINGSHOT_COLOR_SCALE_DISTANCE_START), self.SLINGSHOT_COLOR_SCALE_DISTANCE_END)
+        slingshot_vector = self.compute_slingshot_vector()
+        clamped_distance = min(max(slingshot_vector.norm, self.SLINGSHOT_COLOR_SCALE_DISTANCE_START), self.SLINGSHOT_COLOR_SCALE_DISTANCE_END)
         hue = (self.SLINGSHOT_COLOR_SCALE_DISTANCE_END - clamped_distance) / (3.0 * (self.SLINGSHOT_COLOR_SCALE_DISTANCE_END - self.SLINGSHOT_COLOR_SCALE_DISTANCE_START))
         color = colorsys.hsv_to_rgb(hue, 1, 255)  # hue : Green = 1/3, Red = 0
         painter.setPen(QPen(QColor(*color), 3, Qt.SolidLine))
-        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(self.graph_mobs['ball'].x + d_x, self.graph_mobs['ball'].y + d_y)
+
+        ball_position = Position(*self.graph_mobs['ball'].position[:2])
+        x2, y2, _ = QtToolBox.field_ctrl.convert_real_to_scene_pst(*(ball_position + slingshot_vector).to_tuple())
         painter.drawLine(x1, y1, x2, y2)
 
         # Arrowhead
-        theta = FieldView.angle(x2 - x1, y2 - y1)
+        theta = atan2(y2 - y1, x2 - x1)
         painter.drawLine(x2, y2,
                          x2 + self.SLINGSHOT_ARROWHEAD_LENGTH * cos(theta + pi - self.SLINGSHOT_ARROWHEAD_ANGLE / 2),
                          y2 + self.SLINGSHOT_ARROWHEAD_LENGTH * sin(theta + pi - self.SLINGSHOT_ARROWHEAD_ANGLE / 2))
@@ -482,42 +488,23 @@ class FieldView(QWidget):
                          x2 + self.SLINGSHOT_ARROWHEAD_LENGTH * cos(theta + pi + self.SLINGSHOT_ARROWHEAD_ANGLE / 2),
                          y2 + self.SLINGSHOT_ARROWHEAD_LENGTH * sin(theta + pi + self.SLINGSHOT_ARROWHEAD_ANGLE / 2))
 
-    @staticmethod
-    def angle(x, y):  # Refactor me
-        if x == 0:
-            theta = pi / 2 if y > 0 else -pi / 2
-        else:
-            theta = atan(y / x)
-            if x < 0:
-                theta += pi
-            elif y < 0:
-                theta += 2 * pi
-        return theta
-
     def compute_slingshot_vector(self):
-        d_x = (self.slingshot_target[0] - self.graph_mobs['ball'].x)
-        d_y = (self.slingshot_target[1] - self.graph_mobs['ball'].y)
-        slingshot_distance = (d_x ** 2 + d_y ** 2) ** 0.5
-        if slingshot_distance == 0:
-            slingshot_vector = (0, 0)
+        ball_to_target = self.slingshot_target - Position(*self.graph_mobs['ball'].position[:2])
+        if ball_to_target.norm == 0:
+            slingshot_vector = Position(0, 0)
         elif self.slingshot_distance_lock and self.slingshot_distance < self.MAX_SLINGSHOT_DISTANCE:
-            slingshot_vector = (d_x * (self.slingshot_distance / slingshot_distance),
-                                d_y * (self.slingshot_distance / slingshot_distance))
-        elif slingshot_distance < self.MAX_SLINGSHOT_DISTANCE:
-            slingshot_vector = (d_x, d_y)
+            slingshot_vector = ball_to_target * self.slingshot_distance / ball_to_target.norm
+        elif ball_to_target.norm < self.MAX_SLINGSHOT_DISTANCE:
+            slingshot_vector = ball_to_target
         else:
-            slingshot_vector = (d_x * (self.MAX_SLINGSHOT_DISTANCE / slingshot_distance),
-                                d_y * (self.MAX_SLINGSHOT_DISTANCE / slingshot_distance))
+            slingshot_vector = ball_to_target * self.MAX_SLINGSHOT_DISTANCE / ball_to_target.norm
         return slingshot_vector
 
     def compute_slingshot_speed_vector(self):
-        d_x, d_y = self.compute_slingshot_vector()
-        return d_x * self.SLINGSHOT_DISTANCE_TO_SPEED_FACTOR, d_y * self.SLINGSHOT_DISTANCE_TO_SPEED_FACTOR
+        return self.compute_slingshot_vector() * self.SLINGSHOT_DISTANCE_TO_SPEED_FACTOR
 
     def compute_slingshot_target_distance(self):
-        d_x = (self.slingshot_target[0] - self.graph_mobs['ball'].x)
-        d_y = (self.slingshot_target[1] - self.graph_mobs['ball'].y)
-        return (d_x ** 2 + d_y ** 2) ** 0.5
+        return (self.slingshot_target - Position(*self.graph_mobs['ball'].position[:2])).norm
 
     def get_teams_formation(self):
         teams_formation = []
