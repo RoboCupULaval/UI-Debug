@@ -176,7 +176,7 @@ class FieldView(QWidget):
 
     def init_graph_mobs(self):
         """ Initialisation des objets graphiques """
-        max_robots_in_team = 12   # TODO : Variable globale?
+        max_robots_in_team = 16   # TODO : Variable globale?
 
         # Élément graphique pour les dessins
         self.graph_draw['field-lines'] = self.controller.get_drawing_object('field-lines')()
