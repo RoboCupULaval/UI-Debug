@@ -21,7 +21,6 @@ from View.FilterCtrlView import FilterCtrlView
 from View.PlotterView import PlotterView
 from View.StrategyCtrView import StrategyCtrView
 from View.LoggerView import LoggerView
-from View.MainWindow import MainWindow
 from View.ParamView import ParamView
 from View.MediaControllerView import MediaControllerView
 from View.StatusBarView import StatusBarView
@@ -66,7 +65,6 @@ class MainController(QWidget):
         self.model_recorder = RecorderModel()
 
         # Création des Vues
-        self.main_window = MainWindow()
         self.view_menu = QMenuBar(self)
         self.view_logger = LoggerView(self)
         self.view_field_screen = FieldView(self)
@@ -160,8 +158,11 @@ class MainController(QWidget):
 
         # Action et entête des sous-menus
         # => Menu Aide
+        shortcutsAction = QAction('Raccourcis', self)
         helpAction = QAction('À propos', self)
+        shortcutsAction.triggered.connect(self.shorcutsMsgBox)
         helpAction.triggered.connect(self.aboutMsgBox)
+        helpMenu.addAction(shortcutsAction)
         helpMenu.addAction(helpAction)
 
         # => Menu Fichier
@@ -287,6 +288,13 @@ class MainController(QWidget):
 
     def aboutMsgBox(self):
         QMessageBox.about(self, 'À Propos', 'ROBOCUP ULAVAL © 2016\n\ncontact@robocupulaval.com')
+
+    def shorcutsMsgBox(self):
+        QMessageBox.about(self, 'Raccourcis', '\n'.join(['- Double-clic droit : Placer la balle',
+                                                         '- Ctrl : Entrer dans le mode slingshot',
+                                                         '\n  Dans le mode slingshot :\n',
+                                                         '- Shift : Verrouiller la force du tir',
+                                                         '- Clic gauche pour tirer la balle']))
 
     @pyqtSlot(name='on_triggered')
     def closeEvent(self, event):
