@@ -286,6 +286,7 @@ class ParamView(QDialog):
             self.form_ratio_mobs.setStyleSheet(style_good)
             QtToolBox.field_ctrl.ratio_field_mobs = float(self.form_ratio_mobs.text())
         except Exception as e:
+            print(e)
             self.form_ratio_mobs.setStyleSheet(style_bad)
             is_wrong = True
 
