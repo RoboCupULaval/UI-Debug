@@ -37,6 +37,9 @@ class UDPServer(Thread):
 
         self.init_logger()
 
+    def toggle_debug(self):
+        pass
+
     def init_logger(self):
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)

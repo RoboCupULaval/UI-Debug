@@ -58,9 +58,6 @@ class FrameModel:
             frames = self._get_last_frames()
             #if not self._frame_has_been_processed(frame):
             for frame in frames:
-                # if len(frame.geometry.calib) > 0:
-                #     for c in frame.geometry.calib:
-                #         print(c.camera_id, c.tx, c.ty)
                 self._last_frame_caught_time = datetime.now()
                 self._update_view_screen_mobs(datetime.now(), frame)
                 if frame.geometry.field.field_width != 0:
