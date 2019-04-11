@@ -187,7 +187,6 @@ class FieldController(object):
 
     def drag_camera(self, x, y):
         """ Déplacement de la caméra """
-
         self.need_redraw = True
         if not self._lock_camera:
             if self._cursor_last_pst is None:
@@ -264,10 +263,9 @@ class FieldController(object):
     def _set_field_size_new(self, field: SSL_GeometryFieldSize):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
-
-        if self.prev_field != field:
-            self.need_redraw = True  # Only redraw when receiving new geometry message
-
+        if self.prev_field == field:
+            return
+        self.need_redraw = True  # Only redraw when receiving new geometry message
         self.field_goal_left = \
             {name: line for name, line in self.field_lines.items() if
              name.startswith("LeftGoal") and name != "LeftGoalLine"}

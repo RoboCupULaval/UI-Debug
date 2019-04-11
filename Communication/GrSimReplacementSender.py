@@ -34,7 +34,7 @@ class GrSimReplacementSender:
             # GrSim use meter not millimeters
             packet.replacement.robots.add(x=x/1000, y=y/1000, dir=direction, id=robot_id, yellowteam=yellow_team)
 
-            self.send_packet(packet)
+        self.send_packet(packet)
 
     def send_robot_position(self, x, y, direction, robot_id, yellow_team):
         packet = grSim_Packet()
