@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import math
 from math import cos, sin, atan2, sqrt, pi
 
 from Communication.messages_robocup_ssl_geometry_pb2 import SSL_GeometryFieldSize
@@ -51,6 +51,7 @@ class FieldController(object):
         self.ratio_screen = 1 / 10
         self.is_x_axe_flipped = False
         self.is_y_axe_flipped = True
+        self.is_horizontal = True
 
         # Dimension du terrain
         self.margin = 250  # Marge au tour du terrain pour l'écran
@@ -128,27 +129,43 @@ class FieldController(object):
 
     def convert_real_to_scene_pst(self, x, y, theta=0.0):
         """ Convertit les coordonnées réelles en coordonnées du terrain """
+
+        if not self.is_horizontal:
+            x, y = -y, x
+            theta += math.pi / 2
         rot_x = cos(theta)
         rot_y = sin(theta)
+
         if self.is_x_axe_flipped:
             x *= -1
             rot_x *= -1
         if self.is_y_axe_flipped:
             y *= -1
             rot_y *= -1
-        x = (x + self.field_length / 2 + self.margin) * self.ratio_screen + self._camera_position[0]
-        y = (y + self.field_width / 2 + self.margin) * self.ratio_screen + self._camera_position[1]
-        return x, y, atan2(rot_y, rot_x)
+
+        x_screen = (x + self.field_length / 2 + self.margin) * self.ratio_screen + self._camera_position[0]
+        y_screen = (y + self.field_width / 2 + self.margin) * self.ratio_screen + self._camera_position[1]
+        return x_screen, y_screen, atan2(rot_y, rot_x)
 
     def convert_screen_to_real_pst(self, x, y):
         """ Convertir les coordonnées du terrain en coordonnées réelles """
-        x_2 = (x - self._camera_position[0]) / self.ratio_screen - self.field_length / 2 - self.margin
-        y_2 = (y - self._camera_position[1]) / self.ratio_screen - self.field_width / 2 - self.margin
+        x_real = (x - self._camera_position[0]) / self.ratio_screen - self.field_length / 2 - self.margin
+        y_real = (y - self._camera_position[1]) / self.ratio_screen - self.field_width / 2 - self.margin
+
         if self.is_x_axe_flipped:
-            x_2 *= -1
+            x_real *= -1
         if self.is_y_axe_flipped:
-            y_2 *= -1
-        return x_2, y_2
+            y_real *= -1
+
+        if self.is_horizontal:
+            return x_real, y_real
+        else:
+            return y_real, -x_real
+
+    def set_horizontal(self, val: bool):
+        if self.is_horizontal != val:
+            self.need_redraw = True
+        self.is_horizontal = val
 
     def flip_x_axe(self):
         """ Retourne l'axe des X du terrain """
