@@ -1,5 +1,5 @@
 # Under MIT License, see LICENSE.txt
-
+import math
 from math import cos, sin, atan2, sqrt, pi
 
 from Communication.messages_robocup_ssl_geometry_pb2 import SSL_GeometryFieldSize
@@ -51,6 +51,7 @@ class FieldController(object):
         self.ratio_screen = 1 / 10
         self.is_x_axe_flipped = False
         self.is_y_axe_flipped = True
+        self.is_horizontal = True
 
         # Dimension du terrain
         self.margin = 250  # Marge au tour du terrain pour l'écran
@@ -73,6 +74,10 @@ class FieldController(object):
         self.field_lines = {}
         self.field_goal_left = {}
         self.field_goal_right = {}
+
+        self.prev_field = None
+
+        self.need_redraw = True
 
     @property
     def line_width(self):
@@ -124,27 +129,43 @@ class FieldController(object):
 
     def convert_real_to_scene_pst(self, x, y, theta=0.0):
         """ Convertit les coordonnées réelles en coordonnées du terrain """
+
+        if not self.is_horizontal:
+            x, y = -y, x
+            theta += math.pi / 2
         rot_x = cos(theta)
         rot_y = sin(theta)
+
         if self.is_x_axe_flipped:
             x *= -1
             rot_x *= -1
         if self.is_y_axe_flipped:
             y *= -1
             rot_y *= -1
-        x = (x + self.field_length / 2 + self.margin) * self.ratio_screen + self._camera_position[0]
-        y = (y + self.field_width / 2 + self.margin) * self.ratio_screen + self._camera_position[1]
-        return x, y, atan2(rot_y, rot_x)
+
+        x_screen = (x + self.field_length / 2 + self.margin) * self.ratio_screen + self._camera_position[0]
+        y_screen = (y + self.field_width / 2 + self.margin) * self.ratio_screen + self._camera_position[1]
+        return x_screen, y_screen, atan2(rot_y, rot_x)
 
     def convert_screen_to_real_pst(self, x, y):
         """ Convertir les coordonnées du terrain en coordonnées réelles """
-        x_2 = (x - self._camera_position[0]) / self.ratio_screen - self.field_length / 2 - self.margin
-        y_2 = (y - self._camera_position[1]) / self.ratio_screen - self.field_width / 2 - self.margin
+        x_real = (x - self._camera_position[0]) / self.ratio_screen - self.field_length / 2 - self.margin
+        y_real = (y - self._camera_position[1]) / self.ratio_screen - self.field_width / 2 - self.margin
+
         if self.is_x_axe_flipped:
-            x_2 *= -1
+            x_real *= -1
         if self.is_y_axe_flipped:
-            y_2 *= -1
-        return x_2, y_2
+            y_real *= -1
+
+        if self.is_horizontal:
+            return x_real, y_real
+        else:
+            return y_real, -x_real
+
+    def set_horizontal(self, val: bool):
+        if self.is_horizontal != val:
+            self.need_redraw = True
+        self.is_horizontal = val
 
     def flip_x_axe(self):
         """ Retourne l'axe des X du terrain """
@@ -166,6 +187,7 @@ class FieldController(object):
 
     def drag_camera(self, x, y):
         """ Déplacement de la caméra """
+        self.need_redraw = True
         if not self._lock_camera:
             if self._cursor_last_pst is None:
                 self._cursor_last_pst = x, y
@@ -196,7 +218,9 @@ class FieldController(object):
 
     def zoom(self, x, y, scroll_delta_y):
         """ Zoom la caméra de +10% (+/- un facteur de ralentissement)"""
-        SCALE_CHANGE = 0.1
+        SCALE_CHANGE = 0.05
+
+        self.need_redraw = True
         if not self._lock_camera and self.ratio_screen < 0.6:
             rx, ry = self.convert_screen_to_real_pst(x, y)
             self.ratio_screen *= 1 + SCALE_CHANGE * scroll_delta_y / self.scroll_slowing_factor
@@ -206,7 +230,9 @@ class FieldController(object):
 
     def dezoom(self, x, y, scroll_delta_y):
         """ Dézoom la caméra de -10% (+/- un facteur de ralentissement)"""
-        SCALE_CHANGE = 0.1
+        SCALE_CHANGE = 0.05
+
+        self.need_redraw = True
         if not self._lock_camera and self.ratio_screen > 0.03:
             rx, ry = self.convert_screen_to_real_pst(x, y)
             self.ratio_screen /= 1 + SCALE_CHANGE * -scroll_delta_y / self.scroll_slowing_factor
@@ -237,6 +263,9 @@ class FieldController(object):
     def _set_field_size_new(self, field: SSL_GeometryFieldSize):
         self.field_lines = self._convert_field_line_segments(field.field_lines)
         self.field_arcs = self._convert_field_circular_arc(field.field_arcs)
+        if self.prev_field == field:
+            return
+        self.need_redraw = True  # Only redraw when receiving new geometry message
         self.field_goal_left = \
             {name: line for name, line in self.field_lines.items() if
              name.startswith("LeftGoal") and name != "LeftGoalLine"}
@@ -258,6 +287,8 @@ class FieldController(object):
 
         self._center_circle_radius = self.field_arcs['CenterCircle'].radius
         self._defense_stretch = self.field_lines['LeftPenaltyStretch'].length / 2
+
+        self.prev_field = field
 
     def _convert_field_circular_arc(self, field_arcs):
         return {arc.name: FieldCircularArc(arc) for arc in field_arcs}

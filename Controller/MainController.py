@@ -186,6 +186,14 @@ class MainController(QWidget):
 
         fieldMenu.addSeparator()
 
+        horiAction = QAction("Changer à l'horizontal", self)
+        horiAction.triggered.connect(self.set_screen_to_horizontal)
+        fieldMenu.addAction(horiAction)
+
+        vertAction = QAction("Changer à la vertical", self)
+        vertAction.triggered.connect(self.set_screen_to_vertical)
+        fieldMenu.addAction(vertAction)
+
         flipXAction = QAction("Changer l'axe des X", self, checkable=True)
         flipXAction.triggered.connect(self.flip_screen_x_axe)
         fieldMenu.addAction(flipXAction)
@@ -359,6 +367,14 @@ class MainController(QWidget):
             self.setWindowState(Qt.WindowFullScreen)
         else:
             self.setWindowState(Qt.WindowActive)
+
+    def set_screen_to_horizontal(self):
+        """ Met l'écran à l'horizontal """
+        QtToolBox.field_ctrl.set_horizontal(True)
+
+    def set_screen_to_vertical(self):
+        """ Met l'écran à la vertical """
+        QtToolBox.field_ctrl.set_horizontal(False)
 
     def flip_screen_x_axe(self):
         """ Bascule l'axe des X de l'écran """
