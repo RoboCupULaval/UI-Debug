@@ -23,7 +23,18 @@ class FieldCircularArc:
                                                                            self.end_angle)
 
 
-class FieldLineSegment:
+class LineSegment:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+        self.length = sqrt(p1[0] ** 2 + p2[1] ** 2)
+        self.thickness = 1
+
+    def __str__(self):
+        return "p1:{}, p2:{}".format(self.p1, self.p2)
+
+
+class FieldLineSegment(LineSegment):
     def __init__(self, protobuf_line):
         self.p1 = (protobuf_line.p1.x, protobuf_line.p1.y)
         self.p2 = (protobuf_line.p2.x, protobuf_line.p2.y)
@@ -278,6 +289,24 @@ class FieldController(object):
 
         self._goal_width = field.goal_width
         self._goal_depth = field.goal_depth
+
+        if len(self.field_goal_left) == 0:
+            left = -field.field_length / 2
+            self.field_goal_left['LeftGoalTop'] = LineSegment((left, self._goal_width/2),
+                                                              (left - self._goal_depth, self._goal_width/2))
+            self.field_goal_left['LeftGoalBot'] = LineSegment((left, -self._goal_width/2),
+                                                              (left - self._goal_depth, -self._goal_width/2))
+            self.field_goal_left['LeftGoalRight'] = LineSegment((left - self._goal_depth, -self._goal_width/2),
+                                                                (left - self._goal_depth, self._goal_width/2))
+
+        if len(self.field_goal_right) == 0:
+            right = field.field_length / 2
+            self.field_goal_right['RightGoalTop'] = LineSegment((right, self._goal_width/2),
+                                                                (right + self._goal_depth, self._goal_width/2))
+            self.field_goal_right['RightGoalBot'] = LineSegment((right, -self._goal_width/2),
+                                                                (right + self._goal_depth, -self._goal_width/2))
+            self.field_goal_right['RightGoalRight'] = LineSegment((right + self._goal_depth, -self._goal_width/2),
+                                                                  (right + self._goal_depth, self._goal_width/2))
 
         if "RightFieldLeftPenaltyArc" not in self.field_arcs:
             # This is a new type of field for Robocup 2018, it does not have a circular goal zone
